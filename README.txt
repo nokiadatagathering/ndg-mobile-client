@@ -1,4 +1,4 @@
-The is the NDG mobile client
+This is the NDG mobile client
 
 NDG mobile client has two .jar files added into the lib directory. We have specified the location, the .jar name, give a short description and the software license: 
 2. lib/
