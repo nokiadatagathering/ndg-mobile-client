@@ -1,0 +1,18 @@
+Include:
+import br.org.indt.mmc.settings.LanguageHandler;
+
+Replace:
+public static final String phoneLang = System.getProperty("microedition.locale");
+To:
+public static String phoneLang = System.getProperty("microedition.locale");
+
+Include after "private Local()" Method:
+static {
+	LanguageHandler handler = new LanguageHandler();
+	phoneLang = handler.getLanguage();
+}
+
+Replace:
+InputStream is = loc.getClass().getResourceAsStream("/resources/text/lang."+phoneLang);
+To:
+InputStream is = loc.getClass().getResourceAsStream("/resources/text/lang."+phoneLang.substring(0,2));
