@@ -13,7 +13,7 @@ public class Category {
 
     private int totalQuestions;
     private String name;
-    private boolean fullFilled;
+    private boolean fullFilled = false;
     private NDGQuestion[] questions;
 
     public NDGQuestion[] getQuestions() {
@@ -25,7 +25,11 @@ public class Category {
     }
 
     public boolean isFullFilled() {
-        return fullFilled;
+        for ( int i = 0;i< questions.length; i++) {
+            if( questions[i].getVisited() == true )
+                return true;
+        }
+        return false;
     }
 
     public void setFullFilled(boolean fullFilled) {
@@ -33,7 +37,7 @@ public class Category {
     }
 
     public int getTotalQuestions() {
-        return totalQuestions;
+        return questions.length;
     }
 
     public void setTotalQuestions(int totalQuestions) {
@@ -47,6 +51,4 @@ public class Category {
     public void setName(String name) {
         this.name = name;
     }
-
-
 }

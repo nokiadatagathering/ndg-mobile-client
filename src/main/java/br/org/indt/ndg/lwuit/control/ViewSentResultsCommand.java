@@ -5,10 +5,10 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.SentResultList;
+import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.SentList;
-import br.org.indt.ndg.mobile.error.WaitingForm;
 import com.sun.lwuit.Command;
 
 /**
@@ -24,8 +24,7 @@ public class ViewSentResultsCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        //AppMIDlet.getInstance().getResultList().commandAction(Resources.CMD_VIEWSENT, null);
-        AppMIDlet.getInstance().setDisplayable(new WaitingForm(Resources.CMD_VIEW.getLabel()));
+        WaitingScreen.show(Resources.CMD_VIEW);
         ViewSentResultsRunnable vrr = new ViewSentResultsRunnable();
         Thread t = new Thread(vrr);  //create new thread to compensate for waitingform
         t.setPriority(Thread.MIN_PRIORITY);
@@ -42,7 +41,7 @@ public class ViewSentResultsCommand extends CommandControl {
         public void run() {
             try { Thread.sleep(200); } catch(Exception e){}
             AppMIDlet.getInstance().getFileSystem().loadSentFiles();
-            AppMIDlet.getInstance().setDisplayable(new SentList());
+            AppMIDlet.getInstance().setDisplayable(SentResultList.class);
         }
     }
 

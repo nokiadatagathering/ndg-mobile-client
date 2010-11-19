@@ -9,9 +9,9 @@ import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.animations.CommonTransitions;
-import com.sun.lwuit.geom.Dimension;
-import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.plaf.UIManager;
 
 /**
@@ -44,20 +44,24 @@ public class WaitingScreen {
     }
 
     private void showModeless() {
-        dialog.setPreferredSize(new Dimension(50,50));
-        dialog.show(73,98,53,53,true, false);
+        dialog.showPacked( BorderLayout.CENTER, false);
     }
 
 
-    public WaitingScreen(String status) {
+    private WaitingScreen(String status) {
         dialog = new Dialog();
-        dialog.getStyle().setPadding(Component.TOP, 20);
-        dialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        dialog.setLayout(new BorderLayout());
         Image image = Screen.getRes().getAnimation("wait");
-        Label l = new Label(image);
-        l.setAlignment(Component.CENTER);
-        l.setText("  "+status);
-        dialog.addComponent(l);
-    }
 
+        Label label = new Label(image);
+        label.setAlignment(Component.CENTER);
+
+        TextArea msg = new TextArea();
+        msg.setText(status);
+        msg.setStyle(UIManager.getInstance().getComponentStyle("Label"));
+        msg.setEditable(false);
+
+        dialog.addComponent(BorderLayout.NORTH ,label);
+        dialog.addComponent(BorderLayout.CENTER, msg);
+    }
 }

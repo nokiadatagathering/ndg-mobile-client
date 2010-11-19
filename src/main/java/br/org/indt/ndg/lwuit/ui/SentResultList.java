@@ -7,7 +7,6 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.SentList;
 import br.org.indt.ndg.lwuit.control.BackSentResultListCommand;
 import br.org.indt.ndg.lwuit.control.DeleteSentResultCommand;
 import br.org.indt.ndg.lwuit.control.MarkAllResultsCommand;
@@ -32,7 +31,7 @@ public class SentResultList extends Screen implements ActionListener{
     private String path = Resources.SENT_LIST_TITLE;
     private String title;
     //REMOVE LATER.
-    private SentList sentList;
+    //private SentList sentList;
 
     private List list;
     private ListModel underlyingModel;
@@ -45,12 +44,12 @@ public class SentResultList extends Screen implements ActionListener{
     protected void loadData() {
         title = AppMIDlet.getInstance().getFileStores().getSurveyStructure().getTitle();
         results = ResultControl.getInstance().getSentResults();
-        sentList = new SentList();
+        //sentList = new SentList();
     }
 
-    public SentList getSentList(){
-        return sentList;
-    }
+//    public SentList getSentList(){
+//        return sentList;
+//    }
 
     protected void customize() {
         setTitle(title, path);

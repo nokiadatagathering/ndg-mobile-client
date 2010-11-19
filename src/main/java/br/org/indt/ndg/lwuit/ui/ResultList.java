@@ -42,7 +42,6 @@ public class ResultList extends Screen implements ActionListener {
     private ListModel underlyingModel;
     private ResultListCellRenderer renderer;
     private Result[] results;
-    int totalResults;
     private boolean checked;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
@@ -52,7 +51,6 @@ public class ResultList extends Screen implements ActionListener {
     protected void loadData() {
         title1 = surveysControl.getOpenedSurveyTitle();
         results = SurveysControl.getInstance().getResultsFromOpenedSurvey();
-        totalResults = results.length;
         registerEvent(new ResultListOnShow(), ON_SHOW);
     }
 

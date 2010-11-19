@@ -5,7 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.lwuit.ui.GpsForm;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -25,6 +25,6 @@ public class BackSimpleLocationCommand extends BackCommand{
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getSimpleLocation().commandAction(Resources.CMD_BACK, null);
+        AppMIDlet.getInstance().setDisplayable(GpsForm.class);
     }
 }

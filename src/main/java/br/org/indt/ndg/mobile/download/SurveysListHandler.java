@@ -41,9 +41,10 @@ public class SurveysListHandler extends DefaultHandler {
      */
     public String[] parse(DataInputStream dis) throws SAXException, IOException, ParserConfigurationException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setValidating(true);
+//        factory.setValidating(true);
         surveysTitles = new Vector();
         newFile = true;
+
         factory.newSAXParser().parse(dis, this);
         String[] result = new String[surveysTitles.size()];
         for (int i = 0; i < surveysTitles.size(); i++) {

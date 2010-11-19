@@ -1,20 +1,21 @@
 package br.org.indt.ndg.mobile.xmlhandle;
 
+import br.org.indt.ndg.lwuit.control.ExitCommand;
+import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
+import br.org.indt.ndg.lwuit.model.DateQuestion;
+import br.org.indt.ndg.lwuit.model.DecimalQuestion;
+import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
 import br.org.indt.ndg.lwuit.model.ImageQuestion;
+import br.org.indt.ndg.lwuit.model.IntegerQuestion;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
+import br.org.indt.ndg.lwuit.model.NumericQuestion;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.structures.FileSystemSurveyStructure;
 import br.org.indt.ndg.mobile.structures.SurveyStructure;
-import br.org.indt.ndg.mobile.structures.question.Question;
-import br.org.indt.ndg.mobile.structures.question.TypeChoice;
-import br.org.indt.ndg.mobile.structures.question.TypeDate;
-import br.org.indt.ndg.mobile.structures.question.TypeTextFieldDecimal;
-import br.org.indt.ndg.mobile.structures.question.TypeTextFieldInteger;
-import br.org.indt.ndg.mobile.structures.question.TypeTextFieldString;
-import br.org.indt.ndg.mobile.structures.question.TypeTime;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,7 +72,8 @@ public class kParser {
             Logger.getInstance().logException("Exception[parserSurveyFileInfo]: " + e.getMessage());
             e.printStackTrace();
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EPARSE_GENERAL);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
         }
     }
     
@@ -157,11 +159,11 @@ public class kParser {
             else if (elemName.equals("length")) {
                 text = parser.nextText();
                 if (currentQuestion.getType().equals("_str"))
-                    ((TypeTextFieldString) currentQuestion).setLength(Integer.parseInt(text));
+                    ((DescriptiveQuestion) currentQuestion).setLength(Integer.parseInt(text));
                 else if (currentQuestion.getType().equals("_int") )
-                    ((TypeTextFieldInteger) currentQuestion).setLength(Integer.parseInt(text));
+                    ((NumericQuestion) currentQuestion).setLength(Integer.parseInt(text));
                 else if (currentQuestion.getType().equals("_decimal") )
-                    ((TypeTextFieldDecimal) currentQuestion).setLength(Integer.parseInt(text));
+                    ((NumericQuestion) currentQuestion).setLength(Integer.parseInt(text));
                 
                 
             }
@@ -172,35 +174,32 @@ public class kParser {
                 String operator = parser.getAttributeValue(namespace, "operator");
                 String skipTo = parser.getAttributeValue(namespace, "skipTo");
 
-                ((TypeChoice) currentQuestion).setCatTo(catTo);
-                ((TypeChoice) currentQuestion).setOperand(operand);
-                ((TypeChoice) currentQuestion).setOperator(operator);  
-                ((TypeChoice) currentQuestion).setSkipTo(skipTo);
-                ((TypeChoice) currentQuestion).setSkipEnabled(true);  
+                ((ChoiceQuestion) currentQuestion).setCatTo(Integer.parseInt(catTo));
+                ((ChoiceQuestion) currentQuestion).setChoiceItem(Integer.parseInt(operand));
+                ((ChoiceQuestion) currentQuestion).setInverse(operator.equals("1"));
+                ((ChoiceQuestion) currentQuestion).setSkipTo(Integer.parseInt(skipTo));
+                ((ChoiceQuestion) currentQuestion).setSkipEnabled(true);
 
                 text = parser.nextText();
             }
             else if (elemName.equals("select")) {
                 text = parser.nextText();
-                ((TypeChoice) currentQuestion).setSelect(text);
+                ((ChoiceQuestion) currentQuestion).setExclusive( "exclusive".equals(text) );
                 
             }
             else if (elemName.equals("item")) {
-                if (currentQuestion instanceof TypeChoice) {
+                if (currentQuestion instanceof ChoiceQuestion) {
                     currentOther = parser.getAttributeValue(parser.getNamespace(), "otr");
                     text = parser.nextText();
-                    ((TypeChoice) currentQuestion).addChoice(text, currentOther);
-                    ((TypeChoice) currentQuestion).addChoiceOrdered(text);
-                } else if (currentQuestion instanceof TypeTextFieldString) {
+                    ((ChoiceQuestion) currentQuestion).addChoice(text);
+                    ((ChoiceQuestion) currentQuestion).addOther( currentOther );
+                    ((ChoiceQuestion) currentQuestion).addOthersText( text );
+                } else if (currentQuestion instanceof DescriptiveQuestion) {
                     currentOther = parser.getAttributeValue(parser.getNamespace(), "otr");
                     text = parser.nextText();
-                    ((TypeTextFieldString) currentQuestion).addChoice(text, currentOther);
-                    ((TypeTextFieldString) currentQuestion).addChoiceOrdered(text);
+                    ((DescriptiveQuestion) currentQuestion).addChoice(text);
                 }
-
-                
             }
-            
             //Posiciona no fim da tag <description> <length> <item> <select> <SkipLogic>
             parser.require(XmlPullParser.END_TAG, null, elemName);
         }
@@ -240,12 +239,12 @@ public class kParser {
         String _type = parser.getAttributeValue(namespace, "type");
         String _id = parser.getAttributeValue(namespace, "id");
 
-        if (_type.equals("_str")) currentQuestion = new TypeTextFieldString();
-        else if (_type.equals("_int")) currentQuestion = new TypeTextFieldInteger();
-        else if (_type.equals("_decimal")) currentQuestion = new TypeTextFieldDecimal();
-        else if (_type.equals("_choice")) currentQuestion = new TypeChoice();
-        else if (_type.equals("_date")) currentQuestion = new TypeDate();
-        else if (_type.equals("_time")) currentQuestion = new TypeTime();
+        if (_type.equals("_str")) currentQuestion = new DescriptiveQuestion();
+        else if (_type.equals("_int")) currentQuestion = new IntegerQuestion( );
+        else if (_type.equals("_decimal")) currentQuestion = new DecimalQuestion();
+        else if (_type.equals("_choice")) currentQuestion = new ChoiceQuestion();
+        else if (_type.equals("_date")) currentQuestion = new DateQuestion();
+        else if (_type.equals("_time")) currentQuestion = new TimeQuestion();
         else if (_type.equals("_img")) currentQuestion = new ImageQuestion();
 
         currentQuestion.setType(_type);
@@ -257,23 +256,23 @@ public class kParser {
 
         if (_type.equals("_time")) {
             String convention = parser.getAttributeValue(namespace, "convention");            
-            ((TypeTime) currentQuestion).setConvention(convention);
+            ((TimeQuestion) currentQuestion).setConvention(convention);
         }
 
         if(_type.equals("_int") || _type.equals("_date") || _type.equals("_decimal")){
             String min = parser.getAttributeValue(namespace, "min");
             String max = parser.getAttributeValue(namespace, "max");
             if (_type.equals("_int")){
-                ((TypeTextFieldInteger) currentQuestion).setLowConstraint(min);
-                ((TypeTextFieldInteger) currentQuestion).setHighConstraint(max);
+                ((NumericQuestion) currentQuestion).setLowConstraint(min);
+                ((NumericQuestion) currentQuestion).setHighConstraint(max);
             }
             else if (_type.equals("_date")){
-                ((TypeDate) currentQuestion).setLowConstraint(min);
-                ((TypeDate) currentQuestion).setHighConstraint(max);
+                ((DateQuestion)currentQuestion).setLowConstraint(min);
+                ((DateQuestion) currentQuestion).setHighConstraint(max);
             }
             else if (_type.equals("_decimal")){
-                ((TypeTextFieldDecimal) currentQuestion).setLowConstraint(min);
-                ((TypeTextFieldDecimal) currentQuestion).setHighConstraint(max);
+                ((NumericQuestion) currentQuestion).setLowConstraint(min);
+                ((NumericQuestion) currentQuestion).setHighConstraint(max);
             }
         }
     }

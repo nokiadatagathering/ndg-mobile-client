@@ -36,6 +36,7 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             comp = checkbox;
         } else {
             Label label = new Label(disp.getDisplayableName());
+            label.setAlignment(CENTER);
             comp = label;
         }
         comp.setStyle(styleLabel);

@@ -9,6 +9,7 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.ResultList;
 import com.sun.lwuit.Command;
 
 /**
@@ -32,16 +33,12 @@ public class DeleteResultNowCommand extends CommandControl {
 
         boolean[] listFlags = (boolean[]) parameter;
 
-        /*SurveysControl.getInstance().getCurrentOldDeleteList().setSelectedFlags(listFlags);
-        // call command action in old screen
-        SurveysControl.getInstance().getCurrentOldDeleteList().commandAction(Resources.CMD_DELETE, null);
-        */
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-        int resultCmdIndex = GeneralAlert.getInstance().show(Resources.CMD_DELETE.getLabel(), Resources.DELETE_RESULTS_CONFIRMATION, GeneralAlert.CONFIRMATION);
+        int resultCmdIndex = GeneralAlert.getInstance().show(Resources.CMD_DELETE, Resources.DELETE_RESULTS_CONFIRMATION, GeneralAlert.CONFIRMATION);
         if (resultCmdIndex == GeneralAlert.RESULT_YES) {
             SurveysControl.getInstance().deleteResults(listFlags);
-            AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultList());
+            AppMIDlet.getInstance().setResultList(new ResultList());
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
         }
     }
     

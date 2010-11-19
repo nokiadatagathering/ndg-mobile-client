@@ -6,8 +6,8 @@
 package br.org.indt.ndg.lwuit.control;
 
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.download.DownloadNewSurveys;
 
 public class CancelSSDownloadCommand extends BackCommand {
 
@@ -24,7 +24,7 @@ public class CancelSSDownloadCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        SurveysControl.getInstance().getCurrentOldStatusScreenDownload().commandAction(Resources.CMD_CANCEL, null);
+        DownloadNewSurveys.getInstance().cancelAndKillOperation();
     }
 
 }

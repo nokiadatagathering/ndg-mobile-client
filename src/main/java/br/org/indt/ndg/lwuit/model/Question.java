@@ -38,14 +38,6 @@ public class Question extends NDGQuestion implements DisplayableModel{
         return getName();
     }
 
-    public boolean isVisited(){
-        return visited;
-    }
-
-//    public void setVisited(boolean visited){
-//        this.isVisited = visited;
-//    }
-
     /**
      * this method should be abstract, but for refactoring reasons, it is not.
      * @return

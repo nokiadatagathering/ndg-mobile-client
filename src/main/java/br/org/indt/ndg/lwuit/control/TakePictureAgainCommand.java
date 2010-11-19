@@ -5,7 +5,8 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.camera.ViewFinderFormLCDUICanvas;
+import br.org.indt.ndg.lwuit.ui.camera.ViewFinderForm;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
@@ -23,7 +24,7 @@ public class TakePictureAgainCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        ViewFinderFormLCDUICanvas.getInstance().show();
+        AppMIDlet.getInstance().setDisplayable( ViewFinderForm.class );
     }
 
     public static TakePictureAgainCommand getInstance(){

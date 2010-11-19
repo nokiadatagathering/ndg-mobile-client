@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.CategoryList;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
@@ -22,7 +23,7 @@ public class BackInterviewFormCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultList());
+        AppMIDlet.getInstance().setDisplayable(CategoryList.class);
     }
 
     public static BackInterviewFormCommand getInstance() {

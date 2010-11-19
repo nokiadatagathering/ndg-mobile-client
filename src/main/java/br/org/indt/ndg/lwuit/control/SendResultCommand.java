@@ -5,8 +5,11 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.StatusScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.submit.SubmitResultRunnable;
+import br.org.indt.ndg.mobile.submit.SubmitServer;
 import com.sun.lwuit.Command;
 
 /**
@@ -22,7 +25,13 @@ public class SendResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getResultView().commandAction(Resources.CMD_SEND, null);
+        SubmitResultRunnable srr = new SubmitResultRunnable(AppMIDlet.getInstance().getFileSystem().getResultFilename());
+        AppMIDlet.getInstance().setSubmitServer( new SubmitServer() );
+        srr.setSubmitServer( AppMIDlet.getInstance().getSubmitServer() );
+        AppMIDlet.getInstance().setDisplayable(StatusScreen.class );
+        try { Thread.sleep(500); } catch (InterruptedException ex) {}
+        Thread t = new Thread(srr);
+        t.start();
     }
 
     public static SendResultCommand getInstance() {
@@ -30,5 +39,4 @@ public class SendResultCommand extends CommandControl {
             instance = new SendResultCommand();
         return instance;
     }
-
 }

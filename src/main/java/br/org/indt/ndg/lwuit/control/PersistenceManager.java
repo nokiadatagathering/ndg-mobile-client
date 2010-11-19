@@ -6,12 +6,13 @@
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.model.*;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.logging.Logger;
-import br.org.indt.ndg.mobile.structures.question.TypeTime;
+import br.org.indt.ndg.mobile.ResultList;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -131,15 +132,17 @@ public class PersistenceManager {
             output.print("time=\"" + String.valueOf(timeTaken/1000)+ "\">");  //convert to seconds
             output.println();
 
-            Location loc = AppMIDlet.getInstance().getLocation();
+            if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
 
-            if (loc != null) {
-                if(loc.getQualifiedCoordinates() != null){
-                    output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
-                    output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
+                Location loc = AppMIDlet.getInstance().getLocation();
+
+                if (loc != null) {
+                    if (loc.getQualifiedCoordinates() != null) {
+                        output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
+                        output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
+                    }
                 }
             }
-
             output.println("<title>" + AppMIDlet.getInstance().u2x(displayName) + "</title>");
 
             int catId = 0;
@@ -158,24 +161,16 @@ public class PersistenceManager {
                     output.print("visited=\"" + question.getVisited() + "\"");
 
                     if (question.getType().equals("_time")) {
-                        if (((TimeQuestion)question).getConvention() == 1) {                            
-                            output.print(" convention=\"" + "am" + "\"");
+                        if (((TimeQuestion)question).getConvention() == 24 || ((TimeQuestion)question).getConvention() == 0 ) {
+                            output.print(" convention=\"" + "24" + "\"");
                         } else {
-                            if (((TimeQuestion)question).getConvention() == 2) {
-                                output.print(" convention=\"" + "pm" + "\"");                               
-                            } else {
-
-                                if (((TimeQuestion)question).getConvention() == 12) {                                    
-                                    ((TimeQuestion)question).setConvention(1);
-                                    output.print(" convention=\"" + "am" + "\"");
-                                } else {
-                                    if ( ((TimeQuestion)question).getConvention() == 24 ) {
-                                        output.print(" convention=\"" + "24" + "\"");
-                                    }
-                                }
-                            }
+                            if( ((TimeQuestion)question).getAm_pm() == TimeQuestion.AM )
+                                output.print(" convention=\"" + "am" + "\"");
+                            else
+                                output.print(" convention=\"" + "pm" + "\"");
                         }
                     }
+
                     output.print(">");
 
                     output.println();
@@ -198,11 +193,13 @@ public class PersistenceManager {
         } catch( ConnectionNotFoundException e ) {
             error = true;
             Logger.getInstance().log(e.getMessage());
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ECREATE_RESULT);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ECREATE_RESULT, GeneralAlert.ERROR );
         } catch( IOException e ) {
             error = true;
             Logger.getInstance().log(e.getMessage());
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EWRITE_RESULT);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EWRITE_RESULT, GeneralAlert.ERROR );
         }
         catch(Exception e){
             Logger.getInstance().log(e.getMessage());
@@ -223,28 +220,26 @@ public class PersistenceManager {
     private String getQuestionType(NDGQuestion question) {
         String result = "";
         if (question instanceof DescriptiveQuestion) {
-                result = "_str";
-            }
-            else if (question instanceof NumericQuestion) {
-                if (((NumericQuestion) question).isDecimal()) {
-                    result = "_decimal";
-                }
-                else {
-                    result = "_int";
-                }
-            }
-            else if (question instanceof DateQuestion) {
-                result = "_date";
-            }
-            else if (question instanceof TimeQuestion) {
-                result = "_time";
-            }
-            else if (question instanceof ChoiceQuestion) {
-                result = "_choice";
-            }
-            else if(question instanceof ImageQuestion){
-                result = "_img";
-            }
+            result = "_str";
+        }
+        else if (question instanceof DecimalQuestion) {
+            result = "_decimal";
+        }
+        else if (question instanceof IntegerQuestion) {
+            result = "_int";
+        }
+        else if (question instanceof DateQuestion) {
+            result = "_date";
+        }
+        else if (question instanceof TimeQuestion) {
+            result = "_time";
+        }
+        else if (question instanceof ChoiceQuestion) {
+            result = "_choice";
+        }
+        else if(question instanceof ImageQuestion){
+            result = "_img";
+        }
         return result;
     }
 
@@ -291,8 +286,8 @@ public class PersistenceManager {
             // Refresh ResultList since a new result was created
             AppMIDlet.getInstance().getFileStores().resetQuestions();
             AppMIDlet.getInstance().getFileSystem().loadResultFiles();
-            AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultList());
+            AppMIDlet.getInstance().setResultList(new ResultList());
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
         }
     }
 

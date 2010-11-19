@@ -26,8 +26,8 @@ public class UpdateClientApp extends Screen implements ActionListener {
 
 
     protected void loadData() {
-        strText1 = SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText1();
-        strText2 = SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText2();
+        strText1 = "Check for Update";//SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText1();
+        strText2 = Resources.CONNECTING;//SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText2();
 
         if (firstcreation) {
             item = new TextArea(3,20);

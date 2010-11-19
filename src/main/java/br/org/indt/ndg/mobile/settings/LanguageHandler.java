@@ -5,6 +5,8 @@
 
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.lwuit.control.ExitCommand;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import java.io.IOException;
@@ -78,7 +80,8 @@ public class LanguageHandler {
                 fc.close();
             } 
             catch (IOException ioe2) {
-                AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.IMPOSSIBLE_CREATE_ROOTDIR);
+                GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.IMPOSSIBLE_CREATE_ROOTDIR, GeneralAlert.ERROR );
                 //this.ROOT_DIR = this.ROOT_DIR_PHONE;
             }
         }

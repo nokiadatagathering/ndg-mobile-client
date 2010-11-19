@@ -5,8 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.SimpleLocation;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 
 public class ViewDetailsGpsFormCommand extends CommandControl {
@@ -24,6 +25,6 @@ public class ViewDetailsGpsFormCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        SurveysControl.getInstance().getCurrentOldGpsForm().commandAction(Resources.CMD_VIEW_GPS_DETAILS, null);
+        AppMIDlet.getInstance().setDisplayable( SimpleLocation.class );
     }
 }

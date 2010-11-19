@@ -30,7 +30,6 @@ public class ResultControl {
         fs = AppMIDlet.getInstance().getFileSystem();
         xmlResultFile = fs.getXmlResultFile();
 
-        //Enumeration e = xmlResultFile.elements();
         Result r;
         int totalResultsFromNDG = xmlResultFile.size();
         Result[] results = new Result[totalResultsFromNDG];

@@ -7,8 +7,8 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.error.WaitingForm;
-import br.org.indt.ndg.lwuit.ui.SentResultList;
+import br.org.indt.ndg.lwuit.ui.WaitingScreen;
+import br.org.indt.ndg.mobile.ResultList;
 import com.sun.lwuit.Command;
 
 /**
@@ -29,8 +29,18 @@ public class BackSentResultListCommand extends BackCommand{
     }
 
     protected void doAction(Object parameter) {
-        SentResultList list = (SentResultList) parameter;
-        list.getSentList().commandAction(Resources.CMD_BACK, null);
+        WaitingScreen.show(Resources.LOADING_RESULTS);
+        BackResultRunnable brr = new BackResultRunnable();
+        Thread t = new Thread(brr);  //create new thread to compensate for waitingform
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
     }
 
+    class BackResultRunnable implements Runnable {
+        public void run() {
+            AppMIDlet.getInstance().getFileSystem().loadResultFiles();
+            AppMIDlet.getInstance().setResultList(new ResultList() );
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+        }
+    }
 }

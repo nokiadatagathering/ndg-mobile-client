@@ -5,9 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.GpsForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.settings.GpsForm;
 import com.sun.lwuit.Command;
 
 /**
@@ -29,6 +29,6 @@ public class GPSCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().setDisplayable(new GpsForm());
+        AppMIDlet.getInstance().setDisplayable(GpsForm.class);
     }
 }

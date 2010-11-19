@@ -6,7 +6,6 @@
 package br.org.indt.ndg.mobile.download;
 
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.xmlhandle.DoneParsingException;
 import java.io.DataInputStream;
 import java.io.IOException;

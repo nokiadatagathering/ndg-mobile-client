@@ -1,6 +1,7 @@
 
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -8,37 +9,17 @@ import java.io.PrintStream;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.List;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 
-public class Settings extends List implements CommandListener {
+public class Settings {
     
     private SettingsStructure settingsStructure = new SettingsStructure();
     
     public Settings() {
-        super("Settings", Choice.IMPLICIT);
-
         loadSettingsInfo();
-        
-        this.setFitPolicy(this.TEXT_WRAP_ON);
-    }
-    
-    public void commandAction(Command c, Displayable d) {
-        if (c == Resources.CMD_BACK) {
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getSurveyList());
-        } else if (c == SELECT_COMMAND) {
-            int index = this.getSelectedIndex();
-            if (index == 0) {
-                AppMIDlet.getInstance().setDisplayable(new GpsForm());
-            }
-        }
     }
     
     public void writeSettings() {
@@ -63,8 +44,7 @@ public class Settings extends List implements CommandListener {
             output.println(" language=\"" + settingsStructure.getLanguage() + "\">");
             
             settingsStructure.writeGpsSettings(output);
-            settingsStructure.writeSmsSettings(output);
-            settingsStructure.writeTransportSettings(output);
+            settingsStructure.writeCategoryEnableSettings(output);
             settingsStructure.writeLogSettings(output);
             settingsStructure.writeServerSettings(output);
             settingsStructure.writeVersionSettings(output);
@@ -76,9 +56,11 @@ public class Settings extends List implements CommandListener {
             connection.close();
             
         } catch (ConnectionNotFoundException e) {
-            AppMIDlet.getInstance().getGeneralAlert().showError(e);
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(e);
         } catch(IOException e) {
-            AppMIDlet.getInstance().getGeneralAlert().showError(e);
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(e);
         }
     }
     
@@ -124,15 +106,13 @@ public class Settings extends List implements CommandListener {
             FileConnection conn = (FileConnection) Connector.open(Resources.ROOT_DIR + Resources.SETTINGS_FILE);
             if(!conn.exists()){
                 String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
-                String[] defaultSmsNumbers = AppMIDlet.getInstance().getDefaultSmsNumbers();
                 String defaultAppLanguage = AppMIDlet.getInstance().getDefaultAppLanguage();
                 String[] defaultServelts = AppMIDlet.getInstance().getDefaultServlets();
                 
                 String settings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<settings agree=\"1\" splash=\"8\" language=\"" + defaultAppLanguage + "\">\n" +
                         "<gps configured=\"yes\"/>\n" +
-                        "<sms country_code=\"" + defaultSmsNumbers[0] + "\" area_code=\"" + defaultSmsNumbers[1] + "\" phone_number=\"" + defaultSmsNumbers[2] + "\" receivingPort=\"50001\" sendingPort=\"50000\" number_of_char_per_sms=\"100\"/>\n" +
-                        "<transport gprs=\"yes\" sms=\"no\"/>\n" +
+                        "<categoryView enabled=\"no\"/>\n" +
                         "<log active=\"no\"/>\n" +
                         "<server compression=\"on\">\n" +
                         "<url_compress>" + defaultServerUrl + defaultServelts[0] + defaultServelts[1] + "</url_compress>\n" +

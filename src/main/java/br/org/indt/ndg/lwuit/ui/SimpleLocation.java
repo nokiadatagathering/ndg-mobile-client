@@ -8,6 +8,7 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.control.BackSimpleLocationCommand;
 import br.org.indt.ndg.lwuit.control.OkSimpleLocationCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
@@ -19,9 +20,10 @@ public class SimpleLocation extends Screen implements ActionListener {
     private String strText;
     private String title1, title2;
     private boolean bUpdating = false;
-    TextArea questionName;
+    private TextArea questionName;
+
     protected void loadData() {
-        strText = SurveysControl.getInstance().getTextFromGps();
+        strText = AppMIDlet.getInstance().getLocationHandler().getLocationString();
         title1 = Resources.NEWUI_NOKIA_DATA_GATHERING;
         title2 = Resources.GPS_LOCAL;
     }
@@ -43,7 +45,7 @@ public class SimpleLocation extends Screen implements ActionListener {
         form.removeAll();
         form.addComponent(questionName);
 
-        // Starting thread for updating status from old screen (GPS Coordinates)
+        // Starting thread for updating status from location provider(GPS Coordinates)
         bUpdating = true;
         Thread t = new Thread(new UpdateStatus());
         t.setPriority(Thread.MIN_PRIORITY);
@@ -64,11 +66,11 @@ public class SimpleLocation extends Screen implements ActionListener {
 
         public void run() {
             while (bUpdating) {
-                strText = SurveysControl.getInstance().getTextFromGps();
-                questionName.setText(strText);
                 try {
+                    strText = AppMIDlet.getInstance().getLocationHandler().getLocationString();
+                    questionName.setText(strText);
                     Thread.sleep(1000);
-                } catch (InterruptedException ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }

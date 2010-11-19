@@ -26,5 +26,4 @@ public class Answer extends NDGAnswer{
     public void setValue(Object value) {
         this.value = value;
     }
-
 }

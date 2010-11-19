@@ -6,7 +6,7 @@
 package br.org.indt.ndg.lwuit.control;
 
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.download.DownloadNewSurveys;
 import com.nokia.mid.appl.cmd.Local;
 
 public class DownloadCheckSurveyListCommand extends CommandControl {
@@ -24,6 +24,6 @@ public class DownloadCheckSurveyListCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        SurveysControl.getInstance().getCurrentOldSurveyList().commandAction(Resources.CMD_DOWNLOAD, null);
+        DownloadNewSurveys.getInstance().download();
     }
 }

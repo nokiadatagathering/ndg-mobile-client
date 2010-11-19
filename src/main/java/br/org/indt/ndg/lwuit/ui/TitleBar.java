@@ -5,7 +5,6 @@
 
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
@@ -37,7 +36,7 @@ public class TitleBar implements Painter {
         g.drawString(title1, 65, 3);
         g.setFont(nokiaLarge);
         g.drawString(title2, 65, 17);
-        if (SurveysControl.getInstance().isGPSConnected()) {
+        if (AppMIDlet.getInstance().getLocationHandler().getLocationObtained()) {
             Image imageGPS = Screen.getRes().getImage("gps");
             g.drawImage(imageGPS, 2, 22);
         }

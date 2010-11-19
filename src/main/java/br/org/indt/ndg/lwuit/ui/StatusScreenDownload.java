@@ -8,6 +8,7 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.control.CancelSSDownloadCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.download.DownloadNewSurveys;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
@@ -25,7 +26,7 @@ public class StatusScreenDownload extends Screen implements ActionListener {
     private boolean firstcreation = true;
 
     protected void loadData() {
-        strText = SurveysControl.getInstance().getCurrentOldStatusScreenDownload().getGaugeText();
+        strText =  DownloadNewSurveys.getInstance().ServerStatus();
         if (firstcreation) {
             item = new TextArea(3,20);
             item.setStyle(UIManager.getInstance().getComponentStyle("Label"));

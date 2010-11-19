@@ -21,6 +21,15 @@ public class WaitingForm extends Screen {
     private String title1;
     private String title2;
 
+    public WaitingForm()
+    {
+    }
+
+    public WaitingForm( String _title )
+    {
+        this.title1 = _title;
+    }
+
     protected void loadData() {
         status = Resources.PROCESSING;
         title1 = SurveysControl.getInstance().getOpenedSurveyTitle();

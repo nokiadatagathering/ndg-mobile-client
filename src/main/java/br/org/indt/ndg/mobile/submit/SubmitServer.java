@@ -1,5 +1,6 @@
 package br.org.indt.ndg.mobile.submit;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,29 +8,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Vector;
-
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
-
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.ResultList;
-import br.org.indt.ndg.mobile.sms.SMSMessage;
+import br.org.indt.ndg.mobile.SurveyList;
 import br.org.indt.ndg.mobile.error.ServerCantWriteResultsException;
-
 import br.org.indt.ndg.mobile.logging.Logger;
-import br.org.indt.ndg.mobile.sms.SMSSender;
-import br.org.indt.ndg.mobile.sms.SMSUtils;
-import br.org.indt.ndg.mobile.sms.UnsentResult;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZOutputStream;
-import javax.microedition.lcdui.Alert;
 
 public class SubmitServer {
     //These values are set in Settings.xml
-    public static boolean gprs_support;
-    public static boolean sms_support;
     private final int SERVER_CANNOT_WRITE_RESULT = -1;
     private static final int NO_SURVEY_IN_SERVER = 2;
     private final int SUCCESS = 1;
@@ -44,26 +36,15 @@ public class SubmitServer {
     private boolean stop = false;
     private String urlServlet = "";
     
-    private StatusScreen statusScreen = null;
-    
-    private SMSSender sender;
+   
+
     
     public SubmitServer() {
-        gprs_support = AppMIDlet.getInstance().getSettings().getStructure().getGPRSSupport();
-        sms_support = AppMIDlet.getInstance().getSettings().getStructure().getSMSSupport();
-        if(!gprs_support && !sms_support){
-            AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.NO_TRANSPORT, Resources.NO_TRANSPORT_SELECTED);
-        }
-        else{
-            statusScreen = new StatusScreen(this);
-        }                     
+
     }
     
     public void cancel() {
         stop = true;
-        if(sender != null){
-            sender.cancel();
-        }
     }
     
     public void submitResult(String resultFilename){
@@ -72,30 +53,22 @@ public class SubmitServer {
         send(resultsToSend);
     }
     
-    public void submit(StatusScreen ss) {
-        statusScreen = ss;
-        Vector resultFilenames = AppMIDlet.getInstance().getSubmitList().getSelectedResultNames();
+    public void submit( Vector resultFilenames ) {
         send(resultFilenames);
     }
     
-    private void send(Vector resultFilenames){
-        if(gprs_support){            
+    private void send(Vector resultFilenames){      
             boolean compression_on = AppMIDlet.getInstance().getSettings().getStructure().getServerCompression();
             urlServlet = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl();
-            statusScreen.reset(resultFilenames.size());
-            statusScreen.setHttpLabel(urlServlet);
 
             Enumeration e = resultFilenames.elements();
-            int currentFileIndex = 0;                     
-
             while (e.hasMoreElements() && !stop) {
                 try {
                     httpConn = (HttpConnection) Connector.open(urlServlet);
                     httpConn.setRequestMethod(HttpConnection.POST);
-                    httpOutput = httpConn.openDataOutputStream();                    
+                    httpOutput = httpConn.openDataOutputStream();
                 }
                 catch(Exception ex){
-                    Logger.getInstance().log("Exception sending to Server: " + ex.getMessage());
                     finalizeGPRSTransmission();
                     break;
                 }
@@ -103,9 +76,6 @@ public class SubmitServer {
                 String file = null;   
                 String buffer = "";
                 file = (String) e.nextElement();
-                statusScreen.setFileLabel(file);
-                statusScreen.setCurrentFileIndex(++currentFileIndex);
-                
                 buffer = loadFile(file);
                 try{
                     if (!stop){
@@ -119,7 +89,10 @@ public class SubmitServer {
                             throw new ServerCantWriteResultsException();
                         }
                         else if (in == NO_SURVEY_IN_SERVER) {
-                            AppMIDlet.getInstance().getGeneralAlert().showErrorOk(Resources.SURVEY_NOT_IN_SERVER);
+                           GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
+                           GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.SURVEY_NOT_IN_SERVER, GeneralAlert.ERROR);
+                           AppMIDlet.getInstance().setSurveyList(new SurveyList());
+                           AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                         } else {
                             //System.out.println("Server received data");
                                         /*
@@ -133,23 +106,21 @@ public class SubmitServer {
                 }
                 catch (IOException ioe) {
                     if (!stop){
-                        Logger.getInstance().log(Resources.ESEND_RESULT1 + ioe.getMessage());
-                        AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.NETWORK_FAILURE, Resources.TRY_AGAIN_LATER);
+                        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+                        GeneralAlert.getInstance().showCodedAlert( Resources.NETWORK_FAILURE,
+                                                                   ioe.getMessage() != null ? ioe.getMessage().trim() : "",
+                                                                   GeneralAlert.ALARM );
                     }
                 } catch (ServerCantWriteResultsException snwre) {
                     if (!stop) {
-                        Logger.getInstance().log(Resources.ESEND_RESULT2 + snwre.getMessage());
-                        AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.NETWORK_FAILURE, Resources.TRY_AGAIN_LATER);
+                        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+                        GeneralAlert.getInstance().show( Resources.NETWORK_FAILURE, Resources.TRY_AGAIN_LATER , GeneralAlert.ALARM );
                     }
                 }
                 finalizeGPRSTransmission();
-            }//while
-            //finalizeGPRSTransmission();
+            }
             AppMIDlet.getInstance().setResultList(new ResultList());
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultList());
-        }
-        else
-            throw new IllegalStateException("Transport not set in Settings.xml");
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
     
     
@@ -158,12 +129,10 @@ public class SubmitServer {
         try {
             if (httpOutput != null) httpOutput.close();
             if (httpInput != null) httpInput.close();
-            //if (fileConn != null) fileConn.close();
             if (fileInput != null) fileInput.close();
             if (httpConn != null) httpConn.close();
         } catch (Exception exc) {
             if (!stop) {
-                AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ESEND_RESULT3);
                 Logger.getInstance().log(exc.getMessage());
             }
         }
@@ -177,6 +146,8 @@ public class SubmitServer {
             httpOutput.flush();
         } catch (IOException ioe) {
             Logger.getInstance().log(ioe.getMessage());
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().showCodedAlert( Resources.NETWORK_FAILURE, ioe.getMessage().trim() , GeneralAlert.ALARM );
         }
     }
 
@@ -226,7 +197,7 @@ public class SubmitServer {
             dos.close();
             
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            Logger.getInstance().log(ioe.getMessage());
         }
        
         return strTemp;

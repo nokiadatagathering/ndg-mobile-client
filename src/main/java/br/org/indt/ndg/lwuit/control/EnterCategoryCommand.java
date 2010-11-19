@@ -5,8 +5,8 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
@@ -24,8 +24,10 @@ public class EnterCategoryCommand extends CommandControl {
 
     protected void doAction(Object parameter) {
         int selectedIndex = ((Integer)parameter).intValue();
-        AppMIDlet.getInstance().getCategoryList().setSelectedIndex(selectedIndex, true);
-        AppMIDlet.getInstance().getCategoryList().commandAction(Resources.CMD_RESULTS, null);  
+        //AppMIDlet.getInstance().getCategoryList().setSelectedIndex(selectedIndex);
+        SurveysControl.getInstance().setSelectedCategory(selectedIndex);
+        AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
+        //AppMIDlet.getInstance().getCategoryList().commandAction(Resources.CMD_RESULTS, null);
     }
 
     public static EnterCategoryCommand getInstance() {

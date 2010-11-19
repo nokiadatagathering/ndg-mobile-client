@@ -5,10 +5,10 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.CategoryList;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.ResultList;
 import com.sun.lwuit.Command;
 import java.util.Date;
 
@@ -27,12 +27,10 @@ public class OpenResultCommand extends CommandControl {
     protected void doAction(Object parameter) {
         if (parameter != null) {
             int selectedIndex = ((Integer)parameter).intValue();
-            AppMIDlet.getInstance().getResultList().setSelectedIndex(selectedIndex, true);
             AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
         }
-        //AppMIDlet.getInstance().getResultList().commandAction(Resources.CMD_OPEN_RESULT, null);
-        //AppMIDlet.getInstance().setDisplayable(new WaitingForm(Resources.CMD_OPEN_RESULT.getLabel()));
-        br.org.indt.ndg.lwuit.ui.WaitingForm.show(br.org.indt.ndg.lwuit.ui.WaitingForm.class, true);
+        
+        WaitingScreen.show(Resources.PROCESSING);
         OpenResultRunnable orr = new OpenResultRunnable();
         Thread t = new Thread(orr);  //create new thread to compensate for waitingform
         t.setPriority(Thread.MIN_PRIORITY);
@@ -49,16 +47,19 @@ public class OpenResultCommand extends CommandControl {
         public void run() {
             try { Thread.sleep(200); } catch(Exception e){}
 
+            SurveysControl.getInstance().reset();
+            SurveysControl.getInstance().resetQuestion();//this is from refactoring IV
+            
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(true);
                 AppMIDlet.getInstance().getFileStores().parseResultFile();
                 if (AppMIDlet.getInstance().getFileStores().getError()) {
-                    AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EPARSE_RESULT);
+                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
                 } else {
                     AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time increment used to create new survey
                     AppMIDlet.getInstance().getFileStores().loadAnswers();
-                    AppMIDlet.getInstance().setCategoryList(new CategoryList());
-                    AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getCategoryList());
+                    AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getInterviewForm());
                 }
             }
         }

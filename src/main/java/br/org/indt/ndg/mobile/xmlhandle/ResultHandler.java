@@ -1,7 +1,14 @@
 package br.org.indt.ndg.mobile.xmlhandle;
 
+import br.org.indt.ndg.lwuit.model.BoolAnswer;
+import br.org.indt.ndg.lwuit.model.ChoiceAnswer;
+import br.org.indt.ndg.lwuit.model.DateAnswer;
+import br.org.indt.ndg.lwuit.model.DecimalAnswer;
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
+import br.org.indt.ndg.lwuit.model.IntegerAnswer;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
+import br.org.indt.ndg.lwuit.model.StringAnswer;
+import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -11,14 +18,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import br.org.indt.ndg.mobile.structures.ResultStructure;
-import br.org.indt.ndg.mobile.structures.answer.Answer;
-import br.org.indt.ndg.mobile.structures.answer.BoolAnswer;
-import br.org.indt.ndg.mobile.structures.answer.ChoiceAnswer;
-import br.org.indt.ndg.mobile.structures.answer.DateAnswer;
-import br.org.indt.ndg.mobile.structures.answer.DecimalAnswer;
-import br.org.indt.ndg.mobile.structures.answer.IntegerAnswer;
-import br.org.indt.ndg.mobile.structures.answer.StringAnswer;
-import br.org.indt.ndg.mobile.structures.answer.TimeAnswer;
 import java.util.Calendar;
 
 public class ResultHandler extends DefaultHandler {
@@ -65,7 +64,7 @@ public class ResultHandler extends DefaultHandler {
                     convention = 2;
                 }
 
-                ((TimeAnswer)currentAnswer).setConvention(convention);
+                ((TimeAnswer)currentAnswer).setAmPm24(convention);
 
 
             }
@@ -88,7 +87,7 @@ public class ResultHandler extends DefaultHandler {
         int hour = Integer.parseInt(time.substring(0,ix));
         int min  = Integer.parseInt(time.substring(ix+1));
         Calendar calendar = Calendar.getInstance();
-        if(convention == 0){           
+        if(convention == 0 || convention == 24 ){
            calendar.set(Calendar.HOUR_OF_DAY, hour);
         }else{            
             calendar.set(Calendar.HOUR, hour);
@@ -105,17 +104,22 @@ public class ResultHandler extends DefaultHandler {
             
             if (qName.equals("str")) ((StringAnswer) currentAnswer).setValue(chars);
             else if (qName.equals("date")) ((DateAnswer) currentAnswer).setDate(Long.parseLong(chars));
-            else if (qName.equals("time")) ((TimeAnswer) currentAnswer).setTime(timeStamp2Long(chars,((TimeAnswer) currentAnswer).getConvention()));
+            else if (qName.equals("time")) ((TimeAnswer) currentAnswer).setTime(timeStamp2Long(chars,((TimeAnswer) currentAnswer).getAmPm24()));
             else if (qName.equals("int")) {
-                int iValue = 0;
-                try {
-                    iValue = Integer.parseInt(chars);
+                try
+                {
+                    ((IntegerAnswer) currentAnswer).setValue(chars);
                 }
-                catch(NumberFormatException ex) {}
-                ((IntegerAnswer) currentAnswer).setValue(iValue);
+                catch(NumberFormatException ex)
+                {}
             }
             else if (qName.equals("decimal"))
-                ((DecimalAnswer) currentAnswer).setValue(Double.parseDouble(chars));                
+                try
+                {
+                    ((DecimalAnswer) currentAnswer).setValue(chars);
+                }
+                catch ( NumberFormatException ex )
+                {}
             else if (qName.equals("index")) ((BoolAnswer) currentAnswer).setIndex(chars);
             else if (qName.equals("item")){
                 ((ChoiceAnswer) currentAnswer).setSelectedIndex(chars);                

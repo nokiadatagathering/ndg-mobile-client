@@ -23,7 +23,7 @@ public class CheckNewSurveysCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getSurveyList().commandAction(Resources.CMD_CHECK_NEW_SURVEYS, null);
+        DownloadNewSurveys.getInstance().check();
     }
 
     public static CheckNewSurveysCommand getInstance() {

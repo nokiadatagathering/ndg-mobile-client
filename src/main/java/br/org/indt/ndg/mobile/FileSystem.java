@@ -9,7 +9,8 @@
 
 package br.org.indt.ndg.mobile;
 
-import br.org.indt.ndg.mobile.error.WaitingForm;
+import br.org.indt.ndg.lwuit.control.ExitCommand;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.logging.Logger;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -23,7 +24,6 @@ import br.org.indt.ndg.mobile.structures.FileSystemSurveyStructure;
 import br.org.indt.ndg.mobile.xmlhandle.FileSystemResultHandler;
 import br.org.indt.ndg.mobile.xmlhandle.FileSystemSurveyHandler;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
-import br.org.indt.ndg.mobile.xmlhandle.Results;
 import br.org.indt.ndg.mobile.xmlhandle.kParser;
 
 
@@ -91,14 +91,6 @@ public class FileSystem {
         return fsResultStructure.isLocalFile();
     }
     
-//    public int getSurveyCurrentIndex() {
-//        return fsSurveyStructure.getCurrentIndex();
-//    }
-    
-//    public int getResultCurrentIndex() {
-//        return fsResultStructure.getCurrentIndex();
-//    }
-    
     public void setSurveyCurrentIndex(int _index) {
         fsSurveyStructure.setCurrentIndex(_index);
     }
@@ -150,9 +142,7 @@ public class FileSystem {
     public void deleteFile(String filename) {
         delete(filename, true);
     }
-    public void deleteSMSFile(String smsFileName){
-        delete(smsFileName, false);        
-    }
+
     private void delete(String filename, boolean removeFromMemory){
         if(removeFromMemory){
             this.removeDisplayName(filename);
@@ -168,7 +158,8 @@ public class FileSystem {
         } 
         catch (IOException ioe) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EDELETE_RESULT);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EDELETE_RESULT, GeneralAlert.ERROR );
         }
     }
     
@@ -198,7 +189,8 @@ public class FileSystem {
         }
         catch (IOException ioe) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EDELETE_RESULT);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EDELETE_RESULT, GeneralAlert.ERROR );
         }
     }
     
@@ -217,14 +209,6 @@ public class FileSystem {
         moveResult(path, fileName, "s_");        
     }
     
-    public void saveResult() {
-        AppMIDlet.getInstance().setDisplayable(new WaitingForm(Resources.SAVING_RESULT));
-        SaveResultRunnable srr = new SaveResultRunnable();
-        Thread t = new Thread(srr); //create new thread to compensate for waitingform
-        t.setPriority(Thread.MIN_PRIORITY);
-        t.start();
-    }
-    
     private void moveResult(String path, String fileName, String prefix){
         try {           
             FileConnection fc = (FileConnection) Connector.open(path);
@@ -237,7 +221,8 @@ public class FileSystem {
                 fc.close();
             }
         } catch (IOException ioe) {
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ERENAME);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
         
     }
@@ -256,7 +241,8 @@ public class FileSystem {
                 fc.close();
             }
         } catch (IOException ioe) {
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ERENAME);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
     }
     
@@ -272,7 +258,8 @@ public class FileSystem {
             if(fc != null)
                 fc.close();
         } catch (IOException ioe) {
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ERENAME);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
     }
     
@@ -283,7 +270,9 @@ public class FileSystem {
                 fc.rename("c_" + _filename);
             }
         } catch (IOException ioe) {
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ERENAME);
+
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
     }
     
@@ -325,7 +314,6 @@ public class FileSystem {
                         this.loadSurveyInfo(dirName);
                     } else {
 //                        error = true;
-//                        AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELOAD_SURVEY);
                     }
                 }
             }
@@ -339,7 +327,8 @@ public class FileSystem {
             
         } catch (IOException ioe) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELOAD_SURVEYS);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_SURVEYS, GeneralAlert.ERROR );
         }      
     }
     
@@ -379,7 +368,8 @@ public class FileSystem {
             fc.close();                      
         } catch (IOException ioe) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELOAD_RESULTS);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_RESULTS, GeneralAlert.ERROR );
         }
     }
         
@@ -411,22 +401,8 @@ public class FileSystem {
             fc.close();
         } catch (IOException ioe) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELOAD_RESULTS);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_RESULTS, GeneralAlert.ERROR );
         }
     }    
 }
-class SaveResultRunnable implements Runnable {
-        public void run() {
-            Results results = new Results();
-            results.writeToXmlFile();
-            
-            if (results.getError()) {
-                AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EWRITE_RESULT);
-            } else {  
-                AppMIDlet.getInstance().getFileStores().resetQuestions();
-                AppMIDlet.getInstance().getFileSystem().loadResultFiles();
-                AppMIDlet.getInstance().setResultList(new ResultList());
-                AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultList());
-            }
-        }
-    }

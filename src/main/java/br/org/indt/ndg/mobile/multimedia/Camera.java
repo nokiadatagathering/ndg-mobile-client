@@ -5,18 +5,14 @@
 
 package br.org.indt.ndg.mobile.multimedia;
 
-import br.org.indt.ndg.lwuit.ui.camera.ViewFinderFormLCDUICanvas;
 import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.MediaComponent;
 import java.io.IOException;
-import java.util.Date;
-import javax.microedition.lcdui.Item;
 import javax.microedition.media.Manager;
 import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.control.VideoControl;
-
 /**
  *
  * @author alexandre martini
@@ -26,9 +22,10 @@ public class Camera {
 
     public static int THUMBNAIL_WIDTH = 62;
     public static int THUMBNAIL_HEIGHT = 54;
+    private final String JPEG = "encoding=image/jpeg";
+    private final String JPG = "encoding=image/jpg";
 
     private VideoControl vc;
-    private Item viewFinder;
     private Player player;
     private boolean init;
     private MediaComponent mediaComp;
@@ -36,32 +33,34 @@ public class Camera {
 
     private Camera(){
         try {
-            player = Manager.createPlayer("capture://video");
-            initCamera();
-            vc = (VideoControl) player.getControl("VideoControl");
-            if (vc != null) {
-                viewFinder = (Item) vc.initDisplayMode(vc.USE_DIRECT_VIDEO, ViewFinderFormLCDUICanvas.getInstance());
-                vc.setVisible(true);
-            } else {
-                throw new IllegalStateException("There is no VideoControl mechanism");
+            try
+            {//for S40 devices
+                player = Manager.createPlayer("capture://image");
             }
-
+            catch(Exception ex)
+            {//for S60 devices
+                player = Manager.createPlayer("capture://video");
+            }
+            player.prefetch();
+            player.realize();
+            vc = (VideoControl) player.getControl("VideoControl");
+            mediaComp = new MediaComponent(player);
+            mediaComp.setFullScreen(true);
+            player.start();
+            init = true;
         } catch (IOException ex) {
             ex.printStackTrace();
         } catch (MediaException ex) {
             ex.printStackTrace();
         }
-//        initCamera();
     }
 
     public void shutDown() {
-        try {
-            player.stop();
+            mediaComp.stop();
+            mediaComp.setVisible(false);
+            player.deallocate();
             init = false;
             imageData = null;
-        } catch (MediaException ex) {
-            Logger.getInstance().log("Player Stopped");
-        }
     }
 
     public static Camera getInstance(){
@@ -85,21 +84,6 @@ public class Camera {
         }
     }
 
-    private Item getViewFinder(){
-        return viewFinder;
-    }
-
-    public Item setFullScreen(){
-        initCamera();
-        try {
-            vc.setDisplayFullScreen(true);
-        } catch (MediaException ex) {
-            ex.printStackTrace();
-        }
-        return getViewFinder();
-    }
-  
-
     /**
      *
      * @return the last picture or null, if there is none.
@@ -109,19 +93,48 @@ public class Camera {
     }
 
     public byte[] takePicture(int width, int height){
-        initCamera();
-        
         if(width <= 0 || height <= 0)
-            throw new IllegalArgumentException("Invalid width or height");        
+            throw new IllegalArgumentException("Invalid width or height");
         try {
             if(vc == null){
                 vc = (VideoControl)player.getControl("VideoControl");
             }
-            imageData = vc.getSnapshot("encoding=jpeg" + "&width=" + width + "&height=" + height);            
+            imageData = vc.getSnapshot( GetEncoding() + "&width=" + width + "&height=" + height);
         } catch (MediaException ex) {
             Logger.getInstance().logException(ex.getMessage());
         }
         return imageData;
+    }
+
+    private String GetEncoding() {
+        String encodings = System.getProperty("video.snapshot.encodings");
+        if( encodings.indexOf(JPEG) >=0 )
+        {
+            return JPEG;
+        }
+        else if ( encodings.indexOf(JPG) >= 0)
+        {
+            return JPG;
+        }
+        else
+        {
+            if( encodings.length() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                int encodingEnd = encodings.indexOf(" ");
+                if( encodingEnd == 0 || encodingEnd == encodings.length() || encodingEnd == -1 )
+                {
+                    return encodings;
+                }
+                else
+                {
+                    return encodings.substring(0, encodingEnd-1);
+                }
+            }
+        }
     }
 
     public static Image createThumbnail(Image image) {
@@ -155,10 +168,8 @@ public class Camera {
      */
     public MediaComponent getViewFinderLWUIT(){
         if(!init){
-            //init();
+            initCamera();
         }
         return mediaComp;
     }
-
-
 }

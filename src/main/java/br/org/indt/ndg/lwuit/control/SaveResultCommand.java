@@ -5,10 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
+import java.util.Vector;
 
 /**
  *
@@ -23,7 +22,8 @@ public class SaveResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getCategoryList().commandAction(Resources.CMD_SAVE, null);
+        Vector questions = (Vector)parameter;
+        PersistenceManager.getInstance().save(questions);//to be checked or refactored
     }
 
     public static SaveResultCommand getInstance() {

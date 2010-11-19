@@ -1,11 +1,10 @@
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.control.ExitCommand;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.io.IOException;
-
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.Image;
-
 import com.nokia.mid.appl.cmd.Local;
+import com.sun.lwuit.Image;
 
 public class Resources {          
     /** Internationalized Resources */
@@ -33,7 +32,6 @@ public class Resources {
     //****************************************************************************
     
     public static final String DELETE_SURVEY = Local.getText(Local.QTJ_CMD_DELETE_SURVEY);
-    //public static final String DELETE_SURVEY = Local.getText(Local.QTJ_CHECK_NEW_SURVEYS);
     public static final String CHECK_NEW_SURVEYS = Local.getText(Local.QTJ_CHECK_NEW_SURVEYS);
     public static final String DOWNLOAD = Local.getText(Local.QTJ_CMD_DOWNLOAD);
     public static final String SETTINGS = Local.getText(Local.QTJ_SETTINGS);
@@ -42,48 +40,11 @@ public class Resources {
     public static final String DISPLAY = Local.getText(Local.QTJ_DISPLAY);
     public static final String RANGE_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_RANGE_TITLE);   
     //public static final String NO_SURVEY_IN_SERVER = Local.getText(Local.QTJ_NO_SURVEY_IN_SERVER);
-    
-    public static final Command CMD_BACK = new Command(Local.getText(Local.QTJ_CMD_BACK), Command.BACK, 1);
-    public static final Command CMD_SEND = new Command(Local.getText(Local.QTJ_CMD_SEND), Command.ITEM, 1);
-    public static final Command CMD_OPEN_RESULT = new Command(Local.getText(Local.QTJ_OPEN_RESULT), Command.ITEM, 1);
-    public static final Command CMD_DELETE = new Command(Local.getText(Local.QTJ_CMD_DELETE), Command.ITEM, 1);
-    public static final Command CMD_SAVE = new Command(Local.getText(Local.QTJ_CMD_SAVE), Command.ITEM, 1);
-    public static final Command CMD_EXIT = new Command(Local.getText(Local.QTJ_CMD_EXIT), Command.EXIT, 1);
-    public static final Command CMD_EXIT_OPTIONS = new Command(Local.getText(Local.QTJ_CMD_EXIT), Command.ITEM, 10);
-    public static final Command CMD_NEW_RESULT = new Command(Local.getText(Local.QTJ_CMD_NEW_SURVEY), Command.ITEM, 1);
-    public static final Command CMD_RESULTS = new Command(Local.getText(Local.QTJ_CMD_RESULTS), Command.ITEM, 1);
-    public static final Command CMD_NEXT = new Command(Local.getText(Local.QTJ_CMD_NEXT), Command.ITEM, 1);
-    public static final Command CMD_START = new Command(Local.getText(Local.QTJ_CMD_START), Command.ITEM, 1);
-    public static final Command CMD_VIEW = new Command(Local.getText(Local.QTJ_CMD_VIEW), Command.ITEM, 1);
-    public static final Command CMD_VIEWSENT = new Command(Local.getText(Local.QTJ_CMD_VIEWSENT), Command.ITEM, 1);
-    public static final Command CMD_MARKALL = new Command(Local.getText(Local.QTJ_CMD_MARKALL), Command.ITEM, 1);
-    public static final Command CMD_UNMARKALL = new Command(Local.getText(Local.QTJ_CMD_UNMARKALL), Command.ITEM, 1);
-    public static final Command CMD_CANCEL = new Command(Local.getText(Local.QTJ_CMD_CANCEL), Command.CANCEL, 1);
-    public static final Command CMD_MOVETOUNSENT = new Command(Local.getText(Local.QTJ_CMD_MOVETOUNSENT), Command.ITEM, 1);
-    public static final Command CMD_QUESTIONS = new Command(Local.getText(Local.QTJ_CMD_QUESTIONS), Command.BACK, 1);
-    public static final Command CMD_CATEGORIES = new Command(Local.getText(Local.QTJ_CMD_CATEGORIES), Command.BACK, 1);
-    public static final Command CMD_RESULTADOS = new Command(Local.getText(Local.QTJ_CMD_RESULTADOS), Command.BACK, 1);
-    public static final Command CMD_SURVEYS = new Command(Local.getText(Local.QTJ_CMD_SURVEYS), Command.BACK, 1);
-    public static final Command CMD_OK = new Command(Local.getText(Local.QTJ_CMD_OK), Command.ITEM, 1);
-    public static final Command CMD_SELECT = new Command(Local.getText(Local.QTJ_MORE_RESULTS), Command.ITEM, 1);  
-    public static final Command CMD_SAVE_SETTINGS = new Command(Local.getText(Local.QTJ_CMD_SAVE_SETTINGS), Command.ITEM, 1);
-    public static final Command CMD_SETTINGS = new Command(Local.getText(Local.QTJ_CMD_SETTINGS), Command.ITEM, 1);
-    public static final Command CMD_GPSTEST = new Command(Local.getText(Local.QTJ_CMD_GPSTEST), Command.ITEM, 1);
-    public static final Command CMD_OPEN_SURVEY = new Command(Local.getText(Local.QTJ_CMD_OPEN), Command.ITEM, 1);
-    //public static final Command CMD_OPEN_SURVEY = new Command("Open", Command.ITEM, 1);
-    public static final Command CMD_GPS = new Command(GPS, Command.ITEM, 1);
-    public static final Command CMD_DOWNLOAD = new Command(DOWNLOAD, Command.ITEM, 1);
-    public static final Command CMD_CHECK_NEW_SURVEYS = new Command(CHECK_NEW_SURVEYS, Command.ITEM, 1);
-    public static final Command CMD_DELETE_SURVEY = new Command(DELETE_SURVEY, Command.ITEM, 1);
-    public static final Command CMD_YES = new Command(Local.getText(Local.QTJ_YES), Command.OK, 1);
-    public static final Command CMD_NO = new Command(Local.getText(Local.QTJ_NO), Command.CANCEL, 1);
-    public static final Command CMD_CHECK_UPDATE = new Command(Local.getText(Local.QTJ_CHECK_FOR_UPDATE), Command.ITEM, 1);
-    public static final Command CMD_VIEW_GPS_DETAILS = new Command(Local.getText(Local.QTJ_CMD_VIEW_GPS_DETAILS), Command.ITEM, 1);
-    public static final Command CMD_ACCEPT = new Command(Local.getText(Local.QTJ_CMD_ACCEPT), Command.OK, 1);
-    public static final Command CMD_DECLINE = new Command(Local.getText(Local.QTJ_CMD_DECLINE), Command.CANCEL, 1);
-    public static final Command CMD_TEST_CONN= new Command(Local.getText(Local.QTJ_CMD_TEST_CONNECTION), Command.ITEM, 1);
-    public static final Command CMD_HIDE= new Command(Local.getText(Local.QTJ_CMD_HIDE), Command.ITEM, 1);
-    
+
+    public static final String CMD_DELETE = Local.getText(Local.QTJ_CMD_DELETE);
+    public static final String CMD_SAVE = Local.getText(Local.QTJ_CMD_SAVE);
+    public static final String CMD_VIEW = Local.getText(Local.QTJ_CMD_VIEW);
+   
     public static final String QUESTION_LIST_TITLE = Local.getText(Local.QTJ_QUESTION_LIST_TITLE);
     public static final String RESULTS_LIST_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_TITLE);
     public static final String SUBMIT_LIST_TITLE = Local.getText(Local.QTJ_SUBMIT_LIST_TITLE);
@@ -185,8 +146,41 @@ public class Resources {
     public static final String REGISTRATION_DONE = Local.getText(Local.QTJ_REGISTRATION_DONE);
     public static final String APP_REGISTERED = Local.getText(Local.QTJ_APP_REGISTERED);
     public static final String APP_REGISTRATION_FAILED = Local.getText(Local.QTJ_APP_REGISTRATION_FAILED);
-   
-            
+    public static final String CHECK_NETWORK = Local.getText(Local.QTJ_NDG_CHECK_NTWRK);
+    public static final String CHECK_SERVER = Local.getText(Local.QTJ_NDG_CHECK_NTWRK);
+    public static final String NO_ROUTE_TO_HOST = Local.getText(Local.QTJ_NDG_NO_ROUTE);
+    public static final String SOFTWARE_CONN_ABORT = Local.getText(Local.QTJ_NDG_SOFTWARE_ABORT);
+    public static final String CONNECTION_REFUSED = Local.getText(Local.QTJ_NDG_CONNECTION_REFUSED);
+    public static final String PERMISSION_DENIED = Local.getText(Local.QTJ_NDG_PERMISSION_DENIED);
+    public static final String NETWORK_DOWN = Local.getText(Local.QTJ_NDG_NETWORK_DOWN);
+    public static final String NETWORK_UNREACHABLE = Local.getText(Local.QTJ_NDG_NETWORK_UNREACHABLE);
+    public static final String CONNECTION_TIMEOUT = Local.getText(Local.QTJ_NDG_CONNECTION_TIMEOUT);
+    public static final String NETWORK_UNAVAILABLE = Local.getText(Local.QTJ_NDG_NETWORK_UNAVAILABLE);
+    public static final String HOST_NOT_FOUND = Local.getText(Local.QTJ_NDG_HOST_NOT_FOUND);
+    public static final String HTTP_NOT_FOUND = Local.getText(Local.QTJ_HTTP_NOT_FOUND);
+    public static final String HTTP_FORBIDDEN = Local.getText(Local.QTJ_HTTP_FORBIDDEN);
+    public static final String HTTP_BAD_REQUEST = Local.getText(Local.QTJ_HTTP_BAD_REQUEST);
+    public static final String HTTP_UNAUTHORIZED = Local.getText(Local.QTJ_HTTP_UNAUTHORIZED);
+    public static final String HTTP_INTERNAL_ERROR = Local.getText(Local.QTJ_HTTP_INTERNAL_ERROR);
+    public static final String HTTP_OVERLOADED = Local.getText(Local.QTJ_HTTP_OVERLOADED);
+    public static final String FAILED_REASON = Local.getText(Local.QTJ_FAILED);
+    public static final String NO_DNS = Local.getText(Local.QTJ_NDG_NO_DNS);
+    public static final String NO_LOCATION = Local.getText(Local.QTJ_NDG_NO_LOCATION);
+
+    public static final String IMEI_ALREADY_EXISTS = Local.getText(Local.QTJ_IMEI_ALREADY_EXISTS);
+    public static final String MSISDN_NOT_FOUND = Local.getText(Local.QTJ_MSISDN_NOT_FOUND);
+    public static final String REGISTRATION_FAILURE = Local.getText(Local.QTJ_REGISTRATION_FAILURE);
+    public static final String SUCCESS = Local.getText(Local.QTJ_SUCCESS);
+    public static final String MSISDN_ALREADY_REGISTERED = Local.getText(Local.QTJ_MSISDN_ALREADY_REGISTERED);
+    public static final String WIRELESS_INTERFACE_ERROR = Local.getText(Local.QTJ_WIRELESS_INTERFACE_ERROR);
+    public static final String THERE_ARE_NO_NEW_SURVEYS = Local.getText(Local.QTJ_THERE_ARE_NO_NEW_SURVEYS);
+    public static final String CATEGORYVIEW_CONFIGURATION = Local.getText(Local.QTJ_CATEGORYVIEW_CONFIGURATION);
+    public static final String CATEGORYVIEW = Local.getText(Local.QTJ_CATEGORYVIEW);
+    public static final String NOTPROPERINTEGER = Local.getText(Local.QTJ_NOTPROPERINTEGER);
+    public static final String NOTPROPERDECIMAL= Local.getText(Local.QTJ_NOTPROPRDECIMAL);
+
+
+
     public static final int NOENTRY = -99999;
     
     /** General */   
@@ -243,23 +237,20 @@ public class Resources {
     public static final String EDOWNLOAD_ACK_ERROR = Local.getText(Local.QTJ_EDOWNLOAD_ACK_ERROR);
     public static final String EINVALID_SURVEYS = Local.getText(Local.QTJ_EINVALID_SURVEYS);
     public static final String EINVALID_XML_FILE = Local.getText(Local.QTJ_EINVALID_XML_FILE);
-    
-    public static Image question = null;
-    public static Image check = null;
-    public static Image splash = null;
-    public static Image pendingACK = null;
-    
+       
     public static int splashCountdown = 8000;
     
     private boolean error = false;
-    
+
+    public static Image splashLWUID;
+    public static Image check;
+    public static Image question;
+
     public Resources() {        
         try {
             question = Image.createImage("/resources/images/redquestion.png");
             check = Image.createImage("/resources/images/greencheck.png");
-            pendingACK = Image.createImage("/resources/images/hourglass.png");
-            
-            splash = Image.createImage("/resources/images/splashEN.jpg");
+            splashLWUID = Image.createImage("/resources/images/splashEN.jpg");
 //            if (Local.phoneLang.substring(0,2).equals("pt"))
 //                splash = Image.createImage("/resources/images/splashPT.jpg");
 //            else if (Local.phoneLang.substring(0,2).equals("es"))
@@ -268,7 +259,8 @@ public class Resources {
 //                splash = Image.createImage("/resources/images/splashEN.jpg");
         } catch (IOException ex) {
             error = true;
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELOAD_IMAGES);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_IMAGES, GeneralAlert.ERROR );
         }
     }
     

@@ -78,6 +78,9 @@ public abstract class NDGQuestion implements Persistable{
     public boolean getVisited() {
         return this.visited;
     }
+    public boolean getFirstTime() {
+        return this.firstTime;
+    }
     public boolean isNew() {
         return isNew;
     }

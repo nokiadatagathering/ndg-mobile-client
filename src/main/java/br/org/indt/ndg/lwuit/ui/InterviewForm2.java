@@ -4,9 +4,9 @@
  */
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackInterviewFormCommand;
+import br.org.indt.ndg.lwuit.control.BackInterview2FormCommand;
 import br.org.indt.ndg.lwuit.control.PersistenceManager;
-import br.org.indt.ndg.lwuit.control.SaveInterviewFormCommand;
+import br.org.indt.ndg.lwuit.control.SaveInterviewForm2Command;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.extended.CheckBox;
 import br.org.indt.ndg.lwuit.extended.DateField;
@@ -17,9 +17,11 @@ import br.org.indt.ndg.lwuit.extended.List;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
 import br.org.indt.ndg.lwuit.model.DateQuestion;
+import br.org.indt.ndg.lwuit.model.DecimalQuestion;
 import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
 import br.org.indt.ndg.lwuit.model.ImageQuestion;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
+import br.org.indt.ndg.lwuit.model.NumberAnswer;
 import br.org.indt.ndg.lwuit.model.NumericQuestion;
 import br.org.indt.ndg.lwuit.model.Question;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
@@ -28,7 +30,6 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.multimedia.Picture;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
-import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -47,6 +48,7 @@ import com.sun.lwuit.list.ListModel;
 import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.list.ListCellRenderer;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -112,8 +114,8 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         form.setCyclicFocus(false);
 
         //form.addCommand(cmdNext);
-        form.addCommand(BackInterviewFormCommand.getInstance().getCommand());
-        form.addCommand(SaveInterviewFormCommand.getInstance().getCommand());
+        form.addCommand(BackInterview2FormCommand.getInstance().getCommand());
+        form.addCommand(SaveInterviewForm2Command.getInstance().getCommand());
         form.setCommandListener(this);
 
         if (PersistenceManager.getInstance().isEditing()) {
@@ -138,6 +140,10 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
 
             if (question instanceof ChoiceQuestion) {
                 updateSkipInfo();
+            }
+
+            if (question instanceof TimeQuestion && question.getFirstTime()) {
+                clearAMPMInfo();
             }
 
             if (checkIfSkiped(catId, questId)) {
@@ -360,7 +366,7 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
 
     private void SaveResult() {
         // Save
-        SaveInterviewFormCommand.getInstance().execute(vQuestions);
+        SaveInterviewForm2Command.getInstance().execute(vQuestions);
     }
 
     private boolean validateAnswer() {
@@ -429,9 +435,14 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
                 }
             }
         }
-
     }
 
+    private void clearAMPMInfo() {
+        if (currentQuestion instanceof TimeQuestion) {
+            ((TimeQuestion) currentQuestion).setAm_pm(-1); // clears
+        }
+    }
+    
     private int findIndex(int catId, int questId) {
         //int nIndex = ((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD) + focusIndex;
         int nIndex = 0;
@@ -474,23 +485,23 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         Object cmd = evt.getSource();
 
         // Back Command pressed
-        if (cmd == BackInterviewFormCommand.getInstance().getCommand()) {
+        if (cmd == BackInterview2FormCommand.getInstance().getCommand()) {
             if (isModifiedInterview()) {
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-                int resultCmdIndex = GeneralAlert.getInstance().show(Resources.CMD_SAVE.getLabel(), Resources.SAVE_MODIFICATIONS, GeneralAlert.CONFIRMATION);
+                int resultCmdIndex = GeneralAlert.getInstance().show(Resources.CMD_SAVE, Resources.SAVE_MODIFICATIONS, GeneralAlert.CONFIRMATION);
                 if (resultCmdIndex == GeneralAlert.RESULT_YES) {
                     UpdateAnswer();
                     if (validateAnswer()) {
                         SaveResult();
                     }
                 } else {
-                    BackInterviewFormCommand.getInstance().execute(null);
+                    BackInterview2FormCommand.getInstance().execute(null);
                 }
             } else {
-                BackInterviewFormCommand.getInstance().execute(null);
+                BackInterview2FormCommand.getInstance().execute(null);
             }
 
-        } else if (cmd == SaveInterviewFormCommand.getInstance().getCommand()) {
+        } else if (cmd == SaveInterviewForm2Command.getInstance().getCommand()) {
             UpdateAnswer();
             if (validateAnswer()) {
                 SaveResult();
@@ -664,14 +675,12 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
             else if ((cmd instanceof RadioButton)) {
 
                 if (currentQuestion instanceof TimeQuestion) {
-
                     if (((TimeQuestion) currentQuestion).getConvention() != 24) {
-
                         if (((RadioButton) cmd).getText().equals("am")) {
-                            ((TimeQuestion) currentQuestion).setConvention(1);
+                            ((TimeQuestion) currentQuestion).setAm_pm(TimeQuestion.AM);
                         } else {
                             if (((RadioButton) cmd).getText().equals("pm")) {
-                                ((TimeQuestion) currentQuestion).setConvention(2);
+                                  ((TimeQuestion) currentQuestion).setAm_pm(TimeQuestion.PM);
                             }
                         }
                     }
@@ -762,10 +771,16 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
                         //if  ( (focusIndex+1)  < vQuestions.size() ) {
                         focusIndex++;
                         int nIndex = ((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD) + (focusIndex);
-                        currentQuestion = (NDGQuestion) vQuestions.elementAt(nIndex);
-                        group = (Component[]) vGroups.elementAt(focusIndex); // ibb
-                        group[0].requestFocus();
-                        updateContainerBorder();
+                        if( nIndex < vQuestions.size() )
+                        {
+                            currentQuestion = (NDGQuestion) vQuestions.elementAt(nIndex);
+                            group = (Component[]) vGroups.elementAt(focusIndex); // ibb
+                            group[0].requestFocus();
+                            updateContainerBorder();
+                        } else {
+                            focusIndex--;
+                        }
+
                     } else {
                         if (((NUMBER_OF_QUESTION_TO_LOAD * (pageIndex + 1)) - NUMBER_OF_QUESTION_TO_LOAD) < vQuestions.size()) {
                             pageIndex++;
@@ -904,92 +919,6 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
 
                 }
             }
-
-            /*if ((cmd instanceof RadioButton)) {
-            UpdateAnswer();
-            currentQuestion = (NDGQuestion) vQuestions.elementAt(((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD) + focusIndex);
-            updateSkipInfo();
-
-            if ((catTo != -1) && (skipTo != -1)) {
-            // The selected RadioButton HAS Skip
-            int nLastIndex = findIndex(catTo, skipTo);
-            if (nLastIndex > -1) {
-            int nIndex = ((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD) + (focusIndex);
-            for (nIndex = nIndex + 1; nIndex < nLastIndex; nIndex++) {
-            currentQuestion = (NDGQuestion) vQuestions.elementAt(nIndex);
-            currentQuestion.setSkiped(true);
-            }
-            }
-
-            int newFocusIndex = nLastIndex % NUMBER_OF_QUESTION_TO_LOAD;
-            int newPageIndex = ((int) Math.floor(nLastIndex / NUMBER_OF_QUESTION_TO_LOAD)) + 1;
-
-            if (newPageIndex == pageIndex) {
-            // Update components
-            for (int i = focusIndex + 1; i < newFocusIndex; i++) {
-            Component[] group = (Component[]) vGroups.elementAt(i);
-            for (int j = 0; j < group.length; j++) {
-            group[j].setEnabled(false);
-            }
-            }
-            focusIndex = newFocusIndex;
-            Component[] group = (Component[]) vGroups.elementAt(focusIndex);
-            updateContainerBorder();
-            group[0].requestFocus();
-            } else {
-            pageIndex = newPageIndex;
-            if (((NUMBER_OF_QUESTION_TO_LOAD * (pageIndex)) - NUMBER_OF_QUESTION_TO_LOAD) < vQuestions.size()) {
-            showQuestions((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD, true);
-            updateContainerBorder();
-            }
-            }
-            } // The selected RadioButton DOES NOT HAVE Skip
-            else {
-            int nLastIndex = findIndex(((ChoiceQuestion) currentQuestion).getCatTo(), ((ChoiceQuestion) currentQuestion).getSkipTo());
-            if (nLastIndex > -1) {
-            int nIndex = ((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD) + (focusIndex);
-            for (nIndex = nIndex + 1; nIndex < nLastIndex; nIndex++) {
-            currentQuestion = (NDGQuestion) vQuestions.elementAt(nIndex);
-            currentQuestion.setSkiped(false);
-            }
-            }
-
-            int newFocusIndex = nLastIndex % NUMBER_OF_QUESTION_TO_LOAD;
-            int newPageIndex = ((int) Math.floor(nLastIndex / NUMBER_OF_QUESTION_TO_LOAD)) + 1;
-            System.err.println("newPageIndex >> " + newPageIndex);
-
-            if (newPageIndex == pageIndex) {
-            // Update components
-            for (int i = focusIndex + 1; i < newFocusIndex; i++) {
-            Component[] group = (Component[]) vGroups.elementAt(i);
-            for (int j = 0; j < group.length; j++) {
-            group[j].setEnabled(true);
-            }
-            }
-            }
-            System.err.println("focusIndex" + focusIndex);
-            System.err.println("ComponentCount" + form.getContentPane().getComponentCount());
-            System.err.println("vQuestions" + vQuestions.size());
-
-
-            //if((focusIndex + 1) < NUMBER_OF_QUESTION_TO_LOAD){
-            if (((focusIndex + 1) * 2) < form.getContentPane().getComponentCount()) {
-            //if  ( (focusIndex+1)  < vQuestions.size() ) {
-            focusIndex++;
-            Component[] group = (Component[]) vGroups.elementAt(focusIndex);
-            group[0].requestFocus();
-            updateContainerBorder();
-            } else {
-            if (((NUMBER_OF_QUESTION_TO_LOAD * (pageIndex + 1)) - NUMBER_OF_QUESTION_TO_LOAD) < vQuestions.size()) {
-            pageIndex++;
-            showQuestions((NUMBER_OF_QUESTION_TO_LOAD * pageIndex) - NUMBER_OF_QUESTION_TO_LOAD, true);
-            updateContainerBorder();
-            }
-            }
-            }
-
-
-            }*/
         }
     }
 
@@ -1105,8 +1034,9 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         TextArea qname = createQuestionName(question.getName());
         c.addComponent(qname);
 
-        NumericField nfNumber = new NumericField(((NumericQuestion) question).getLength(), ((NumericQuestion) question).isDecimal());
-        nfNumber.setText((String) question.getAnswer().getValue());
+        NumericField nfNumber = new NumericField(((NumericQuestion) question).getLength(), question instanceof DecimalQuestion );
+        String value =((NumberAnswer)question.getAnswer()).getValueString();
+        nfNumber.setText(value);
         nfNumber.addFocusListener(this);
         nfNumber.addDataChangeListener(new HandleSpecialBuggedLetters());
 
@@ -1177,17 +1107,26 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         am.addActionListener(new HandleMoreDetails());
         pm.addActionListener(new HandleMoreDetails());
 
+        long datelong = Long.parseLong((String) question.getAnswer().getValue());
+        Date date = new Date(datelong);
 
-        if (question.getAm_pm() == 1) {
-            //am.setSelected(true);
+        if (((TimeQuestion) question).getAm_pm() == 1) {
             groupButton.setSelected(am);
-        } else if (question.getAm_pm() == 2) {
+        } else if (((TimeQuestion) question).getAm_pm() == 2) {
             groupButton.setSelected(pm);
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            if (cal.get(Calendar.AM_PM) == Calendar.AM) {
+                groupButton.setSelected(am);
+                ((TimeQuestion) currentQuestion).setAm_pm(TimeQuestion.AM);
+            } else {
+                groupButton.setSelected(pm);
+                ((TimeQuestion) currentQuestion).setAm_pm(TimeQuestion.PM);
+            }
         }
 
-        long datelong = Long.parseLong((String) question.getAnswer().getValue());
-
-        tfTime.setTime(new Date(datelong));
+        tfTime.setTime(date);
         tfTime.setEditable(true);
         tfTime.addFocusListener(this);
         tfTime.addDataChangeListener(new HandleSpecialBuggedLetters());
@@ -1380,26 +1319,20 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         questionName.setEditable(false);
         questionName.setFocusable(false);
         questionName.setColumns(NUMBER_OF_COLUMNS);
-        questionName.setRows(2);
+        questionName.setRows(1);
         questionName.setGrowByContent(false);
         questionName.setText(name);
 
-        int fullTextWidth = questionName.getStyle().getFont().stringWidth(name);
-        int line0Width = questionName.getStyle().getFont().stringWidth(questionName.getTextAt(0));
-
-        if (fullTextWidth > line0Width) {
-            int compWidth = questionName.getPreferredW();
-            int qtlin = (fullTextWidth / compWidth);
-            int pluslin = fullTextWidth % compWidth;
-
-            if ((pluslin > (compWidth * 0.50))) {
-                qtlin = qtlin + 2;
-
-            } else {
-                qtlin++;
-            }
-            questionName.setRows(qtlin);
-        } else {
+        int pw = Display.getInstance().getDisplayWidth();
+        int w = questionName.getStyle().getFont().stringWidth(name);
+        if (w > pw)
+        {
+            questionName.setGrowByContent(true);
+            questionName.setRows(2);
+        }
+        else
+        {
+            questionName.setGrowByContent(false);
             questionName.setRows(1);
         }
 
@@ -1752,22 +1685,25 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         }
 
         public Component getListCellRendererComponent(com.sun.lwuit.List list, Object o, int i, boolean isSelected) {
+            if( o == null )
+            {
+                return this;
+            }
             setSelected(((OptionSelectableRadio) o).getSelected());
             //setSelected(false);
             setText(o.toString());
 
-            if (isSelected) {
-
+            if (isSelected)
+            {
                 setFocus(true);
                 getStyle().setBgPainter(focusBGPainter);
                 getStyle().setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-
-
-            } else {
+            }
+            else
+            {
                 setFocus(false);
                 getStyle().setBgPainter(bgPainter);
                 getStyle().setFont(Screen.getRes().getFont("NokiaSansWide15"));
-
             }
             return this;
         }

@@ -5,9 +5,10 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.SurveyList;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.submit.TestConnection;
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 
 public class CancelTestConnectionCommand extends BackCommand {
@@ -25,7 +26,8 @@ public class CancelTestConnectionCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        TestConnection.getInstance().commandAction(Resources.CMD_CANCEL, null);
+        TestConnection.getInstance().cancel();
+        AppMIDlet.getInstance().setDisplayable(SurveyList.class);
     }
 
 }

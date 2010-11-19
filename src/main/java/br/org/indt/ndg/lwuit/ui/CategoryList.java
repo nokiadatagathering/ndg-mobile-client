@@ -5,12 +5,10 @@
 
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
 import br.org.indt.ndg.lwuit.control.EnterCategoryCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultCommand;
-import br.org.indt.ndg.lwuit.control.StartResultCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.Category;
 import com.sun.lwuit.List;
@@ -49,13 +47,12 @@ public class CategoryList extends Screen implements ActionListener {
         form.addCommand(BackCategoriesListCommand.getInstance().getCommand());
         form.addCommand(SaveResultCommand.getInstance().getCommand());
         form.addCommand(EnterCategoryCommand.getInstance().getCommand());
-        form.addCommand(StartResultCommand.getInstance().getCommand());
 
         form.setCommandListener(this);
 
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(categories);
-
+        underlyingModel.setSelectedIndex( SurveysControl.getInstance().getSelectedCategoryIndex());
         list = new List(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
@@ -72,13 +69,12 @@ public class CategoryList extends Screen implements ActionListener {
         Object cmd = evt.getSource();
         if (cmd == BackCategoriesListCommand.getInstance().getCommand()) {
             BackCategoriesListCommand.getInstance().execute(null);
-        } else if (cmd == SaveResultCommand.getInstance().getCommand()) {
-            SaveResultCommand.getInstance().execute(null);
-        } else if (cmd == EnterCategoryCommand.getInstance().getCommand() || cmd == list) {
-                EnterCategoryCommand.getInstance().execute(new Integer(list.getSelectedIndex()));
-        } else if (cmd == StartResultCommand.getInstance().getCommand()) {
-            StartResultCommand.getInstance().execute(new Integer(list.getSelectedIndex()));
-        } 
+        }
+        else if (cmd == SaveResultCommand.getInstance().getCommand()) {
+            SaveResultCommand.getInstance().execute(SurveysControl.getInstance().getQuestionsFlat());
+        }
+        else if (cmd == EnterCategoryCommand.getInstance().getCommand() || cmd == list) {
+            EnterCategoryCommand.getInstance().execute(new Integer(list.getSelectedIndex()));
+        }
     }
-
 }

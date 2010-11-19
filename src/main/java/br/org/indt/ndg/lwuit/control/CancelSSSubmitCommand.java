@@ -5,8 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.ResultList;
 import com.nokia.mid.appl.cmd.Local;
 
 public class CancelSSSubmitCommand extends BackCommand {
@@ -24,6 +25,8 @@ public class CancelSSSubmitCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        SurveysControl.getInstance().getCurrentOldStatusScreenSubmit().commandAction(Resources.CMD_CANCEL, null);
+         AppMIDlet.getInstance().getSubmitServer().cancel();
+         AppMIDlet.getInstance().setResultList(new ResultList());  //updated result list
+         AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 }

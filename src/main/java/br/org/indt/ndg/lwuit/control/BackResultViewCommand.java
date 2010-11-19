@@ -7,6 +7,7 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.ResultList;
 import com.sun.lwuit.Command;
 
 /**
@@ -22,7 +23,9 @@ public class BackResultViewCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getResultView().commandAction(Resources.CMD_BACK, null);
+        AppMIDlet.getInstance().getFileStores().resetQuestions();
+        AppMIDlet.getInstance().setResultList( new ResultList());
+        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 
     public static BackResultViewCommand getInstance() {

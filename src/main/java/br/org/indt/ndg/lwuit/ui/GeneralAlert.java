@@ -6,6 +6,8 @@
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CommandControl;
+import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.error.NetworkErrCode;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
@@ -19,11 +21,12 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  *
@@ -48,7 +51,7 @@ public class GeneralAlert extends Screen implements ActionListener {
 
     private static String title;
     private static String label;
-    private Hashtable hCommands = new Hashtable();
+    private Vector hCommands = new Vector();
 
     private int resultCmdIndex;
 
@@ -67,19 +70,20 @@ public class GeneralAlert extends Screen implements ActionListener {
 
     public void addCommand(int _cmd, boolean bFirst) {
         if (bFirst) {
-            hCommands.clear();
+            hCommands.removeAllElements();
         }
         if (_cmd == DIALOG_OK) {
-            hCommands.put(cmdOk, "");
+            hCommands.addElement(cmdOk);
         }
         else if (_cmd == DIALOG_YES_NO) {
-            hCommands.put(cmdNo, "");
-            hCommands.put(cmdYes, "");
+            hCommands.addElement(cmdYes);
+            hCommands.addElement(cmdNo);
         }
     }
 
-    public void addCommand(CommandControl cmd, Object param) {
-        hCommands.put(cmd, param);
+    public void addCommand(CommandControl cmd) {
+        hCommands.removeAllElements();
+        hCommands.addElement(cmd);
     }
 
     private Image getIcon(int alertType) {
@@ -87,9 +91,9 @@ public class GeneralAlert extends Screen implements ActionListener {
         switch (alertType) {
             case ERROR:         img = Screen.getRes().getImage("error"); break;
             case CONFIRMATION:  img = Screen.getRes().getImage("confirmation"); break;
-            case INFO:  img = Screen.getRes().getImage("info"); break;
-            case WARNING:  img = Screen.getRes().getImage("warning"); break;
-            case ALARM:  img = Screen.getRes().getImage("warning"); break;
+            case INFO:          img = Screen.getRes().getImage("info"); break;
+            case WARNING:       img = Screen.getRes().getImage("warning"); break;
+            case ALARM:         img = Screen.getRes().getImage("warning"); break;
         }
         return img;
     }
@@ -102,37 +106,34 @@ public class GeneralAlert extends Screen implements ActionListener {
         dialog = new Dialog();
         dialog.getTitleStyle().setBgPainter(tp);
         dialog.setTitle(" ");
-
         dialog.setLayout(new BorderLayout());
-        Image img = getIcon(alertType);
+        dialog.setScrollable(false);
+
         Container c = new Container(new FlowLayout());
+        Image img = getIcon(alertType);
+        Label imgLabel= new Label(img);
+        imgLabel.setAlignment( Label.LEFT );
         c.addComponent(new Label(img));
-        dialog.addComponent(BorderLayout.WEST, c);
-        TextArea msg = new TextArea(5,22);
+        dialog.addComponent(BorderLayout.NORTH, c);
+        c.setScrollable(false);
+
+        Container c2 = new Container( new BoxLayout(BoxLayout.Y_AXIS));
+        TextArea msg = new TextArea(2,12);
         msg.setText(label);
         msg.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-        //msg.getStyle().setFont(msgFont);
-        int rows = msg.getLines();
-        msg.setRows(rows);
         msg.setEditable(false);
-        if (rows < 4) { // less than 4 lines needs a space label on top
-            Image dialogspace = Screen.getRes().getImage("dialogspace");
-            Label l = new Label(dialogspace);
-            dialog.addComponent(BorderLayout.NORTH, l);
+
+        int rows = msg.getLines();
+        if( rows < 4)
+        {
+           c2.addComponent( new Label( Screen.getRes().getImage("dialogspace")));
         }
+        msg.setRows(rows);
+        c2.addComponent(msg);
+        dialog.addComponent(BorderLayout.CENTER,c2);
 
-        dialog.addComponent(BorderLayout.CENTER, msg);
-
-//        dialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-//        Container c = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-//        Image img = getIcon(alertType);
-//        dialog.addComponent(new Label(img));
-//        dialog.addComponent(new Label(label));
-//        dialog.addComponent(c);
-
-        Enumeration commands = hCommands.keys();
-        while (commands.hasMoreElements()) {
-            dialog.addCommand(((CommandControl) commands.nextElement()).getCommand());
+        for ( int i = 0; i< hCommands.size(); i++ ) {
+            dialog.addCommand( ((CommandControl)hCommands.elementAt(i)).getCommand());
         }
 
         dialog.setCommandListener(this);
@@ -143,10 +144,9 @@ public class GeneralAlert extends Screen implements ActionListener {
 
         int nCmdIndex = 1;
         CommandControl cmdControl;
-        Enumeration commands = hCommands.keys();
-        while (commands.hasMoreElements()) {
+        for (int i = 0; i< hCommands.size(); i++ ) {
             nCmdIndex++;
-            cmdControl = (CommandControl) commands.nextElement(); /*CommandControl*/
+            cmdControl = (CommandControl) hCommands.elementAt(i);
             if (cmd == cmdControl.getCommand()) {
                 // Set resultCmdIndexs
                 if (cmdControl instanceof YesCommandControl) {
@@ -158,12 +158,16 @@ public class GeneralAlert extends Screen implements ActionListener {
                 else {
                     resultCmdIndex = nCmdIndex;
                 }
-                cmdControl.execute(hCommands.get(cmdControl)/*param*/);
+                cmdControl.execute("");
                 dialog.dispose();
             }
         }
     }
-
+    
+    public int show( Exception ex ) {
+        return show(Resources.ERROR_TITLE, (ex.getMessage() == null) ? ex.toString() : ex.getMessage() ,GeneralAlert.ERROR );
+    }
+    
     public int show(String _title, String _label, int _alertType) {
         UIManager.getInstance().getLookAndFeel().setReverseSoftButtons(false);
         title = _title;
@@ -176,12 +180,16 @@ public class GeneralAlert extends Screen implements ActionListener {
         return resultCmdIndex;
     }
 
+    public int showCodedAlert(String _title, String _label, int _alertType) {
+        return show( _title, NetworkErrCode.codeToString(_label), _alertType );
+    }
+
     public static void dispose() {
         instance.dialog.dispose();
     }
 
     private void showDialog() {
-        dialog.show(53, 26, 53, 38, true);
+        dialog.showPacked(BorderLayout.CENTER, true);
     }
 
     class TitlePainter implements Painter {
@@ -217,7 +225,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             Font titleFont = Screen.getRes().getFont("NokiaSansWideBold15");
             g.setFont(titleFont);
             g.setColor(dialogTitleStyle.getFgColor());
-            g.drawString(title, rect.getX()+10, rect.getY()+5);
+            g.drawString(title, rect.getX()+5, rect.getY()+3);
 
         }
     }

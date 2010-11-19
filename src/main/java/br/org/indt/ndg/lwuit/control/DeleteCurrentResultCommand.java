@@ -5,13 +5,12 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
-
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.ResultList;
-import br.org.indt.ndg.mobile.sms.SMSUtils;
 
 /**
  *
@@ -26,7 +25,16 @@ public class DeleteCurrentResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getResultView().commandAction(Resources.CMD_DELETE, null);
+        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
+        int resultCmdIndex = GeneralAlert.getInstance().show(Resources.DELETE_CONFIRMATION, Resources.DELETE_RESULT_CONFIRMATION, GeneralAlert.CONFIRMATION);
+        if( resultCmdIndex == GeneralAlert.RESULT_YES )
+        {
+            FileSystem fs = AppMIDlet.getInstance().getFileSystem();
+            String resultFilename = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+            fs.deleteFile(resultFilename);
+            AppMIDlet.getInstance().setResultList(new ResultList());
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+        }
     }
 
     public static DeleteCurrentResultCommand getInstance() {

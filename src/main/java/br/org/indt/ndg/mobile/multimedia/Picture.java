@@ -9,8 +9,6 @@ package br.org.indt.ndg.mobile.multimedia;
 
 
 import com.sun.lwuit.Image;
-import java.util.Date;
-//import javax.microedition.lcdui.Graphics;
 
 /**
  *

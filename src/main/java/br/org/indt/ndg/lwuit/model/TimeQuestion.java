@@ -18,6 +18,9 @@ public class TimeQuestion extends Question {
     private long high = Resources.NOENTRY;
 
     private long convention = Resources.NOENTRY;
+    
+    public static final int AM = 1;
+    public static final int PM = 2;
     private long am_pm = -1;
 
     private long parseDateLow(String _date) {  //timer format is hours:min ex: 01:30
@@ -67,6 +70,15 @@ public class TimeQuestion extends Question {
         }
         catch(RuntimeException re){
             low = Resources.NOENTRY;
+        }
+    }
+
+    public void setConvention(String _time) {
+        try{
+            convention = Integer.parseInt(_time);
+        }
+        catch(Exception re){
+            convention = Resources.NOENTRY;
         }
     }
 
@@ -174,5 +186,4 @@ public class TimeQuestion extends Question {
     public void setAm_pm(long am_pm) {
         this.am_pm = am_pm;
     }
-
 }

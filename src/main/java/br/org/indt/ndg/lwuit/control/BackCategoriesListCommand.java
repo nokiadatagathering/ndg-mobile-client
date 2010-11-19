@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.ResultList;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
@@ -22,7 +23,7 @@ public class BackCategoriesListCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getCategoryList().commandAction(Resources.CMD_BACK, null);
+        AppMIDlet.getInstance().setDisplayable(ResultList.class);
     }
 
     public static BackCategoriesListCommand getInstance() {
@@ -30,6 +31,4 @@ public class BackCategoriesListCommand extends BackCommand {
             instance = new BackCategoriesListCommand();
         return instance;
     }
-
-
 }

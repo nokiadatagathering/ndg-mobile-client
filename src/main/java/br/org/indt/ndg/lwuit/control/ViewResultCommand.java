@@ -5,11 +5,11 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-
+import br.org.indt.ndg.lwuit.ui.ResultView;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.ResultView;
-import br.org.indt.ndg.mobile.error.WaitingForm;
 import com.sun.lwuit.Command;
 
 /**
@@ -27,12 +27,10 @@ public class ViewResultCommand extends CommandControl {
     protected void doAction(Object parameter) {
         if (parameter != null) {
             int selectedIndex = ((Integer)parameter).intValue();
-            AppMIDlet.getInstance().getResultList().setSelectedIndex(selectedIndex, true);
             AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
         }
         
-        //AppMIDlet.getInstance().getResultList().commandAction(Resources.CMD_VIEW, null);*/
-        AppMIDlet.getInstance().setDisplayable(new WaitingForm(Resources.CMD_VIEW.getLabel()));
+        WaitingScreen.show(Resources.CMD_VIEW);
         ViewResultRunnable vrr = new ViewResultRunnable();
         Thread t = new Thread(vrr);  //create new thread to compensate for waitingform
         t.setPriority(Thread.MIN_PRIORITY);
@@ -51,11 +49,11 @@ public class ViewResultCommand extends CommandControl {
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
                 AppMIDlet.getInstance().getFileStores().parseResultFile();
                 if (AppMIDlet.getInstance().getFileStores().getError()) {
-                    AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.EPARSE_RESULT);
+                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_RESULT, GeneralAlert.ERROR );
                 } else {
                     AppMIDlet.getInstance().getFileStores().loadAnswers();
-                    AppMIDlet.getInstance().setResultView(new ResultView(AppMIDlet.getInstance().getResultList()));
-                    AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getResultView());
+                    AppMIDlet.getInstance().setDisplayable( ResultView.class );
                 }
             }
         }

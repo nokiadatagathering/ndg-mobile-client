@@ -5,8 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.SurveyList;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Command;
-import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 
 public class CancelCheckSurveyListCommand extends BackCommand {
@@ -24,7 +25,7 @@ public class CancelCheckSurveyListCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        SurveysControl.getInstance().getCurrentOldSurveyList().commandAction(Resources.CMD_CANCEL, null);
+        AppMIDlet.getInstance().setDisplayable(SurveyList.class);
     }
 
 }

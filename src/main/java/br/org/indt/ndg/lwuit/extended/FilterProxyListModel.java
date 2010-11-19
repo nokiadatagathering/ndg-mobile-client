@@ -30,7 +30,7 @@ public class FilterProxyListModel implements ListModel, DataChangedListener {
        if(filter == null) {
            return index;
        }
-       if(filter.size() > index) {
+       if(filter.size() > index && index >=0) {
            return ((Integer)filter.elementAt(index)).intValue();
        }
        return -1;

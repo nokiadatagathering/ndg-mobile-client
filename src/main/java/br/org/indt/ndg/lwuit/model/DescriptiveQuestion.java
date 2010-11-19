@@ -16,7 +16,7 @@ import java.util.Vector;
 public class DescriptiveQuestion extends Question {
 
     private int length;
-    private Vector choices;
+    private Vector choices = new Vector();
     private Vector others;
     private Vector othersText;
 
@@ -41,6 +41,10 @@ public class DescriptiveQuestion extends Question {
 
     public void setChoices(Vector choices) {
         this.choices = choices;
+    }
+
+    public void addChoice(String choices) {
+        this.choices.addElement( choices );
     }
 
     public Vector getOthers() {

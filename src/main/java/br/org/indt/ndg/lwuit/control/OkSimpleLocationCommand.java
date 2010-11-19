@@ -5,7 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.lwuit.ui.SurveyList;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -25,7 +25,7 @@ public class OkSimpleLocationCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getSimpleLocation().commandAction(Resources.CMD_OK, null);
+        AppMIDlet.getInstance().setDisplayable(SurveyList.class);
     }
 
 }

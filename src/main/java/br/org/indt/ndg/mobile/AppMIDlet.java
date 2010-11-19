@@ -3,32 +3,26 @@ package br.org.indt.ndg.mobile;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import java.io.IOException;
-import javax.microedition.lcdui.Alert;
-import br.org.indt.ndg.lwuit.control.Display;
-//import javax.microedition.lcdui.Display;
-import javax.microedition.lcdui.Displayable;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
-
 import javax.microedition.location.Location;
-
-import br.org.indt.ndg.mobile.error.GeneralAlert;
 import br.org.indt.ndg.mobile.settings.Settings;
-import br.org.indt.ndg.mobile.settings.SimpleLocation;
-
-import br.org.indt.ndg.mobile.sms.SMSReceiver;
+import br.org.indt.ndg.mobile.settings.LocationHandler;
 import br.org.indt.ndg.mobile.xmlhandle.Conversor;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.settings.IMEIHandler;
 import br.org.indt.ndg.lwuit.ui.RegisterIMEI;
+import br.org.indt.ndg.lwuit.ui.SplashScreen;
+import br.org.indt.ndg.mobile.submit.SubmitServer;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.animations.CommonTransitions;
 import com.sun.lwuit.plaf.UIManager;
 import java.io.DataOutputStream;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
-import javax.microedition.io.PushRegistry;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.location.LocationProvider;
 
 public class AppMIDlet extends MIDlet {
     
@@ -36,46 +30,32 @@ public class AppMIDlet extends MIDlet {
     
     private SurveyList surveyList = null;
     private ResultList resultList = null;
-    private ResultView resultView = null;
-    private SubmitList submitList = null;
     private FileSystem fileSystem = null;
     private FileStores fileStores = null;
     private Resources resources = null; 
-    
-    private CategoryList categoryList = null;
-    private QuestionList questionList = null;
-    
-    private Displayable previousScreen = null;
-    private Displayable currentScreen = null;
-    private GeneralAlert generalAlert = null;
-    private AgreementScreen agreementScreen = null;
+
     private Settings settings = null;
     private Conversor unicode = null;
     
-    private SimpleLocation simpleLocation = null;
+    private LocationHandler locationHandler = null;
+    private SubmitServer submitServer;
     
     private long timeTracker = 0;
     
     private String imei = "9999";
-    private boolean initializedManually = false;
 
-    private SplashScreen splashScreen = null;
     
     public AppMIDlet() throws Exception {
         instance = this;
     }
     
-    public void setSimpleLocation(SimpleLocation _simplelocation) {
-        this.simpleLocation = _simplelocation;
-    }
-    
-    public SimpleLocation getSimpleLocation() {
-        return this.simpleLocation;
+    public LocationHandler getLocationHandler() {
+        return this.locationHandler;
     }
     
     public Location getLocation() {
-        if (simpleLocation == null) return null;
-        else return simpleLocation.getLocation();
+        if (locationHandler == null) return null;
+        else return locationHandler.getLocation();
     }
     
     public static AppMIDlet getInstance() {
@@ -98,15 +78,7 @@ public class AppMIDlet extends MIDlet {
     public String getDefaultServerUrl() {
         return getAppProperty("server-url");
     }
-    
-    public String[] getDefaultSmsNumbers() {
-        return new String[] {
-            getAppProperty("sms-country_code"),
-            getAppProperty("sms-area_code"),
-            getAppProperty("sms-phone_number")
-        };
-    }
-    
+       
     public String getDefaultAppLanguage() {
         return getAppProperty("app-language");
     }
@@ -140,45 +112,22 @@ public class AppMIDlet extends MIDlet {
     public void setSurveyList(SurveyList _list) {
         surveyList = _list;
     }
-    
-    public CategoryList getCategoryList() {
-        return categoryList;
+
+    public void setSubmitServer( SubmitServer _submitServer ) {
+       this.submitServer = _submitServer;
     }
-    
-    public void setCategoryList(CategoryList _list) {
-        categoryList = _list;
+
+    public SubmitServer getSubmitServer()
+    {
+        return submitServer;
     }
-    
-    public SubmitList getSubmitList() {
-        return submitList;
-    }
-    
-    public void setSubmitList(SubmitList _list) {
-        submitList = _list;
-    }
-    
-    public ResultView getResultView() {
-        return resultView;
-    }
-    
-    public void setResultView(ResultView _resultView) {
-        resultView = _resultView;
-    }
-    
+   
     public ResultList getResultList() {
         return resultList;
     }
     
     public void setResultList(ResultList _list) {
         resultList = _list;
-    }
-    
-    public QuestionList getQuestionList() {
-        return  questionList;
-    }
-    
-    public void setQuestionList(QuestionList _list) {
-        questionList = _list;
     }
     
     public FileSystem getFileSystem() {
@@ -199,18 +148,6 @@ public class AppMIDlet extends MIDlet {
     
     public FileStores getFileStores() {
         return fileStores;
-    }
-    
-    public Displayable getPreviousScreen() {
-        return previousScreen;
-    }
-    
-    public GeneralAlert getGeneralAlert() {
-        return generalAlert;
-    }
-
-    public AgreementScreen getAgreementScreen() {
-        return agreementScreen;
     }
     
     public String x2u(String _value) {
@@ -243,39 +180,27 @@ public class AppMIDlet extends MIDlet {
     }
     
     public void init(boolean showSplashScreen) {
+        Display.init(this);
         resources = new Resources();
+        locationHandler = new LocationHandler();
         
         if (showSplashScreen) {
-            SplashScreen ss = new SplashScreen(Display.getDisplay(this), getSurveyList());
-            setDisplayable(ss);
-            ss.serviceRepaints();
+            Screen.show(SplashScreen.class,true);
         }
 
         this.setIMEI();
-        initInitializedMannuallyFlag();
 
         writeIMEIToFileSystem();
 
         unicode = new Conversor();
-
-        generalAlert = new GeneralAlert(Display.getDisplay(instance));
-
         fileSystem = new FileSystem(Resources.ROOT_DIR);  
-
         fileStores = new FileStores();
 
         initLWUIT();
-
-        int agree_flag = getSettings().getStructure().getAgreeFlag();
-        if (agree_flag == 1) {
-            // Show Agreement Screen
-            agreementScreen = new AgreementScreen();
-            setDisplayable(agreementScreen);
-        }
-        else {
-            registerApp();
-        }  
+        
+        registerApp();
     }
+    
 
     public void initLWUIT() {
 
@@ -283,7 +208,7 @@ public class AppMIDlet extends MIDlet {
         // When creating a new font in a resource file, this charset must be used
         // ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:!@/\*()[]{}|#$%^&<>?'"+- _`~¡¿¤§=£¥€ÀÁÂÃÇÈÉÊÌÍÑÒÓÔÕÙÚÜàáâãçèéêìíñòóôõ÷ùúü
         Hashtable i18n = new Hashtable();
-        com.sun.lwuit.Display.init(this);
+        //com.sun.lwuit.Display.init(this);//moved to app start to speed up resource loading
         i18n.put("menu", Resources.NEWUI_OPTIONS);
         i18n.put("select", Resources.NEWUI_SELECT);
         i18n.put("cancel", Resources.NEWUI_CANCEL);
@@ -315,54 +240,25 @@ public class AppMIDlet extends MIDlet {
             Logger.getInstance().log(e.getMessage());
         }
     }
-
-    public boolean isInitializedManually(){
-        return initializedManually;
-    }
-    public void setInitializedManually(boolean _bVal){
-        initializedManually = _bVal;
-    }
-    private void initInitializedMannuallyFlag() {
-        String[] connections = PushRegistry.listConnections(true);
-        if ((connections == null) || (connections.length == 0)) {
-            initializedManually = true;
-        }
-        initializedManually = false;
-    }
-        
+       
     public void destroy() {
-        if (simpleLocation != null) simpleLocation.close();
-        simpleLocation = null;
+        if (locationHandler != null) locationHandler.disconnect();
+        locationHandler = null;
         surveyList = null;
         resultList = null;
-        resultView = null;
-        categoryList = null;
-        questionList = null;
-        submitList = null;
         resources = null;
         fileSystem = null;
         fileStores = null;
-        generalAlert = null;
         unicode = null;
         settings = null;
-        SMSReceiver.getInstance().end();
     }
     
     protected void startApp() throws MIDletStateChangeException {
         init(true);          
-        //new SMSSender().testCompression();
     }
-    
-    public void setDisplayable(Displayable d) {
-        previousScreen = currentScreen;
-        currentScreen = d;
-        Display.getDisplay(instance).setCurrent(d);
-    }  
-    
-    public void setDisplayable(Alert a, Displayable d) {
-        previousScreen = currentScreen;
-        currentScreen = d;
-        Display.getDisplay(instance).setCurrent(a,d);
+
+    public void setDisplayable( Class c ) {
+        Screen.show( c, true);
     }
 
     protected void pauseApp() {
@@ -374,39 +270,39 @@ public class AppMIDlet extends MIDlet {
     }
 
     public void registerApp() {
-        
         // check if application is registered
         IMEIHandler im = new IMEIHandler();
-        //if(true){
         if(!im.isIMEIRegistered() && !settings.getStructure().getRegisterIMEIUrl().equals("registered")){
             Screen.show(RegisterIMEI.class,true);
-        }
-        else {
+        } else {
             continueAppLoading();
         }
     }
 
     public void continueAppLoading() {
-        //check if gps is already configured
-        try {
-            if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured())
-                setSimpleLocation(new SimpleLocation(false));
-        } catch (Exception e) {
-            AppMIDlet.getInstance().getGeneralAlert().showError(e);
+        //check if location is available, if not turn off gps
+        if(getSettings().getStructure().getGpsConfigured()){
+            int status = locationHandler.connect();
+            if (status == LocationProvider.AVAILABLE ||
+                status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+            } else {
+                getSettings().getStructure().setGpsConfigured(false);
+            }
         }
-
         setSurveyList(new SurveyList());
-
-        SMSReceiver.getInstance().init();
 
         //check for errors first before loading spash screen
         if (!fileSystem.getError() && !resources.getError() && !fileStores.getErrorkParser()) {
 
-            setDisplayable(getSurveyList());
+            setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class);
         }
     }
 
-    public SplashScreen getSplashScreen() {
-        return splashScreen;
+    public Class getInterviewForm() {
+        if( getSettings().getStructure().getCategoriesEnabled() ) {
+            return br.org.indt.ndg.lwuit.ui.CategoryList.class;
+        } else {
+            return br.org.indt.ndg.lwuit.ui.InterviewForm2.class;
+        }
     }
 }

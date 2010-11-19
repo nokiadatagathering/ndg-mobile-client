@@ -17,17 +17,21 @@ import br.org.indt.ndg.lwuit.model.Answer;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
+import br.org.indt.ndg.lwuit.model.NumberAnswer;
 import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.mobile.multimedia.Picture;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
-import java.lang.String;
+import com.sun.lwuit.plaf.UIManager;
 import java.util.Date;
 import java.util.Vector;
 
@@ -41,26 +45,25 @@ public class ResultView extends Screen implements ActionListener {
     private String title1;
     private Font categoryFont = Screen.getRes().getFont("NokiaSansWide14Bold");
     private Font questionFont = Screen.getRes().getFont("NokiaSansWideItalic14");
+    private Font answerFont = Screen.getRes().getFont("NokiaSansWide14");
     private Survey survey;
-
+    int labelheight = 18;
+    int labelheightspace = 8;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
 
     protected void loadData() {
         title1 = surveysControl.getOpenedSurveyTitle();
-        //survey = surveysControl.getCurrentSurvey();
         survey = surveysControl.getCurrentSurveyNewModel();
     }
 
-    private void setPreferredHeight(Label label, int labelHeight) {
-        Dimension d = label.getPreferredSize();
+    private void setPreferredHeight(Component component, int labelHeight) {
+        Dimension d = component.getPreferredSize();
         d.setHeight(labelHeight);
-        label.setPreferredSize(d);
+        component.setPreferredSize(d);
     }
 
     protected void customize() {
-        int labelheight = 16;
-        int labelheightspace = 8; 
 
         int focusableRange = 9;//default value for 240 height
         if (form.getHeight() == 320)
@@ -75,7 +78,7 @@ public class ResultView extends Screen implements ActionListener {
         form.addCommand(SendResultCommand.getInstance().getCommand());
         form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
         form.addCommand(OpenResultCommand.getInstance().getCommand());
-        
+        form.setSmoothScrolling(true);
         form.setCommandListener(this);
         setTitle(title1, title2);
 
@@ -97,14 +100,13 @@ public class ResultView extends Screen implements ActionListener {
             int size = questions.length;
             for (int j=0; j < size; j++) {
                 NDGQuestion question = questions[j];
-                Label labelQuestion = new Label(question.getName() + ":");
-                labelQuestion.getStyle().setFont(questionFont);
-                setPreferredHeight(labelQuestion, labelheight);
-                Label labelAnswer = getFormattedAnswer(question, labelheight);
-
+                TextArea componentQuestion = createWrappedTextArea(
+                        question.getName() + ":", questionFont);
+                componentQuestion.getStyle().setFont(questionFont);
+                Component componentAnswer = getFormattedAnswer(question, labelheight);
                 Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-                container.addComponent(labelQuestion);
-                container.addComponent(labelAnswer);
+                container.addComponent(componentQuestion);
+                container.addComponent(componentAnswer);
                 form.addComponent(container);
                 countFocusable++;
                 if (countFocusable == focusableRange) {
@@ -121,26 +123,23 @@ public class ResultView extends Screen implements ActionListener {
                 countFocusable = 1;
             }
         }
-
     }
 
-    private Label getFormattedAnswer(NDGQuestion question, int labelheight){
-        Label labelAnswer = null;
+    private Component getFormattedAnswer(NDGQuestion question, int labelheight){
+        Component componentAnswer = null;
         Answer answer = question.getAnswer();
-
-        if(question.getType().equals("_img")){
-              byte[] image = (byte[]) question.getAnswer().getValue();
-              if(image != null){
-                 Picture picture = Picture.createPicture(image);
-                 labelAnswer = new Label(picture.getThumbnail());
-              }else{
-                  labelAnswer = new Label("");
-              }
-            
+        if (question.getType().equals("_img")) {
+            byte[] image = (byte[]) question.getAnswer().getValue();
+            if (image != null) {
+                Picture picture = Picture.createPicture(image);
+                componentAnswer = new Label(picture.getThumbnail());
+            } else {
+                componentAnswer = new Label("");
+            }
         } else {
             if(question.getType().equals("_choice")){
                 ChoiceQuestion cquestion = (ChoiceQuestion) question;
-                String choiceAnswer = "";
+                String choiceAnswer = " ";
                 int nIndex;
                 if(!cquestion.isExclusive()){
                     Vector vChoicesAnswer = (Vector) cquestion.getAnswer().getValue();
@@ -150,35 +149,45 @@ public class ResultView extends Screen implements ActionListener {
                         nIndex = Integer.parseInt( (String) vChoicesAnswer.elementAt(k) );
                         String other = (String)vOthersAnswer.elementAt(k);
                         choiceAnswer+= cquestion.getChoiceText(nIndex);
-                        if(other.length()>0)
+                        if(other.length()>0) {
                             choiceAnswer+= "="+other;
-                        if((k+1)<vsize)
-                            choiceAnswer+= " - ";
+                        }
+                        choiceAnswer += "\n";
+                        if((k+1)<vsize) {
+                            choiceAnswer+= " ";
+                        }
                     }
+                    componentAnswer = createWrappedTextArea(choiceAnswer, answerFont);
+
                 } else {
-                    nIndex = Integer.parseInt( (String) question.getAnswer().getValue() );
-                    choiceAnswer = cquestion.getChoiceText(nIndex);
+                    try {
+                        nIndex = Integer.parseInt( (String) question.getAnswer().getValue() );
+                        choiceAnswer += cquestion.getChoiceText(nIndex);
+                        Vector vOthersAnswer = (Vector) cquestion.getOthersText();
+                        String other = (String)vOthersAnswer.elementAt(0);
+                        if(other.length()>0) {
+                            choiceAnswer += "="+other;
+                        }
+                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont);
+                    } catch( NumberFormatException ex ) {
+                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont); // empty question
+                    }
                 }
-                labelAnswer = new Label(choiceAnswer);
             } else if(question.getType().equals("_date")) {
                 DateField dfDate = new DateField(DateField.DDMMYYYY);
                 long datelong = Long.parseLong((String)question.getAnswer().getValue());
                 dfDate.setDate(new Date(datelong));
-                labelAnswer = new Label(dfDate.getText());
+                componentAnswer = new Label(dfDate.getText());
             }
             else if (question.getType().equals("_time")) {
-               
                 TimeQuestion timeQuestion = (TimeQuestion) question;
                 TimeField tfDate = null;
                 if(timeQuestion.getConvention()==12){
-                   tfDate = new TimeField(TimeField.HHMM);                   
+                   tfDate = new TimeField(TimeField.HHMM);
                 }else{
-                   tfDate = new TimeField(TimeField.HHMM1);                   
+                   tfDate = new TimeField(TimeField.HHMM1);
                 }
-
-                long timelong = Long.parseLong((String)question.getAnswer().getValue());                
-
-                
+                long timelong = Long.parseLong((String)question.getAnswer().getValue());                     
                 tfDate.setTime(new Date(timelong));
                 String convention = "";
 
@@ -187,16 +196,17 @@ public class ResultView extends Screen implements ActionListener {
                 }else if(timeQuestion.getAm_pm() == 2){
                     convention = " pm";
                 }
-
-               
-                labelAnswer = new Label(tfDate.getText()+convention);
-            } else {
-                labelAnswer = new Label((String)answer.getValue());
+                componentAnswer = new Label(tfDate.getText()+convention);
             }
-            setPreferredHeight(labelAnswer, labelheight);
-        }
+            else if ( question.getType().equals("_int") || question.getType().equals("_decimal"))
+            {
+                componentAnswer = createWrappedTextArea(((NumberAnswer)answer).getValueString(), answerFont) ;
 
-        return labelAnswer;
+            } else {
+                componentAnswer = createWrappedTextArea((String)answer.getValue(), answerFont);
+            }
+        }
+        return componentAnswer;
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -211,6 +221,29 @@ public class ResultView extends Screen implements ActionListener {
             SendResultCommand.getInstance().execute(null);
     }
 
+        private TextArea createWrappedTextArea(String name, Font font) {
+        TextArea item = new TextArea();
+        item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
+        item.getStyle().setFont(font);
+        item.setEditable(false);
+        item.setFocusable(true);
+        item.setColumns(20);
+        item.setRows(1);
+        item.setGrowByContent(false);
+        item.setText(name);
 
-
+        int pw = Display.getInstance().getDisplayWidth();
+        int w = item.getStyle().getFont().stringWidth(name);
+        if (w > pw)
+        {
+            item.setGrowByContent(true);
+            item.setRows(2);
+        }
+        else
+        {
+            item.setGrowByContent(false);
+            item.setRows(1);
+        }
+        return item;
+    }
 }

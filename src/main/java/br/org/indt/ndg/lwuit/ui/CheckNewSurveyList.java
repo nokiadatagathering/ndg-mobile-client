@@ -36,7 +36,7 @@ public class CheckNewSurveyList extends Screen implements ActionListener {
         item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
         item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
         item.setEditable(false);
-        item.setFocusable(false);
+        item.setFocusable(true);
         item.setText(strSurveys);
         item.setRows(item.getLines()-1);
         form.addComponent(item);

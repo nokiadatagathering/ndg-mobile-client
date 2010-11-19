@@ -5,15 +5,12 @@
 
 package br.org.indt.ndg.lwuit.ui;
 
-
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.model.Category;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.List;
-
 import com.sun.lwuit.layouts.BorderLayout;
-
 import com.sun.lwuit.Label;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
@@ -43,7 +40,6 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         questionsLabel.setStyle(styleSecondLabel);
         questionsLabel.setIcon(null);
 
-        iconLabel = new Label(category.isFullFilled() ? Screen.getRes().getImage("check") : Screen.getRes().getImage("question"));
         iconLabel = new Label("");
         iconLabel.setStyle(styleLabel);
 
@@ -58,7 +54,7 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         if (isSelected) {
             styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
             styleSecondLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold13"));
-            iconLabel.setIcon(category.isFullFilled() ? Screen.getRes().getImage("check_highlighted") : Screen.getRes().getImage("check_blank"));
+            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
             setFocus(true);
             categoryLabel.setFocus(true);
             questionsLabel.setFocus(true);
@@ -67,16 +63,13 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         } else {
             styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
             styleSecondLabel.setFont(Screen.getRes().getFont("NokiaSansWide13"));
-            iconLabel.setIcon(category.isFullFilled() ? Screen.getRes().getImage("check") : Screen.getRes().getImage("check_blank"));
+            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
             setFocus(false);
             categoryLabel.setFocus(false);
             questionsLabel.setFocus(false);
             iconLabel.setFocus(false);
             styleContainer.setBgPainter(bgPainter);
         }
-
-
-
 
         Label topAlign = new Label(" ");
         Label bottonAlign = new Label(" ");
@@ -119,5 +112,4 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
 
         return this;
     }
-
 }

@@ -5,16 +5,14 @@
 
 package br.org.indt.ndg.mobile.submit;
 
-import br.org.indt.ndg.mobile.AppMIDlet;
+import java.util.Vector;
 /**
  *
  */
 public class SubmitResultRunnable implements Runnable{
     
-    private String resultFileName;
-    public SubmitServer submitServer;
-    public StatusScreen statusScreen;
-    
+    private Vector resultFileNameList;
+    private SubmitServer submitServer;
     
     /**
      * 
@@ -22,16 +20,20 @@ public class SubmitResultRunnable implements Runnable{
      * Otherwise, must have the result's name to be sent
      */
     public SubmitResultRunnable(String resultFileName){
-        this.resultFileName = resultFileName;
-    }
-    public void run () {
-        AppMIDlet.getInstance().setDisplayable(statusScreen);
-        if(resultFileName != null) {
-            submitServer.submitResult(resultFileName);
-        }
-        else {
-            submitServer.submit(statusScreen);
-        }
+        this.resultFileNameList = new Vector();
+        resultFileNameList.addElement( resultFileName );
     }
 
+    public SubmitResultRunnable( Vector resultFileNameList){
+        this.resultFileNameList = resultFileNameList;
+    }
+
+    public void setSubmitServer( SubmitServer submitServer)
+    {
+        this.submitServer = submitServer;
+    }
+
+    public void run () {
+        submitServer.submit(resultFileNameList);
+    }
 }

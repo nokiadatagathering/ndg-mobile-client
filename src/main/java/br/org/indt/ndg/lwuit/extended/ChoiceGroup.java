@@ -127,6 +127,11 @@ public class ChoiceGroup extends Container implements ActionListener {
             return -1;
     }
 
+    public void setSelectedIndex(int index) {
+        if (type == EXCLUSIVE)
+            radioGroup.setSelected(index);
+    }
+
     public void requestFocus() {
         if ((choices != null) && (choices.length >0)) {
             choices[0].requestFocus();

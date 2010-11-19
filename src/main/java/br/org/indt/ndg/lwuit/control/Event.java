@@ -34,19 +34,6 @@ public abstract class Event {
             doAction(parameter);
             inProcess = false;
         }
-        /*
-        new Thread(new Runnable() {
-
-            public void run() {
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                lazyExec(parameter);
-            }
-        }).start();
-        */
     }
 
     // @deprecated

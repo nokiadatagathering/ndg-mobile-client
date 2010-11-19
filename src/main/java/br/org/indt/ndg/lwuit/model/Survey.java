@@ -51,7 +51,4 @@ public class Survey implements DisplayableModel{
     public String getDisplayableName() {
         return getName();
     }
-
-
-
 }

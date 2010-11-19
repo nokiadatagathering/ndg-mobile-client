@@ -44,4 +44,5 @@ public class Form extends com.sun.lwuit.Form {
         return menu.show(top,0, marginLeft, marginRight, true);
     }
 
+
 }

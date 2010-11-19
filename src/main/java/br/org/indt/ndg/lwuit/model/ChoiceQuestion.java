@@ -14,9 +14,9 @@ import java.util.Vector;
  */
 public class ChoiceQuestion extends Question {
 
-    private Vector choices;
-    private Vector others;
-    private Vector othersText;
+    private Vector choices = new Vector();
+    private Vector others = new Vector();
+    private Vector othersText = new Vector();
     private boolean exclusive;
     private boolean inverse;
     private int choiceItem;
@@ -53,6 +53,10 @@ public class ChoiceQuestion extends Question {
         return choices;
     }
 
+    public void addChoice(String choice) {
+        this.choices.addElement(choice);
+    }
+
     public void setChoices(Vector choices) {
         this.choices = choices;
     }
@@ -61,12 +65,12 @@ public class ChoiceQuestion extends Question {
         return others;
     }
 
-    public void setOthers(Vector others) {
-        this.others = others;
+    public void addOther( String other ) {
+        this.others.addElement(other);
     }
 
-    public Vector getOthersText() {
-        return othersText;
+    public void setOthers(Vector others) {
+        this.others = others;
     }
 
     public String getChoiceText(int index) {
@@ -76,8 +80,16 @@ public class ChoiceQuestion extends Question {
         return "";
     }
 
+    public void addOthersText(String othersText) {
+        this.othersText.addElement(othersText);
+    }
+
     public void setOthersText(Vector othersText) {
         this.othersText = othersText;
+    }
+
+    public Vector getOthersText() {
+        return othersText;
     }
 
     public void save(PrintStream _output){
@@ -94,7 +106,7 @@ public class ChoiceQuestion extends Question {
 
         for (int index=0; index < vSelecteds.size(); index++) {
             String selectedIndex = (String) vSelecteds.elementAt(index);
-            if (((String) others.elementAt(Integer.parseInt(selectedIndex))).equals("1")) {
+            if (((String)getOthers().elementAt(Integer.parseInt(selectedIndex))).equals("1")) {
                 _output.print("<other " + "index=\"" + selectedIndex + "\">");
                 _output.print(othersText.elementAt(Integer.parseInt(selectedIndex)));
                 _output.println("</other>");

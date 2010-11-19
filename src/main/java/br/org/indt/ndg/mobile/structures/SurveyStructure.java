@@ -1,16 +1,9 @@
 package br.org.indt.ndg.mobile.structures;
 
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
-import br.org.indt.ndg.mobile.error.NullWidgetException;
-import java.io.UnsupportedEncodingException;
 import java.util.Vector;
-
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.logging.Logger;
-import br.org.indt.ndg.mobile.structures.question.Question;
-import br.org.indt.ndg.mobile.structures.question.TypeChoice;
-import br.org.indt.ndg.mobile.structures.question.TypeTextFieldString;
-import com.twmacinta.util.MD5;
+
 
 
 public class SurveyStructure {
@@ -115,7 +108,7 @@ public class SurveyStructure {
         return DisplayIdQuestion-1;
     }    
 
-    public String getDisplayValue() throws NullWidgetException, Exception {
+    public String getDisplayValue() throws Exception {
          NDGQuestion question = (NDGQuestion) ((Vector) categories.elementAt(getDisplayCategoryId())).elementAt(getDisplayQuestionId());
          if(question.isNew()){
              return "";

@@ -12,12 +12,12 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.lcdui.Form;
 
 public class Logger {
     private static Logger instance = new Logger();
     private FileConnection logFile = null;
     private OutputStream output;
+    private String message;
     
     
     private Logger(){
@@ -27,7 +27,10 @@ public class Logger {
     public static Logger getInstance(){
         return instance;
     }
-    
+
+    public String lastMessage(){
+        return message;
+    }
     private void openLogFile() {
         if (logFile == null) { 
             try {
@@ -43,7 +46,8 @@ public class Logger {
                 }
                 output = logFile.openOutputStream(logFile.fileSize());
             } catch (IOException ex) {
-                AppMIDlet.getInstance().setDisplayable(new Form(ex.getMessage()));
+                getInstance().message = ex.getMessage();
+                AppMIDlet.getInstance().setDisplayable(LoggerScreen.class);
                 ex.printStackTrace();
             }  
         }

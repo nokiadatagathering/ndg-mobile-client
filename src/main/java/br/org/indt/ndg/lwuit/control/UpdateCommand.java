@@ -6,9 +6,10 @@
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.UpdateClientApp;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
+
 
 /**
  *
@@ -23,7 +24,8 @@ public class UpdateCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().getSurveyList().commandAction(Resources.CMD_CHECK_UPDATE, null);
+        AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.UpdateClientApp.class );
+        UpdateClientApp.getInstance().CheckForUpdate();
     }
 
     public static UpdateCommand getInstance() {

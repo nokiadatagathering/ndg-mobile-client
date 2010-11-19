@@ -5,11 +5,11 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.SurveyList;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
-
-import br.org.indt.ndg.mobile.SurveyList;
 
 /**
  *
@@ -25,8 +25,16 @@ public class DeleteSurveyCommand extends CommandControl {
 
     protected void doAction(Object parameter) {
         int selectedIndex = ((Integer)parameter).intValue();
-        AppMIDlet.getInstance().getSurveyList().setSelectedIndex(selectedIndex, true);
-        AppMIDlet.getInstance().getSurveyList().commandAction(Resources.CMD_DELETE_SURVEY, null);
+
+        GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_YES_NO , true );
+        if ( GeneralAlert.RESULT_YES == GeneralAlert.getInstance().show(Resources.DELETE_CONFIRMATION,Resources.DELETE_SURVEY_CONFIRMATION, GeneralAlert.CONFIRMATION ) )
+        {
+            AppMIDlet.getInstance().getSurveyList().setSurveyCurrentIndex(selectedIndex);
+            AppMIDlet.getInstance().getSurveyList().getList().removeElementAt(selectedIndex);
+            AppMIDlet.getInstance().getSurveyList().deleteSurvey();
+            AppMIDlet.getInstance().setDisplayable(SurveyList.class);
+        }
+
     }
 
     public static DeleteSurveyCommand getInstance() {

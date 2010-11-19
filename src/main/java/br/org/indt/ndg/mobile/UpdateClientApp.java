@@ -5,34 +5,25 @@
 
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.logging.Logger;
 import java.io.DataInputStream;
+import br.org.indt.ndg.lwuit.ui.SurveyList;
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
-import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Spacer;
-import javax.microedition.lcdui.StringItem;
 
-public class UpdateClientApp extends Form implements CommandListener {
+public class UpdateClientApp {
 
     private static UpdateClientApp uc = null;
-    private String FormContentText1 = "";
-    private String FormContentText2 = "";
     Thread t = null;
     private boolean isCanceled = false;
     private byte currentStep = '0';
     private final byte stepCheckVersion = '1';
     private final byte stepUpdateVersion = '2';
 
-    public UpdateClientApp() {
-        super("");
-        setCommandListener(this);
+    private UpdateClientApp() {
     }
 
     public static UpdateClientApp getInstance() {
@@ -42,59 +33,16 @@ public class UpdateClientApp extends Form implements CommandListener {
         return uc;
     }
 
-    private void CreateForm(String _header, String _text) {
-        this.deleteAll();
-        this.append(new Spacer(this.getWidth(),25));
-        StringItem item = new StringItem("", _header);
-        this.append(item);
-
-        this.append(new Spacer(this.getWidth(),25));
-        item = new StringItem("", _text);
-        this.append(item);
-
-        addCommand(Resources.CMD_CANCEL);
-        FormContentText1 = _header;
-        FormContentText2 = _text;
-
-        AppMIDlet.getInstance().setDisplayable(this);
-
-        try { Thread.sleep(1000); } catch(Exception e){}
-    }
-
     public void CheckForUpdate() {
-        CreateForm("Check for Update", Resources.CONNECTING);
         currentStep = stepCheckVersion;
         UpdateClientAppRunnable ucr = new UpdateClientAppRunnable();
         t = new Thread(ucr);
         t.start();
     }
 
-    public void commandAction(Command c, Displayable d) {
-        if (c == Resources.CMD_CANCEL) {
-            isCanceled = true;
-            t.interrupt();
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getSurveyList());
-        }
-    }
-
-    public String getFormContentText1() {
-        return FormContentText1;
-    }
-
-    public String getFormContentText2() {
-        return FormContentText2;
-    }
-
-    public void handleConfirmResult(Command _cmd) {
-        if (_cmd == Resources.CMD_YES) {
-            currentStep = stepUpdateVersion;
-            UpdateClientAppRunnable ucr = new UpdateClientAppRunnable();
-            t = new Thread(ucr);
-            t.start();
-        }
-        else if (_cmd == Resources.CMD_NO) {
-            AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getSurveyList());
-        }
+    public void Cancel() {
+        isCanceled = true;
+        t.interrupt();
     }
 
     public class UpdateClientAppRunnable implements Runnable {
@@ -129,19 +77,35 @@ public class UpdateClientApp extends Form implements CommandListener {
                     }
                     else {
                         // Server Connection Error
-                        AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.EDOWNLOAD_FAILED_HTTP_CODE + ": " + responseCode, "", AlertType.ERROR);
+                        GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                        GeneralAlert.getInstance().showCodedAlert(Resources.CHECK_FOR_UPDATE_TITLE,
+                                String.valueOf(responseCode), GeneralAlert.ERROR );
                     }
                 }
 
             } catch (IOException ex) {
                 if (!isCanceled) {
                     // Server Connection Error
-                    AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.EDOWNLOAD_FAILED_HTTP_CODE + ": " + ex.getMessage(), "", AlertType.ERROR);
+                    GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                    try{GeneralAlert.getInstance().showCodedAlert(Resources.CHECK_FOR_UPDATE_TITLE,
+                        ex.getMessage(), GeneralAlert.ERROR );} catch(Exception ex1){/*workaround mostlikely LWUIT problem*/}
+                }
+            }
+            catch (SecurityException ex) {
+            }
+            catch ( IllegalArgumentException ex )
+            {
+                if (!isCanceled) {
+                    // Server Connection Error
+                    GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                    GeneralAlert.getInstance().showCodedAlert(Resources.CHECK_FOR_UPDATE_TITLE,
+                                                              ex.getMessage(), GeneralAlert.ERROR );
                 }
             }
             finally {
                 try { if (httpConnection != null) httpConnection.close(); } catch (IOException ex) {}
-                AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getSurveyList());
+                isCanceled = false;
+                AppMIDlet.getInstance().setDisplayable(SurveyList.class);
             }
         }
 
@@ -154,7 +118,9 @@ public class UpdateClientApp extends Form implements CommandListener {
             if (bytesToRead <= 0) {
                 isCanceled = true;
                 Logger.getInstance().log(Resources.EDOWNLOAD_FAILED_INVALID_DATA);
-                AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.EDOWNLOAD_FAILED_INVALID_DATA, "", AlertType.ERROR);
+                GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                GeneralAlert.getInstance().show(Resources.CHECK_FOR_UPDATE_TITLE, Resources.EDOWNLOAD_FAILED_INVALID_DATA, GeneralAlert.ERROR );
+                AppMIDlet.getInstance().setDisplayable(SurveyList.class );
                 return;
             }
 
@@ -166,16 +132,31 @@ public class UpdateClientApp extends Form implements CommandListener {
                    int iVersion = VersionStrToInt(strVersion);
                    int iVersionApp = VersionStrToInt(AppMIDlet.getInstance().getSettings().getStructure().getAppVersion());
                    if (iVersionApp >= iVersion) {
-                       AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.NDG_UPDATED, "UpdateClientApp", AlertType.INFO);
-                       AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getSurveyList());
+                       
+                       GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
+                       GeneralAlert.getInstance().show(Resources.CHECK_FOR_UPDATE_TITLE, Resources.NDG_UPDATED, GeneralAlert.INFO );
+                       AppMIDlet.getInstance().setDisplayable(SurveyList.class);
                    }
                    else {
-                       AppMIDlet.getInstance().getGeneralAlert().showConfirmAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.NDG_NOT_UPDATED, "UpdateClientApp");
+                       GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_YES_NO, true );
+                       if( GeneralAlert.RESULT_YES ==  GeneralAlert.getInstance().show(Resources.CHECK_FOR_UPDATE_TITLE, Resources.NDG_NOT_UPDATED, GeneralAlert.CONFIRMATION) ) {
+                           currentStep = stepUpdateVersion;
+                           UpdateClientAppRunnable ucr = new UpdateClientAppRunnable();
+                           t = new Thread(ucr);
+                           t.start();
+                       } else {
+                           AppMIDlet.getInstance().setDisplayable(SurveyList.class);
+                       }
                    }
                 }
             } catch (IOException ex) {
                 Logger.getInstance().logException(Resources.EDOWNLOAD_FAILED_ERROR_CODE + ": " + ex.getMessage());
-                AppMIDlet.getInstance().getGeneralAlert().showAlert(Resources.CHECK_FOR_UPDATE_TITLE, Resources.EDOWNLOAD_FAILED_ERROR_CODE + ": " + ex.getMessage(), "", AlertType.ERROR);
+                isCanceled = false;
+                GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                GeneralAlert.getInstance().showCodedAlert(Resources.CHECK_FOR_UPDATE_TITLE,
+                                                          ex.getMessage(), GeneralAlert.ERROR );
+                AppMIDlet.getInstance().setDisplayable(SurveyList.class);
+
             }
             finally {
                 try { if (httpInput != null) httpInput.close(); } catch (IOException ex) {}

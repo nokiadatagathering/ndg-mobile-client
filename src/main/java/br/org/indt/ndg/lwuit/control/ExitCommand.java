@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
@@ -33,7 +34,8 @@ public class ExitCommand extends CommandControl {
         try {
             AppMIDlet.getInstance().destroyApp(true);
         } catch (MIDletStateChangeException e) {
-            AppMIDlet.getInstance().getGeneralAlert().showErrorExit(Resources.ELEAVE_MIDLET);
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELEAVE_MIDLET, GeneralAlert.ERROR );
         }
     }
 
