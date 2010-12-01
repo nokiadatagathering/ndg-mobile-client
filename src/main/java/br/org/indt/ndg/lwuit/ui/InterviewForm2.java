@@ -30,6 +30,7 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.multimedia.Picture;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -1339,6 +1340,23 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         return questionName;
     }
 
+    private class TextFieldEx extends TextField {
+
+        protected Command installCommands(Command clear, Command t9) {
+            com.sun.lwuit.Form f = getComponentForm();
+            Command[] originalCommands = new Command[f.getCommandCount()];
+            for (int iter = 0; iter < originalCommands.length; iter++) {
+                originalCommands[iter] = f.getCommand(iter);
+            }
+            f.removeAllCommands();
+            Command retVal = super.installCommands(clear, t9);
+            for (int iter = originalCommands.length - 1; iter >= 0; iter--) {
+                f.addCommand(originalCommands[iter]);
+            }
+            return retVal;
+        }
+    }
+
     private void CreateExclusiveChoiceFieldAutoComplete(NDGQuestion obj) {
 
         ChoiceQuestion question = (ChoiceQuestion) obj;
@@ -1350,7 +1368,7 @@ public class InterviewForm2 extends Screen implements FocusListener, ActionListe
         TextArea qname = createQuestionName(question.getName());
         c.addComponent(qname);
 
-        final TextField exclusiveChoiceTextField = new TextField();
+        final TextFieldEx exclusiveChoiceTextField = new TextFieldEx();
 
         exclusiveChoiceTextField.addFocusListener(new FocusListener() {
 

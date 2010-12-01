@@ -135,7 +135,6 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
             f.addCommand(originalCommands[iter]);
         }
-        originalCommands = null;
         return retVal;
     }
 

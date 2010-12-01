@@ -112,7 +112,6 @@ public class DescriptiveField extends TextField implements DataChangedListener, 
             }
 
             setText(text);
-            commitChange();
             if (showDialog) {
                 this.showSymbolDialog();
             }
@@ -121,23 +120,24 @@ public class DescriptiveField extends TextField implements DataChangedListener, 
 
     public void dataChanged(int type, int index) {
         checkLength();
-        if (type == 1) checkDesc(index);
+        if (type == DataChangedListener.ADDED )
+        {    
+            checkDesc(index);
+        }
     }
 
-
-    
+ 
     protected Command installCommands(Command clear, Command t9) {
         Form f = getComponentForm();
         Command[] originalCommands = new Command[f.getCommandCount()];
         for(int iter = 0 ; iter < originalCommands.length ; iter++) {
             originalCommands[iter] = f.getCommand(iter);
         }
-        Command retVal = super.installCommands(clear, t9);
         f.removeAllCommands();
+        Command retVal = super.installCommands(clear, t9);
         for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
             f.addCommand(originalCommands[iter]);
         }
-        originalCommands = null;
         return retVal;
     }
 

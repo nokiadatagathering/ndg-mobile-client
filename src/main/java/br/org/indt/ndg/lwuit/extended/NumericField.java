@@ -133,12 +133,11 @@ public class NumericField extends TextField implements DataChangedListener, Focu
         for(int iter = 0 ; iter < originalCommands.length ; iter++) {
             originalCommands[iter] = f.getCommand(iter);
         }
-        Command retVal = super.installCommands(clear, t9);
         f.removeAllCommands();
+        Command retVal = super.installCommands(clear, t9);
         for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
             f.addCommand(originalCommands[iter]);
         }
-        originalCommands = null;
         return retVal;
     }
 

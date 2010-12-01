@@ -33,6 +33,7 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.multimedia.Picture;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -580,11 +581,35 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     class ExclusiveChoiceFieldAutoCompleteUI extends ContainerUI {
         ButtonGroup groupButton;
-        TextField exclusiveChoiceTextField;
+        TextFieldEx exclusiveChoiceTextField;
         ListModel underlyingModel;
+
+
+        private class TextFieldEx extends TextField{
+
+            protected Command installCommands(Command clear, Command t9) {
+                com.sun.lwuit.Form f = getComponentForm();
+                Command[] originalCommands = new Command[f.getCommandCount()];
+                for (int iter = 0; iter < originalCommands.length; iter++) {
+                    originalCommands[iter] = f.getCommand(iter);
+                }
+                f.removeAllCommands();
+                Command retVal = super.installCommands(clear, t9);
+                for (int iter = originalCommands.length - 1; iter >= 0; iter--) {
+                    f.addCommand(originalCommands[iter]);
+                }
+                return retVal;
+            }
+        }
+
 
         public ExclusiveChoiceFieldAutoCompleteUI(NDGQuestion obj) {
             super(obj);
+        }
+
+        public void focusGained(Component cmpnt) {
+            super.focusGained(cmpnt);
+            exclusiveChoiceTextField.keyPressed(Display.GAME_FIRE);
         }
 
         public void registerQuestion(){
@@ -593,7 +618,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
-            exclusiveChoiceTextField = new TextField();
+            exclusiveChoiceTextField = new TextFieldEx();
             groupButton = new ButtonGroup();
 
             Vector vChoices = ((ChoiceQuestion)question).getChoices();
@@ -644,6 +669,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                 }
             });
 
+            exclusiveChoiceTextField.addFocusListener(this);
             Container cList = new Container(new BoxLayout(BoxLayout.Y_AXIS));
             cList.setFocusable(false);
             cList.addComponent(choice);
@@ -687,7 +713,11 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void handleMoreDetails( Object obj )
         {
-            groupButton.setSelected(underlyingModel.getSelectedIndex());
+            List list = (List)obj;
+            int filterOffset = list.getSelectedIndex();
+            int selItem = ((FilterProxyListModel)(list.getModel())).getFilterOffset(filterOffset);
+
+            groupButton.setSelected(selItem);
             for( int i = 0; i<groupButton.getButtonCount();i++)
             {
                 RadioButton rb = (RadioButton) groupButton.getRadioButton(i);
@@ -1153,6 +1183,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public Component getListCellRendererComponent(com.sun.lwuit.List list, Object o, int i, boolean isSelected) {
+            if( o == null )
+            {
+                return this;
+            }
             setSelected(((OptionSelectableRadio) o).getSelected());
             //setSelected(false);
             setText(o.toString());
