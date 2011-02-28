@@ -69,8 +69,11 @@ public class PersistenceManager {
             boolean isLocalFile = AppMIDlet.getInstance().getFileSystem().isLocalFile();
             String userId = AppMIDlet.getInstance().getIMEI();
 
-            long currentTime = (new Date()).getTime();
-            long timeTaken = currentTime - AppMIDlet.getInstance().getTimeTracker();
+            // Old time
+            //long currentTime = (new Date()).getTime();
+            //long timeTaken = currentTime - AppMIDlet.getInstance().getTimeTracker();
+
+            long timeTaken = (new Date()).getTime();
 
             String UID = generateUniqueID();
 
@@ -125,7 +128,7 @@ public class PersistenceManager {
             }
             output.print("s_id=\"" + surveyId + "\" ");
             output.print("u_id=\"" + userId + "\" ");
-            output.print("time=\"" + String.valueOf(timeTaken/1000)+ "\">");  //convert to seconds
+            output.print("time=\"" + String.valueOf(timeTaken)+ "\">");  //convert to seconds
             output.println();
 
             if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
