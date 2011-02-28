@@ -82,7 +82,7 @@ public class DownloadNewSurveys implements Runnable{
     }
     
     public void download() {
-        setOperationAsNotCanceled();        
+        setOperationAsNotCanceled();
         AppMIDlet.getInstance().setDisplayable(StatusScreenDownload.class);
         currentStep = STEP2;
         try { Thread.sleep(500); } catch (InterruptedException ex) {}
@@ -92,15 +92,15 @@ public class DownloadNewSurveys implements Runnable{
 
     public void run() {
         try {
-        if (currentStep == STEP1) {
-            showListNewSurveys();
-        } else if (currentStep == STEP2) {
-            downloadSurveys();
-        }
+            if (currentStep == STEP1) {
+                showListNewSurveys();
+            } else if (currentStep == STEP2) {
+                downloadSurveys();
+            }
         }
         catch (Exception e)
         {
-            // ignore
+            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
         }
     }
     
@@ -121,9 +121,9 @@ public class DownloadNewSurveys implements Runnable{
             for (;;) {
                 conn = Connector.open(urlDownload, Connector.READ);
 
-            	if (isOperationCanceled()) {
+                if (isOperationCanceled()) {
                     break;
-            	}
+                }
 
                 httpConnection = (HttpConnection) conn;
 
@@ -230,10 +230,10 @@ public class DownloadNewSurveys implements Runnable{
                     GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
                     GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EDOWNLOAD_FAILED_INVALID_MIME_TYPE + mediaType, GeneralAlert.ERROR );
                     AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-                    return;                    
+                    return;
                 }
             }
-            httpInputStream = httpConnection.openInputStream();        
+            httpInputStream = httpConnection.openInputStream();
             transferSurveysData(httpInputStream);
             
             if (!isOperationCanceled()) {
@@ -321,7 +321,7 @@ public class DownloadNewSurveys implements Runnable{
                  fconn.close();
             } catch (Exception ex){
                 //ignore
-            }                
+            }
         }
     }
     
@@ -348,13 +348,13 @@ public class DownloadNewSurveys implements Runnable{
         strNotDownloadedSurveys = "";
         try {
             for (;;) {
-            	if (isOperationCanceled()) {
+                if (isOperationCanceled()) {
                     break;
-            	}
+                }
                 bytesRead = in.read(buffer);
 
                 if (bytesRead == -1) {
-        	        if (totalKbytes != (totalBytesRead / MAX_DL_SIZE)) {
+                    if (totalKbytes != (totalBytesRead / MAX_DL_SIZE)) {
                             cancelOperation();
                             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
                             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EDOWNLOAD_INCOMPLETED, GeneralAlert.ERROR );
@@ -422,17 +422,15 @@ public class DownloadNewSurveys implements Runnable{
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
                 GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ioe.getMessage().trim(), GeneralAlert.ERROR );
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-        	return;            
         }  catch (SecurityException e) {
                 cancelOperation();
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
                 GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-                return;
-                }
+        }
     }
     
-    private void showListNewSurveys() {
+    private void showListNewSurveys() throws Exception {
         String filename = Resources.ROOT_DIR + Resources.NEW_SURVEYS_LIST;
         FileConnection fconn = null;
         DataOutputStream out = null;
@@ -443,7 +441,7 @@ public class DownloadNewSurveys implements Runnable{
             else {
                 fconn.delete();
                 fconn.create();
-            }         
+            }
             out = fconn.openDataOutputStream();
             downloadResource(urlList, acceptableTypes, out);
             out.flush();
@@ -454,8 +452,7 @@ public class DownloadNewSurveys implements Runnable{
                 dis = fconn.openDataInputStream();
                 SurveysListHandler slh = new SurveysListHandler();
                 surveysTitles = slh.parse(dis);
-            
-                //CheckNewSurveyList cnsl = new CheckNewSurveyList(surveysTitles);
+
                 SurveysControl.getInstance().setAvaiableSurveyToDownload(surveysTitles);
                 if( surveysTitles.length > 0 ) {
                     AppMIDlet.getInstance().setDisplayable(CheckNewSurveyList.class);
@@ -469,49 +466,52 @@ public class DownloadNewSurveys implements Runnable{
             Logger.getInstance().log("ex: " + ex.getMessage() + "::"+ex.getClass().getName());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + ex.getMessage() , GeneralAlert.ERROR );
+            throw ex;
         } catch (ParserConfigurationException ex) {
             Logger.getInstance().log("ex2: " + ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + ex.getMessage() , GeneralAlert.ERROR );
-        } catch (ConnectionNotFoundException e) {
-            Logger.getInstance().log(e.getMessage());
+            throw ex;
+        } catch (ConnectionNotFoundException ex) {
+            Logger.getInstance().log(ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, e.getMessage().trim(), GeneralAlert.ERROR );
-        } catch(IOException e) {
-            Logger.getInstance().log(e.getMessage());
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ex.getMessage().trim(), GeneralAlert.ERROR );
+            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
+        } catch(IOException ex) {
+            Logger.getInstance().log(ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + e.getMessage() , GeneralAlert.ERROR );
-        }  catch (SecurityException e) {
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + ex.getMessage() , GeneralAlert.ERROR );
+            throw ex;
+        }  catch (SecurityException ex) {
             cancelOperation();
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
             GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
+            throw ex;
         } finally {
             try {
                 boolean canceled = false;
                 synchronized (operationCanceled) {
                     if (operationCanceled == Boolean.FALSE)
                         canceled = true;
-                }                
+                }
                 if (canceled) {
                     fconn.delete();
-		}
-		if (out != null) {
+                }
+                if (out != null) {
                     out.close();
-		}
-                
-		if (dis != null) {
+                }
+                if (dis != null) {
                     dis.close();
-		}
-                
-		if (fconn != null) {
+                }
+                if (fconn != null) {
                     fconn.close();
-		}
+                }
             } catch (IOException e) {
                 // ignore
             }
-	}
+        }
     }
-    
+
     public void cancelOperation() {
         synchronized (operationCanceled) {
             operationCanceled = Boolean.TRUE;
@@ -567,11 +567,11 @@ public class DownloadNewSurveys implements Runnable{
                     acceptField.append(acceptableTypes[i]);
                 }
                 httpConnection.setRequestProperty("Accept",
-                                                  acceptField.toString()); 
+                                                  acceptField.toString());
                 httpConnection.setRequestMethod(HttpConnection.GET);
 
                 try {
-                    responseCode = httpConnection.getResponseCode();             
+                    responseCode = httpConnection.getResponseCode();
                 } catch (IOException ioe) {
                     Logger.getInstance().log("ioe: " + ioe.getMessage());
                     // -3 user clicks cancel in winsock open
@@ -592,16 +592,14 @@ public class DownloadNewSurveys implements Runnable{
                     AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                 }
                 //responseCode = httpConnection.getResponseCode(); // what was thtat for?
-                
- 
-                
+
                 // if the server is currently unable to handle the request due 
                 // to a temporary overloading or maintenance of the server then
                 // retry after a interval.
                 if (responseCode != HttpConnection.HTTP_UNAVAILABLE) {
                     break;
                 }
-                retryAfterField = httpConnection.getHeaderField("Retry-After");            
+                retryAfterField = httpConnection.getHeaderField("Retry-After");
                 if (retryAfterField == null) {
                     break;
                 }
@@ -641,7 +639,7 @@ public class DownloadNewSurveys implements Runnable{
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
                 GeneralAlert.getInstance().showCodedAlert(Resources.CHECK_NEW_SURVEYS, String.valueOf(responseCode), GeneralAlert.ERROR );
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-        	return;
+                return;
             }
             mediaType = getMediaType(httpConnection.getType());
 
@@ -739,7 +737,7 @@ public class DownloadNewSurveys implements Runnable{
 
         return contentType.substring(0, semiColon).toLowerCase();
     }
-    
+
     /**
      * Make the download of data.
      *     *
@@ -760,54 +758,45 @@ public class DownloadNewSurveys implements Runnable{
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
             return;
         }
-	int totalKbytes = (int) httpConnection.getLength() / MAX_DL_SIZE;
-
-       //DF ss.reset(totalKbytes);
-
-	//DFss.showDownloadingSurveys();
+        int totalKbytes = (int) httpConnection.getLength() / MAX_DL_SIZE;
 
         try {
             StringBuffer sb = new StringBuffer();
             for (;;) {
-            	if (isOperationCanceled()) {
-                    break;
-            	}
-              
-                bytesRead = in.read(buffer);
-                if (bytesRead == -1) {
-        	        if (totalKbytes != (totalBytesWritten / MAX_DL_SIZE)) {
-                            cancelOperation();
-                            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-                            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EDOWNLOAD_INCOMPLETED, GeneralAlert.ERROR );
-                            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-        	        }
+                if (isOperationCanceled()) {
                     break;
                 }
 
-                //out.write(buffer, 0, bytesRead);
+                bytesRead = in.read(buffer);
+                if (bytesRead == -1) {
+                    if (totalKbytes != (totalBytesWritten / MAX_DL_SIZE)) {
+                        cancelOperation();
+                        GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                        GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EDOWNLOAD_INCOMPLETED, GeneralAlert.ERROR );
+                        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
+                    }
+                    break;
+                }
+
                 String sBuffer = new String(buffer, 0, bytesRead);
                 sb.append(sBuffer);
                 totalBytesWritten += bytesRead;
-                //DFss.setCurrentSurveyIndex(totalBytesWritten / MAX_DL_SIZE);
             }
             byte[] outbyte = sb.toString().getBytes("UTF-8");
             out.write(outbyte, 0, outbyte.length);
-            
         } catch (IOException ioe) {
-                cancelOperation();
-                GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-                GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ioe.getMessage().trim(), GeneralAlert.ERROR );
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-        	return;
+            cancelOperation();
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ioe.getMessage().trim(), GeneralAlert.ERROR );
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
+            return;
         }
          catch (SecurityException e) {
-                cancelOperation();
-                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-                GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
+            cancelOperation();
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
         }
-
         return;
-    }    
-
+    }
 }

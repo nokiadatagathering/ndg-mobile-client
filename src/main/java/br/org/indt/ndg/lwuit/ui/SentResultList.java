@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -67,7 +62,13 @@ public class SentResultList extends Screen implements ActionListener{
             form.addCommand(MoveToUnsentCommand.getInstance().getCommand());
         }
 
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
 
         underlyingModel = new DefaultListModel(results);
 
@@ -81,6 +82,7 @@ public class SentResultList extends Screen implements ActionListener{
         list.setFixedSelection(List.FIXED_NONE);
         form.addComponent(list);
         form.setScrollable(false);
+        list.repaint();
     }
 
     public void actionPerformed(ActionEvent evt) {

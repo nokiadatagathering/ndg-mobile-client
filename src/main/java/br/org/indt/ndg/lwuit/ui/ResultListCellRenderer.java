@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import com.sun.lwuit.CheckBox;
 import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
@@ -28,36 +24,38 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
     }
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
-
         disp = (DisplayableModel) value;
         Component comp = null;
         if(index>0){
-            checkbox = getCheckBox(disp, index);
-            comp = checkbox;
+            label = getCheckBox(disp, index);
+            comp = label;
         } else {
-            Label label = new Label(disp.getDisplayableName());
+            label = new Label(disp.getDisplayableName());
             label.setAlignment(CENTER);
             comp = label;
         }
-        comp.setStyle(styleLabel);
         comp.setVisible(true);
+
 
         if (isSelected) {
             setFocus(true);
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-            styleContainer.setBgPainter(focusBGPainter);
             comp.setFocus(true);
-            if(index>0){
+            comp.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+            comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            if( index > 0 ){
                 Image arrow = Screen.getRes().getImage("right_arrow");
                 Label larrow = new Label(arrow);
-                this.addComponent(BorderLayout.EAST,larrow);
+                addComponent(BorderLayout.EAST,larrow);
             }
+            getStyle().setBgPainter(focusBGPainter);
         } else {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
             setFocus(false);
-            styleContainer.setBgPainter(bgPainter);
             comp.setFocus(false);
-            this.addComponent(BorderLayout.EAST, new Label(" "));
+            comp.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
+            comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            comp.getStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
+            addComponent(BorderLayout.EAST, new Label(" "));
+            getStyle().setBgPainter(bgPainter);
         }
 
         addComponent(BorderLayout.CENTER, comp);
@@ -119,7 +117,5 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
                 selected[i-1] = false;
         }
         return selected;
-
     }
-
 }

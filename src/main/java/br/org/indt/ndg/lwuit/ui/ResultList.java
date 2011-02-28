@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.Resources;
@@ -35,7 +30,7 @@ import com.sun.lwuit.list.ListModel;
  */
 public class ResultList extends Screen implements ActionListener {
 
-    private String title2 = Resources.RESULTS_LIST_TITLE;//NEWUI_TITLE_RESULTS;
+    private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;
 
     private List list;
@@ -70,7 +65,13 @@ public class ResultList extends Screen implements ActionListener {
         form.addCommand(ViewSentResultsCommand.getInstance().getCommand());
         form.addCommand(NewResultCommand.getInstance().getCommand());
 
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
 
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(results);
@@ -140,13 +141,9 @@ public class ResultList extends Screen implements ActionListener {
     }
 
     private void showContextMenu() {
-        if(resultContextMenu==null){
-            resultContextMenu = new ResultListContextMenu(getSelectedResult(), list.size());
-        }else{
-            resultContextMenu.setIndexList(getSelectedResult());
-            resultContextMenu.setSizeList(list.size());
-        }
-        resultContextMenu.show(50,155,120);
+        resultContextMenu = new ResultListContextMenu(getSelectedResult(), list.size());
+        resultContextMenu.show();
+        resultContextMenu = null;
     }
 
     private void setCommands(){

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.model.*;
@@ -12,7 +7,6 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.logging.Logger;
-import br.org.indt.ndg.mobile.ResultList;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -31,6 +25,7 @@ import javax.microedition.location.Location;
 public class PersistenceManager {
 
     private static PersistenceManager instance = null;
+    private SaveResultsObserver m_saveObserver = null;
     private boolean error = false;
     private String resultId;
     private Vector vQuestions;
@@ -55,7 +50,8 @@ public class PersistenceManager {
         return error;
     }
 
-    public void save(Vector _vQuestions) {
+    public void save(Vector _vQuestions, SaveResultsObserver saveObserver) {
+        m_saveObserver = saveObserver;
         vQuestions = _vQuestions;
 
         WaitingScreen.show(Resources.SAVING_RESULT);
@@ -133,13 +129,25 @@ public class PersistenceManager {
             output.println();
 
             if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
-
-                Location loc = AppMIDlet.getInstance().getLocation();
-
-                if (loc != null) {
-                    if (loc.getQualifiedCoordinates() != null) {
-                        output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
-                        output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
+// we do not set new location if it was already in survey and survey is modified
+// it is kept by resultHandler
+                String longitude = null;
+                String latitude = null;
+                if (AppMIDlet.getInstance().getFileStores().getResultStructure() != null) {
+                    latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
+                    longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
+                }
+                
+                if (longitude != null && latitude != null) {
+                    output.println("<latitude>" + latitude + "</latitude>");
+                    output.println("<longitude>" + longitude + "</longitude>");
+                } else {
+                    Location loc = AppMIDlet.getInstance().getLocation();
+                    if (loc != null) {
+                        if (loc.getQualifiedCoordinates() != null) {
+                            output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
+                            output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
+                        }
                     }
                 }
             }
@@ -204,6 +212,9 @@ public class PersistenceManager {
         catch(Exception e){
             Logger.getInstance().log(e.getMessage());
             e.printStackTrace();
+        }
+        finally {
+            System.gc(); 
         }
     }
 
@@ -279,15 +290,20 @@ public class PersistenceManager {
         return AppMIDlet.getInstance().getFileSystem().isLocalFile();
     }
 
+    private void resultsSaved() {
+        if ( m_saveObserver != null) {
+            m_saveObserver.onResultsSaved();
+            m_saveObserver = null;
+        }
+    }
+
     class SaveResultRunnable implements Runnable {
         public void run() {
             PersistenceManager.getInstance().save2();
-
-            // Refresh ResultList since a new result was created
             AppMIDlet.getInstance().getFileStores().resetQuestions();
             AppMIDlet.getInstance().getFileSystem().loadResultFiles();
-            AppMIDlet.getInstance().setResultList(new ResultList());
-            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+            AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
+            PersistenceManager.getInstance().resultsSaved();
         }
     }
 

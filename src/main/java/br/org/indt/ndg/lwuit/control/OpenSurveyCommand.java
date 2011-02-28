@@ -40,12 +40,12 @@ public class OpenSurveyCommand extends CommandControl {
         AppMIDlet.getInstance().getFileSystem().setSurveyCurrentIndex(selectedIndex);
         AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
 
+        WaitingScreen.show(Resources.LOADING_SURVEYS);
+
         OpenSurveyRunnable osr = new OpenSurveyRunnable();
         Thread t = new Thread(osr);  //create new thread to compensate for waitingform
         t.setPriority(Thread.MIN_PRIORITY);
         t.start();
-
-        WaitingScreen.show(Resources.LOADING_SURVEYS);
     }
 
     class OpenSurveyRunnable implements Runnable {

@@ -17,8 +17,11 @@ public class ChoiceQuestion extends Question {
     private Vector choices = new Vector();
     private Vector others = new Vector();
     private Vector othersText = new Vector();
+    private Vector defaultAnswers = new Vector();
+
     private boolean exclusive;
     private boolean inverse;
+
     private int choiceItem;
     private int catTo;
     private int skipTo;
@@ -39,6 +42,10 @@ public class ChoiceQuestion extends Question {
     
     public void setInverse(boolean _val) { this.inverse = _val; }
     public boolean isInverse() { return inverse; }
+
+    public void setDefaultAnswers(Vector _def){defaultAnswers = _def; }
+    public Vector getDefaultAnswers(){return defaultAnswers; }
+
     /////////////////////////////////////////
 
     public boolean isExclusive() {

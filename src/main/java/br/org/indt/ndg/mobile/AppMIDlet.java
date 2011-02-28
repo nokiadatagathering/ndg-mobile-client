@@ -1,5 +1,8 @@
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import java.io.IOException;
@@ -13,15 +16,18 @@ import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.settings.IMEIHandler;
 import br.org.indt.ndg.lwuit.ui.RegisterIMEI;
 import br.org.indt.ndg.lwuit.ui.SplashScreen;
+import br.org.indt.ndg.lwuit.ui.style.StyleConst;
 import br.org.indt.ndg.mobile.submit.SubmitServer;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.animations.CommonTransitions;
+import com.sun.lwuit.impl.midp.VKBImplementationFactory;
 import com.sun.lwuit.plaf.UIManager;
 import java.io.DataOutputStream;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
 
 public class AppMIDlet extends MIDlet {
@@ -57,6 +63,11 @@ public class AppMIDlet extends MIDlet {
         if (locationHandler == null) return null;
         else return locationHandler.getLocation();
     }
+
+    public Coordinates getCoordinates() {
+        if (getLocation() == null) return null;
+        else return getLocation().getQualifiedCoordinates();
+    }
     
     public static AppMIDlet getInstance() {
         return instance;
@@ -64,7 +75,7 @@ public class AppMIDlet extends MIDlet {
     
     public void setIMEI() {
         imei = System.getProperty("com.nokia.mid.imei");
-        //imei = "9999";
+        //imei = "999966663333";
     } 
     
     public String getIMEI() {
@@ -180,10 +191,13 @@ public class AppMIDlet extends MIDlet {
     }
     
     public void init(boolean showSplashScreen) {
-        Display.init(this);
+
+        
+        VKBImplementationFactory.init();    //virtual keyboard will be shown on touch devices
+        Display.init(this);        
         resources = new Resources();
         locationHandler = new LocationHandler();
-        
+        initLWUIT();
         if (showSplashScreen) {
             Screen.show(SplashScreen.class,true);
         }
@@ -193,11 +207,9 @@ public class AppMIDlet extends MIDlet {
         writeIMEIToFileSystem();
 
         unicode = new Conversor();
-        fileSystem = new FileSystem(Resources.ROOT_DIR);  
+        fileSystem = new FileSystem(Resources.ROOT_DIR);
         fileStores = new FileStores();
-
-        initLWUIT();
-        
+        ImageData.cleanTemporaryPhotoFiles();
         registerApp();
     }
     
@@ -232,7 +244,31 @@ public class AppMIDlet extends MIDlet {
             //style = UIManager.getInstance().getComponentStyle("DialogBody");
             //style.setBorder(Border.createEmpty());
             UIManager.getInstance().setLookAndFeel(ndgLF);
-            UIManager.getInstance().setThemeProps(res.getTheme("SurveyList"));
+            
+            switch( AppMIDlet.getInstance().getSettings().getStructure().getStyleId() ) {
+                case StyleConst.DEFAULT:
+                    UIManager.getInstance().setThemeProps(res.getTheme("SurveyList"));
+                    NDGStyleToolbox.getInstance().reset();
+                    break;
+                case StyleConst.HIGHCONTRAST:
+                    UIManager.getInstance().setThemeProps(res.getTheme("HighContrast"));
+                    NDGStyleToolbox.getInstance().reset();
+                    break;
+                case StyleConst.CUSTOM:
+                    UIManager.getInstance().setThemeProps(res.getTheme("SurveyList"));
+                    NDGStyleToolbox.getInstance().reset();
+                    NDGStyleToolbox.getInstance().loadSettings();
+                    break;
+                default:
+                    UIManager.getInstance().setThemeProps(res.getTheme("SurveyList"));
+                    NDGStyleToolbox.getInstance().reset();
+                    break;
+            }
+
+            if(Display.getInstance().isTouchScreenDevice()) {
+                UIManager.getInstance().addThemeProps(res.getTheme("TouchScreen"));
+            }
+
             UIManager.getInstance().getLookAndFeel().setReverseSoftButtons(true);
             UIManager.getInstance().setResourceBundle(i18n);
             Screen.setRes(res);
@@ -240,7 +276,7 @@ public class AppMIDlet extends MIDlet {
             Logger.getInstance().log(e.getMessage());
         }
     }
-       
+
     public void destroy() {
         if (locationHandler != null) locationHandler.disconnect();
         locationHandler = null;
@@ -251,6 +287,7 @@ public class AppMIDlet extends MIDlet {
         fileStores = null;
         unicode = null;
         settings = null;
+        ImageData.cleanTemporaryPhotoFiles();
     }
     
     protected void startApp() throws MIDletStateChangeException {
@@ -272,7 +309,7 @@ public class AppMIDlet extends MIDlet {
     public void registerApp() {
         // check if application is registered
         IMEIHandler im = new IMEIHandler();
-        if(!im.isIMEIRegistered() && !settings.getStructure().getRegisterIMEIUrl().equals("registered")){
+        if(!im.isIMEIRegistered()){
             Screen.show(RegisterIMEI.class,true);
         } else {
             continueAppLoading();
@@ -298,11 +335,12 @@ public class AppMIDlet extends MIDlet {
         }
     }
 
-    public Class getInterviewForm() {
-        if( getSettings().getStructure().getCategoriesEnabled() ) {
-            return br.org.indt.ndg.lwuit.ui.CategoryList.class;
+    public void showInterview() {
+        if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
         } else {
-            return br.org.indt.ndg.lwuit.ui.InterviewForm2.class;
+            SurveysControl.getInstance().setSelectedCategory( 0 );
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.InterviewForm.class);
         }
     }
 }

@@ -1,16 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui.camera;
+import br.org.indt.ndg.lwuit.control.BackPhotoFormCommand;
+import br.org.indt.ndg.lwuit.control.CapturePhotoCommand;
 import br.org.indt.ndg.lwuit.ui.*;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Camera;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.MediaComponent;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BorderLayout;
 
 
 /**
@@ -21,7 +20,6 @@ public class ViewFinderForm extends Screen implements ActionListener {
     private Container container;
     private MediaComponent comp;
     private boolean enableTakingPicture;
-     
 
     protected void loadData() {
         enableTakingPicture = true;
@@ -29,29 +27,52 @@ public class ViewFinderForm extends Screen implements ActionListener {
 
     protected void customize() {
         createScreen();
-        
+        form.setLayout(new BorderLayout());
+
         comp = Camera.getInstance().getViewFinderLWUIT();
-        container = new Container();
-        if(!container.contains(comp))
-            container.addComponent(comp);
-        
+        comp.getStyle().setMargin(0, 0, 0, 0);
+
+        if(container == null) {
+            container = new Container(new BorderLayout());
+        } else {
+            container.removeAll();
+            form.removeComponent(container);
+        }
+
+        container.addComponent(BorderLayout.CENTER, comp);
+        form.removeAll(); // does not always work?
+        form.addCommand(BackPhotoFormCommand.getInstance().getCommand());
+        form.addCommand(CapturePhotoCommand.getInstance().getCommand());
         form.addGameKeyListener(Display.GAME_FIRE, this);
-        form.addComponent(container);
+        form.addCommandListener(this);
+        form.setScrollable(false);
+        if(!form.contains(container)) {
+            form.addComponent(BorderLayout.CENTER, container);
+        }
     }
 
-    private void showPicture(){
-        byte[]  picture = Camera.getInstance().takePicture(comp.getWidth(), comp.getHeight());
+    private void capturePicture(){
+        int width = AppMIDlet.getInstance().getSettings().getStructure().getPhotoX();
+        int height = AppMIDlet.getInstance().getSettings().getStructure().getPhotoY();
+        byte[]  picture = Camera.getInstance().takePicture(width, height);
         NDGCameraManager.getInstance().updatePhotoForm(picture);
         Camera.getInstance().shutDown();
-        container.removeAll();
-        form.removeAll();
-        Screen.show(PhotoForm.class, true);
+    }
+
+    public void capturePictureAndShowPhoto() {
+        if ( enableTakingPicture ) {
+            enableTakingPicture = false;
+            capturePicture();
+            Screen.show(PhotoForm.class, true);
+        }
     }
 
     public void actionPerformed(ActionEvent evt) {
-        if(evt.getKeyEvent() == Display.GAME_FIRE && enableTakingPicture ) {
-            enableTakingPicture = false;
-            showPicture();
+        if ( evt.getKeyEvent() == Display.GAME_FIRE ||
+                evt.getSource() == CapturePhotoCommand.getInstance().getCommand() ) {
+            CapturePhotoCommand.getInstance().execute(this);
+        } else if(evt.getSource() == BackPhotoFormCommand.getInstance().getCommand() ) {
+            BackPhotoFormCommand.getInstance().execute(null);
         }
     }
 }

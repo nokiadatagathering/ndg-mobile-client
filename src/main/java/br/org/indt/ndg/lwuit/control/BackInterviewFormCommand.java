@@ -1,14 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.CategoryList;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.events.ActionEvent;
 
 /**
  *
@@ -23,7 +20,20 @@ public class BackInterviewFormCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().setDisplayable(CategoryList.class);
+        InterviewForm view = (InterviewForm)parameter;
+        // ask to save modifications if any
+        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
+        if ( view.isModifiedInterview() && GeneralAlert.getInstance().show(Resources.CMD_SAVE, Resources.SAVE_MODIFICATIONS, GeneralAlert.CONFIRMATION) == GeneralAlert.RESULT_YES ) {
+            // if accepted proceed as if 'Next' was clicked
+            view.actionPerformed(new ActionEvent(AcceptQuestionListFormCommand.getInstance().getCommand()));
+        } else {
+            if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
+                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
+            } else {
+                // discard results and leave Interview
+                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+            }
+        }
     }
 
     public static BackInterviewFormCommand getInstance() {

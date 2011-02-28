@@ -1,19 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.AcceptQuestionListFormCommand;
 import br.org.indt.ndg.lwuit.control.BackInterviewFormCommand;
+import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
 import br.org.indt.ndg.lwuit.control.PersistenceManager;
-import br.org.indt.ndg.lwuit.control.SaveResultCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.control.TakePhotoCommand;
 import br.org.indt.ndg.lwuit.extended.CheckBox;
 import br.org.indt.ndg.lwuit.extended.DateField;
+import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.extended.FilterProxyListModel;
-import br.org.indt.ndg.lwuit.extended.Form;
 import br.org.indt.ndg.lwuit.extended.List;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
@@ -21,32 +17,33 @@ import br.org.indt.ndg.lwuit.extended.TimeField;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
 import br.org.indt.ndg.lwuit.model.DateQuestion;
-import br.org.indt.ndg.lwuit.model.DecimalQuestion;
 import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
+import br.org.indt.ndg.lwuit.model.ImageAnswer;
+import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.model.ImageQuestion;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.NumberAnswer;
 import br.org.indt.ndg.lwuit.model.NumericQuestion;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
+import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManagerListener;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.multimedia.Picture;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
-import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
-import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.DataChangedListener;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListCellRenderer;
 import com.sun.lwuit.list.ListModel;
@@ -81,7 +78,8 @@ public class InterviewForm extends Screen implements ActionListener {
 
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         form.getContentPane().getStyle().setBorder(Border.createEmpty(), false);
-        form.setScrollAnimationSpeed(500);
+        form.setScrollAnimationSpeed(100);
+        form.setFocusScrolling(true);
 
         NDGQuestion[] questions = SurveysControl.getInstance().getSelectedCategory().getQuestions();
 
@@ -130,9 +128,6 @@ public class InterviewForm extends Screen implements ActionListener {
             else if(currentQuestion instanceof ImageQuestion){
                 ImageFieldUI imgf = new ImageFieldUI(currentQuestion);
                 imgf.registerQuestion();
-                //temp solution TODO refactoring of NDGMANAGER together with INTERVIEFORM2
-                imgf.setForm(form);
-
                 form.addComponent(imgf);
                 lastUI = imgf;
             } else if (currentQuestion instanceof TimeQuestion) {
@@ -161,7 +156,13 @@ public class InterviewForm extends Screen implements ActionListener {
 
         form.addCommand(BackInterviewFormCommand.getInstance().getCommand());
         form.addCommand(AcceptQuestionListFormCommand.getInstance().getCommand());
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
         
         if (PersistenceManager.getInstance().isEditing()) {
             title2 = Resources.EDITING;
@@ -186,16 +187,21 @@ public class InterviewForm extends Screen implements ActionListener {
         return answerChanged;
     }
 
-        private void UpdateAnwser()
-    {
-        for ( int i = 0; i < vContainers.size(); i++)
-        {
+    private void commitAllAnswers() {
+        for ( int i = 0; i < vContainers.size(); i++) {
             ((ContainerUI)vContainers.elementAt(i)).commitValue();
         }
     }
 
-    private boolean validateAnswer() {
-        UpdateAnwser();
+    public boolean validateAllAnswersAndResetModifiedFlag() {
+        boolean result = validateAllAnswers();
+        if (result)
+            setModifiedInterview(false);
+        return result;
+    }
+
+    private boolean validateAllAnswers() {
+        commitAllAnswers();
         for ( int i = 0; i< vContainers.size(); i++)
         {
             if (!((ContainerUI)vContainers.elementAt(i)).getQuestion().passConstraints() )
@@ -207,12 +213,7 @@ public class InterviewForm extends Screen implements ActionListener {
         return true;
     }
 
-    private void SaveResult() {
-        SaveResultCommand.getInstance().execute( SurveysControl.getInstance().getQuestionsFlat() );
-    }
-
-        private void updateSkippedQuestion(ChoiceQuestion question)
-    {
+    private void updateSkippedQuestion(ChoiceQuestion question) {
         try
         {
         int selectedChoiceItem = Integer.parseInt((String) question.getAnswer().getValue());
@@ -251,26 +252,16 @@ public class InterviewForm extends Screen implements ActionListener {
 
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
-
         if (cmd == BackInterviewFormCommand.getInstance().getCommand() ) {
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-            if ( isModifiedInterview() && GeneralAlert.getInstance().show(Resources.CMD_SAVE, Resources.SAVE_MODIFICATIONS, GeneralAlert.CONFIRMATION) == GeneralAlert.RESULT_YES ) {
-                if (validateAnswer()) {
-                    SaveResult();
-                    setModifiedInterview(false);
-                }
-            }
-            else {
-                BackInterviewFormCommand.getInstance().execute(null);
-            }
-
+            BackInterviewFormCommand.getInstance().execute(this);
         } else if ( cmd == AcceptQuestionListFormCommand.getInstance().getCommand() ){
-            if (validateAnswer()) {
-                AcceptQuestionListFormCommand.getInstance().execute(null);
-            }
+            AcceptQuestionListFormCommand.getInstance().execute(this);
+        } else if( cmd == OpenFileBrowserCommand.getInstance().getCommand() ) {
+            OpenFileBrowserCommand.getInstance().execute(null);
+        } else if ( cmd == TakePhotoCommand.getInstance().getCommand() ) {
+            TakePhotoCommand.getInstance().execute(null);
         }
     }
-
 
 abstract class ContainerUI extends Container implements FocusListener {
     private final int NUMBER_OF_COLUMNS = 20;
@@ -287,6 +278,10 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     public ContainerUI(NDGQuestion question)
     {
+        getStyle().setBorder(Border.createBevelLowered( NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor ));
         this.question  = question;
     }
 
@@ -321,18 +316,24 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     public void focusGained(Component cmpnt){
-        getStyle().setBorder(Border.createBevelLowered(0x69b510, 0x69b510, 0x69b510, 0x69b510), false);
+        getStyle().setBorder(Border.createBevelLowered( NDGStyleToolbox.getInstance().focusGainColor,
+                                                        NDGStyleToolbox.getInstance().focusGainColor,
+                                                        NDGStyleToolbox.getInstance().focusGainColor,
+                                                        NDGStyleToolbox.getInstance().focusGainColor ), false);
         refreshTheme();
     }
 
     public void focusLost(Component cmpnt) {
-        commitValue();
+        commitValue();	//TODO ensure it can be removed
         if (!question.passConstraints())
         {
             cmpnt.requestFocus();
             return;
         }
-        getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b), false);
+        getStyle().setBorder(Border.createBevelLowered( NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor,
+                                                        NDGStyleToolbox.getInstance().focusLostColor ), false);
         refreshTheme();
     }
 }
@@ -347,7 +348,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
@@ -358,6 +358,11 @@ abstract class ContainerUI extends Container implements FocusListener {
             tfDesc.setFocusable(true);
             addComponent(tfDesc);
             tfDesc.addFocusListener(this);
+            tfDesc.addDataChangeListener(new DataChangedListener() {
+                public void dataChanged(int type, int index) {
+                    revalidate();
+                }
+            });
 
             if (((DescriptiveQuestion)question).getChoices().size() >= 1) {
                 Vector vChoices = ((DescriptiveQuestion)question).getChoices();
@@ -381,8 +386,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                     }
                 });
 
-                choice.addFocusListener(new HandleChoiceFocusList());
-
                 tfDesc.addDataChangeListener(new DataChangedListener() {
 
                 public void dataChanged(int arg0, int arg1) {
@@ -394,7 +397,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
                 addComponent(choice);
             } else {
-                tfDesc.addDataChangeListener(new HandleSpecialBuggedLetters());
+                tfDesc.addDataChangeListener(new HandleInterviewAnswersModified());
             }
             Label spacer = new Label("");
             spacer.setFocusable(false);
@@ -421,17 +424,15 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion( ) {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
-            getStyle().setFgSelectionColor( 1 ,true);
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
-            nfNumber = new NumericField(((NumericQuestion) question).getLength(),  question instanceof DecimalQuestion );
+            nfNumber = new NumericField(((NumericQuestion) question).getLength() );
             nfNumber.setFocusable(true);
             String value =((NumberAnswer)question.getAnswer()).getValueString();
             nfNumber.setText(value);
             nfNumber.addFocusListener(this);
-            nfNumber.addDataChangeListener(new HandleSpecialBuggedLetters());
+            nfNumber.addDataChangeListener(new HandleInterviewAnswersModified());
 
             addComponent(nfNumber);
             Label spacer = new Label("");
@@ -460,7 +461,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout( new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             
             addComponent(qname);
@@ -469,7 +469,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             dfDate.setDate(new Date(datelong));
             dfDate.setEditable(true);
             dfDate.addFocusListener(this);
-            dfDate.addDataChangeListener(new HandleSpecialBuggedLetters());
+            dfDate.addDataChangeListener(new HandleInterviewAnswersModified());
 
             addComponent(dfDate);
 
@@ -500,7 +500,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             
             addComponent(qname);
@@ -508,6 +507,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             groupButton = new ButtonGroup();
             Vector vChoices = ((ChoiceQuestion)question).getChoices();
             Vector vOthers = ((ChoiceQuestion)question).getOthers();
+            
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
             for (int i = 0; i < totalChoices; i++) {
@@ -520,16 +520,21 @@ abstract class ContainerUI extends Container implements FocusListener {
                 groupButton.add(rb);
                 addComponent(rb);
             }
-
+            
+            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
             String answerValue = (String) question.getAnswer().getValue();
             if (answerValue != null && !answerValue.equals("")) {
-                groupButton.setSelected(Integer.parseInt((String) question.getAnswer().getValue()));
                 int index = Integer.parseInt((String) question.getAnswer().getValue());
+                groupButton.setSelected(index);
                 RadioButton rb = (RadioButton) groupButton.getRadioButton(index);
                 Vector v = ((ChoiceQuestion)question).getOthersText();
                 String str = (String) v.elementAt(0);
                 rb.setOtherText(str);
             }
+            else if (vDefault.size() > 0){
+                groupButton.setSelected(Integer.parseInt((String) vDefault.elementAt(0)));
+            }
+            
             Label spacer = new Label("");
             spacer.setFocusable(false);
             addComponent(spacer);
@@ -581,26 +586,11 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     class ExclusiveChoiceFieldAutoCompleteUI extends ContainerUI {
         ButtonGroup groupButton;
-        TextFieldEx exclusiveChoiceTextField;
+        DescriptiveField exclusiveChoiceTextField;
         ListModel underlyingModel;
 
 
-        private class TextFieldEx extends TextField{
 
-            protected Command installCommands(Command clear, Command t9) {
-                com.sun.lwuit.Form f = getComponentForm();
-                Command[] originalCommands = new Command[f.getCommandCount()];
-                for (int iter = 0; iter < originalCommands.length; iter++) {
-                    originalCommands[iter] = f.getCommand(iter);
-                }
-                f.removeAllCommands();
-                Command retVal = super.installCommands(clear, t9);
-                for (int iter = originalCommands.length - 1; iter >= 0; iter--) {
-                    f.addCommand(originalCommands[iter]);
-                }
-                return retVal;
-            }
-        }
 
 
         public ExclusiveChoiceFieldAutoCompleteUI(NDGQuestion obj) {
@@ -614,11 +604,10 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
-            exclusiveChoiceTextField = new TextFieldEx();
+            
             groupButton = new ButtonGroup();
 
             Vector vChoices = ((ChoiceQuestion)question).getChoices();
@@ -626,27 +615,39 @@ abstract class ContainerUI extends Container implements FocusListener {
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
 
+
             underlyingModel = new DefaultListModel();
             final ManagerOptionSelectableRadio managerOptionSelectableRadio = new ManagerOptionSelectableRadio();
+            int maxQuestionLength = 0;
             for (int i = 0; i < totalChoices; i++) {
-                choices[i] = (String) vChoices.elementAt(i);
-                RadioButton rb = new RadioButton(choices[i]);
-                underlyingModel.addItem(new OptionSelectableRadio(choices[i], managerOptionSelectableRadio));
-                rb.setOther(((String) vOthers.elementAt(i)).equals("1"));
-                rb.setOtherText(""); // Initializes with empty string
-                rb.setFocusable(false);
-                groupButton.add(rb);
+                    choices[i] = (String) vChoices.elementAt(i);
+                    RadioButton rb = new RadioButton(choices[i]);
+                    underlyingModel.addItem(new OptionSelectableRadio(choices[i], managerOptionSelectableRadio));
+                    rb.setOther(((String) vOthers.elementAt(i)).equals("1"));
+                    rb.setOtherText(""); // Initializes with empty string
+                    rb.setFocusable(false);
+                    groupButton.add(rb);
+                    maxQuestionLength = (choices[i].length() > maxQuestionLength) ? choices[i].length() : maxQuestionLength;
             }
+            
+            exclusiveChoiceTextField = new DescriptiveField(maxQuestionLength);
 
+            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
             String answerValue = (String) question.getAnswer().getValue();
             if (answerValue != null && !answerValue.equals("")) {
-                groupButton.setSelected(Integer.parseInt((String) question.getAnswer().getValue()));
-                ((OptionSelectableRadio) underlyingModel.getItemAt(Integer.parseInt((String) question.getAnswer().getValue()))).setSelected(true);
                 int index = Integer.parseInt((String) question.getAnswer().getValue());
+                groupButton.setSelected(index);
+                ((OptionSelectableRadio) underlyingModel.getItemAt(index)).setSelected(true);
+                
                 RadioButton rb = (RadioButton) groupButton.getRadioButton(index);
                 Vector v = ((ChoiceQuestion)question).getOthersText();
                 String str = (String) v.elementAt(0);
                 rb.setOtherText(str);
+            }
+            else if (vDefault.size() > 0){
+                int idx = Integer.parseInt((String) vDefault.elementAt(0));
+                groupButton.setSelected(idx);
+                ((OptionSelectableRadio) underlyingModel.getItemAt(idx)).setSelected(true);
             }
 
             final FilterProxyListModel proxyModel = new FilterProxyListModel(underlyingModel);
@@ -674,7 +675,6 @@ abstract class ContainerUI extends Container implements FocusListener {
             cList.setFocusable(false);
             cList.addComponent(choice);
             cList.setPreferredSize(new Dimension(30, 90));
-            cList.getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
 
             addComponent(exclusiveChoiceTextField);
             addComponent(cList);
@@ -744,7 +744,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             
             addComponent(qname);
@@ -767,11 +766,20 @@ abstract class ContainerUI extends Container implements FocusListener {
             }
             int nIndex;
             Vector vChoicesAnswer = (Vector) question.getAnswer().getValue();
+            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
             for (int i = 0; i < vChoicesAnswer.size(); i++) {
                 nIndex = Integer.parseInt((String) vChoicesAnswer.elementAt(i));
                 ((CheckBox) groupButton.elementAt(nIndex)).setSelected(true);
                 ((CheckBox) groupButton.elementAt(nIndex)).setOtherText((String) ((ChoiceQuestion)question).getOthersText().elementAt(i));
             }
+            
+            if(vChoicesAnswer.isEmpty() || vDefault.size() > 0){
+                for(int idx = 0; idx < vDefault.size(); idx++ ){
+                    nIndex = Integer.parseInt((String) vDefault.elementAt(idx));
+                    ((CheckBox) groupButton.elementAt(nIndex)).setSelected(true);
+                }
+            }
+
 
             Label spacer = new Label("");
             spacer.setFocusable(false);
@@ -818,55 +826,104 @@ abstract class ContainerUI extends Container implements FocusListener {
             }
         }
    }
- 
-    class ImageFieldUI extends ContainerUI implements ActionListener {
-        Button thumbnailImageButton;
-        
-        //tempolary solution
-        Form form;
-        void setForm( Form form )
-        {
-            this.form = form;
-        }
+
+    class ImageFieldUI extends ContainerUI implements ActionListener, NDGCameraManagerListener {
+        private static final int FOUR_ACTIONS_CONTEXT_MENU = 4;//TakePhotoCommand,OpenFileBrowserCommand,ShowPhotoCommand,RemovePhotoCommand
+        private static final int TWO_ACTIONS_CONTEXT_MENU = 2;//TakePhotoCommand,OpenFileBrowserCommand
+
+        private Button thumbnailImageButton;
+        private Container imageContainer;
 
         public ImageFieldUI(NDGQuestion obj) {
             super(obj);
         }
 
-        public void registerQuestion(){
-            setLayout(new BoxLayout(BoxLayout.X_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
-
-            byte[] image01 = (byte[]) question.getAnswer().getValue();
-
-            if (image01 == null || image01.length == 0) {
-                Image img = Screen.getRes().getImage("camera-icon");
-                thumbnailImageButton = new Button();
-                thumbnailImageButton.setIcon(img);
-            } else {
-            //decode
-                Picture picture = Picture.createPicture(image01);
-                thumbnailImageButton = new Button();
-                thumbnailImageButton.setIcon(picture.getThumbnail());
+        public void update(){
+            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
+            if(imageContainer.getComponentCount() <= imgAnswer.getImages().size()) {
+                addCameraIconButton();
             }
-            thumbnailImageButton.setAlignment(Component.RIGHT);
-            thumbnailImageButton.addActionListener(this);
+           setModifiedInterview(true);
+           form.showBack();
+        }
 
-            addComponent(thumbnailImageButton);
+        public void registerQuestion(){
+            setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+
+            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
+
+            imageContainer = new Container (new FlowLayout());
+
+            ImageData imgData = null;
 
             Label spacer = new Label(question.getName());
             spacer.setFocusable(false);
             addComponent(spacer);
+            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)question).getMaxCount()) );
+            maxPhotoCount.getStyle().setFont(NDGStyleToolbox.fontSmall);
+            addComponent(maxPhotoCount);
 
+            if(imgAnswer.getImages().size() > 0){
+                for(int idx = 0; idx < imgAnswer.getImages().size(); idx++){
+                    imgData = (ImageData)imgAnswer.getImages().elementAt(idx);
+                    addButton(imgData.getThumbnail());
+                }
+            }
+            addCameraIconButton();
+            addComponent(imageContainer);
             addFocusListener(this);
         }
 
+        public void addCameraIconButton(){
+            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
+            if(imgAnswer.getImages().size() < ((ImageQuestion)question).getMaxCount()){
+                Image img = Screen.getRes().getImage("camera-icon");
+                addButton(img);
+            }
+        }
+
+        private void addButton(Image img){
+                Button button = new Button();
+                button.setIcon(img);
+                button.addActionListener(this);
+                button.setAlignment(Component.LEFT);
+                button.setFocusable(true);
+                button.addFocusListener(this);
+                imageContainer.addComponent(button);
+        }
+        
+        public void focusGained(Component cmpnt) {
+            super.focusGained(cmpnt);
+            form.addCommand(OpenFileBrowserCommand.getInstance().getCommand());
+            form.addCommand(TakePhotoCommand.getInstance().getCommand());
+            NDGCameraManager.getInstance().sendPostProcessData(this, cmpnt,
+                    (ImageQuestion) question, imageContainer);
+        }
+
+        public void focusLost(Component cmpnt) {
+            super.focusLost(cmpnt);
+            form.removeCommand(OpenFileBrowserCommand.getInstance().getCommand());
+            form.removeCommand(TakePhotoCommand.getInstance().getCommand());
+        }
+
         public void commitValue() {
+            question.setVisited(true);
         }
 
         public void actionPerformed(ActionEvent cmd) {
             if ( cmd.getSource() instanceof Button ) {
-                NDGCameraManager.getInstance().displayCamera( form, thumbnailImageButton, (ImageQuestion) question);
+                NDGCameraManager.getInstance().sendPostProcessData( this,
+                                                                    (Button)cmd.getSource(),
+                                                                    (ImageQuestion) question,
+                                                                    imageContainer);
+
+                int index = imageContainer.getComponentIndex((Button)cmd.getSource());
+
+                if( index  < ((ImageAnswer)question.getAnswer()).getImages().size() ){
+                    new ImageQuestionContextMenu(0, FOUR_ACTIONS_CONTEXT_MENU).show();
+                } else {
+                    new ImageQuestionContextMenu(0, TWO_ACTIONS_CONTEXT_MENU).show();
+                }
             }
         }
 
@@ -885,7 +942,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             
             addComponent(qname);
@@ -896,7 +952,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             tfTime.setTime(new Date(datelong));
             tfTime.setEditable(true);
             tfTime.addFocusListener(this);
-            tfTime.addDataChangeListener(new HandleSpecialBuggedLetters());
+            tfTime.addDataChangeListener(new HandleInterviewAnswersModified());
 
             addComponent(tfTime);
         
@@ -928,7 +984,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            getStyle().setBorder(Border.createBevelLowered(0x7b7b7b, 0x7b7b7b, 0x7b7b7b, 0x7b7b7b));
             qname = createQuestionName(question.getName());
             
             addComponent(qname);
@@ -968,7 +1023,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             tfTime.setTime(date);
             tfTime.setEditable(true);
             tfTime.addFocusListener(this);
-            tfTime.addDataChangeListener(new HandleSpecialBuggedLetters());
+            tfTime.addDataChangeListener(new HandleInterviewAnswersModified());
 
         addComponent(tfTime);
         addComponent(am);
@@ -1019,18 +1074,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
      }
 
-    class HandleChoiceFocusList implements FocusListener {
-
-        public void focusGained(Component cmp) {
-        }
-
-        public void focusLost(Component cmp) {
-//            ((List) cmp).setSelectedIndex(0);
-        }
-    }
-
-    // This is Handle is used to mitigate the undesirable KeyDown and KeyUp Events that occur when pressing the characters V, P, and R.
-    class HandleSpecialBuggedLetters implements DataChangedListener {
+    class HandleInterviewAnswersModified implements DataChangedListener {
 
         public void dataChanged(int arg0, int arg1) {
             // Modification in InterviewForm content
@@ -1188,17 +1232,16 @@ abstract class ContainerUI extends Container implements FocusListener {
                 return this;
             }
             setSelected(((OptionSelectableRadio) o).getSelected());
-            //setSelected(false);
             setText(o.toString());
 
             if (isSelected) {
                 setFocus(true);
                 getStyle().setBgPainter(focusBGPainter);
-                getStyle().setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
+//                getStyle().setFont( NDGStyleToolbox.fontLargeBold );
             } else {
                 setFocus(false);
                 getStyle().setBgPainter(bgPainter);
-                getStyle().setFont(Screen.getRes().getFont("NokiaSansWide15"));
+//                getStyle().setFont( NDGStyleToolbox.fontLarge );
             }
             return this;
         }

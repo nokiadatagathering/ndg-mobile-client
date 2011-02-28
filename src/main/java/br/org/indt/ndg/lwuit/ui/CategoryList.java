@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
 import br.org.indt.ndg.lwuit.control.EnterCategoryCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultCommand;
+import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -21,7 +18,7 @@ import com.sun.lwuit.list.ListModel;
  *
  * @author mluz
  */
-public class CategoryList extends Screen implements ActionListener {
+public class CategoryList extends Screen implements ActionListener, SaveResultsObserver {
 
     private String title2 = Resources.CATEGORY_LIST_TITLE;
     private String title1;
@@ -48,7 +45,13 @@ public class CategoryList extends Screen implements ActionListener {
         form.addCommand(SaveResultCommand.getInstance().getCommand());
         form.addCommand(EnterCategoryCommand.getInstance().getCommand());
 
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
 
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(categories);
@@ -71,10 +74,16 @@ public class CategoryList extends Screen implements ActionListener {
             BackCategoriesListCommand.getInstance().execute(null);
         }
         else if (cmd == SaveResultCommand.getInstance().getCommand()) {
+            SaveResultCommand.getInstance().setObserver(this);
             SaveResultCommand.getInstance().execute(SurveysControl.getInstance().getQuestionsFlat());
         }
         else if (cmd == EnterCategoryCommand.getInstance().getCommand() || cmd == list) {
             EnterCategoryCommand.getInstance().execute(new Integer(list.getSelectedIndex()));
         }
+    }
+
+    public void onResultsSaved() {
+        // Refresh ResultList since a new result was probbaly created
+        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 }

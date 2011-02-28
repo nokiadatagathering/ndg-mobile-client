@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -15,6 +16,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.logging.Logger;
+import java.io.IOException;
+import org.xml.sax.SAXException;
 
 public class Parser {    
     private DefaultHandler handler;    
@@ -83,5 +86,26 @@ public class Parser {
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
         }
+    }
+
+     public void parseFileNoClose(String filename) throws SAXException, IOException, ParserConfigurationException {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+
+            FileConnection fc = (FileConnection) Connector.open(filename);
+
+            InputStream is = fc.openInputStream();
+
+            try {
+                saxParser.parse(is, handler);
+            } catch (DoneParsingException e) {
+
+            } catch (SAXParseException e) {
+                Logger.getInstance().logException("SAXParseException on parsing: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
+            is.close();
+            fc.close();
     }
 }

@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelRegisterIMEICommand;
 import br.org.indt.ndg.lwuit.control.Event;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.NetworkErrCode;
@@ -43,12 +39,12 @@ public class RegisterIMEI extends Screen implements ActionListener {
     
     protected void loadData() {
        item = new TextArea(3,20);
-       item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-       item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+       item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+       item.getStyle().setFont( NDGStyleToolbox.fontSmall );
        item.setEditable(false);
        item.setFocusable(false);
 
-       Image image = Screen.getRes().getAnimation("wait2");
+       Image image = Screen.getRes().getImage("wait2");
        l = new Label(image);
        l.setAlignment(Component.CENTER);
 
@@ -66,7 +62,13 @@ public class RegisterIMEI extends Screen implements ActionListener {
         
         form.removeAllCommands();
         form.addCommand(CancelRegisterIMEICommand.getInstance().getCommand());
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -109,7 +111,6 @@ public class RegisterIMEI extends Screen implements ActionListener {
                     } else {
                         IMEIHandler im = new IMEIHandler();
                         im.registerIMEI();
-                        im.closeRegisterIMEI();
                         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
                         GeneralAlert.getInstance().show(Resources.REGISTRATION_DONE, regStatus2Message(resp), GeneralAlert.INFO);
                         AppMIDlet.getInstance().continueAppLoading();
@@ -154,7 +155,6 @@ public class RegisterIMEI extends Screen implements ActionListener {
                     message.trim() , GeneralAlert.ERROR);
             CancelRegisterIMEICommand.getInstance().execute(null);
         }
-
     }
 
     class RegisterIMEIOnShow extends Event {
@@ -162,5 +162,4 @@ public class RegisterIMEI extends Screen implements ActionListener {
             doRegister();
         }
     }
-
 }

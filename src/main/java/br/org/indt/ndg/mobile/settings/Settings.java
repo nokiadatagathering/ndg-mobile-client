@@ -15,7 +15,6 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 
 public class Settings {
-    
     private SettingsStructure settingsStructure = new SettingsStructure();
     
     public Settings() {
@@ -39,12 +38,14 @@ public class Settings {
             output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             
             output.print("<settings");
-            output.print(" agree=\"" + settingsStructure.getAgreeFlag() + "\"");
+            output.print(" registered=\"" + settingsStructure.getRegisteredFlag() + "\"");
             output.print(" splash=\"" + settingsStructure.getSplashTime() + "\"");
             output.println(" language=\"" + settingsStructure.getLanguage() + "\">");
             
             settingsStructure.writeGpsSettings(output);
-            settingsStructure.writeCategoryEnableSettings(output);
+            settingsStructure.writeGeoTaggingSettings(output);
+            settingsStructure.writePhotoResolutionSettings(output);
+            settingsStructure.writeStyleSettings(output);
             settingsStructure.writeLogSettings(output);
             settingsStructure.writeServerSettings(output);
             settingsStructure.writeVersionSettings(output);
@@ -110,9 +111,11 @@ public class Settings {
                 String[] defaultServelts = AppMIDlet.getInstance().getDefaultServlets();
                 
                 String settings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<settings agree=\"1\" splash=\"8\" language=\"" + defaultAppLanguage + "\">\n" +
+                        "<settings registered=\"0\" splash=\"8\" language=\"" + defaultAppLanguage + "\">\n" +
                         "<gps configured=\"yes\"/>\n" +
-                        "<categoryView enabled=\"no\"/>\n" +
+                        "<geotagging configured=\"yes\"/>\n" +
+                        "<photoResolution configId=\"0\"/>\n" +
+                        "<style id=\"0\"/>\n" +
                         "<log active=\"no\"/>\n" +
                         "<server compression=\"on\">\n" +
                         "<url_compress>" + defaultServerUrl + defaultServelts[0] + defaultServelts[1] + "</url_compress>\n" +
@@ -123,17 +126,16 @@ public class Settings {
                         "</server>\n" +
                         "<version application=\"" + AppMIDlet.getInstance().getAppVersion() + "\"/>\n" +
                         "</settings>";
-                conn.create();                
+                conn.create();
                 OutputStream out = conn.openDataOutputStream();
                 
                 out.write(settings.getBytes("UTF-8"));
                 out.flush();
-                out.close();                
+                out.close();
                 conn.close();
             }
              } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
-
 }

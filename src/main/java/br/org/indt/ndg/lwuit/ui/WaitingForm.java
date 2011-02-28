@@ -42,7 +42,7 @@ public class WaitingForm extends Screen {
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         form.addComponent(new Label(" "));
         form.addComponent(new Label(" "));
-        Image image = Screen.getRes().getAnimation("wait");
+        Image image = Screen.getRes().getImage("wait");
         Label l = new Label(image);
         l.setAlignment(Component.CENTER);
         l.setText("  "+status);

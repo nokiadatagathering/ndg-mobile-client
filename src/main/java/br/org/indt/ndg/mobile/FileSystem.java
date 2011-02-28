@@ -36,8 +36,6 @@ public class FileSystem {
     private FileSystemResultStructure fsResultStructure;
     private FileSystemResultStructure fsSentStructure;
     
-    private Parser parser;
-    
     public void setResultListIndex(int _index)
     {
         resultListIndex = _index;
@@ -337,7 +335,7 @@ public class FileSystem {
         rh.setFileSystemResultStructure(fsResultStructure);
         rh.setFileSystemResultFilename(_filename);
         
-        parser = new Parser(rh);
+        Parser parser = new Parser(rh);
         parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);      
     }
     
@@ -346,7 +344,7 @@ public class FileSystem {
         rh.setFileSystemResultStructure(fsSentStructure);
         rh.setFileSystemResultFilename(_filename);
         
-        parser = new Parser(rh);
+        Parser parser = new Parser(rh);
         parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);   
     }
     

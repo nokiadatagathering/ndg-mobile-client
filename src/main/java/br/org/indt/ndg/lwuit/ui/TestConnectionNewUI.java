@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelTestConnectionCommand;
 import br.org.indt.ndg.lwuit.control.HideTestConnectionCommand;
 import br.org.indt.ndg.lwuit.control.OkTestConnectionCommand;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.submit.TestConnection;
 import com.sun.lwuit.Component;
@@ -28,12 +24,12 @@ public class TestConnectionNewUI extends Screen implements ActionListener {
     protected void loadData() {
         if (firstcreation) {
             item = new TextArea(3,20);
-            item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-            item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+            item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+            item.getStyle().setFont( NDGStyleToolbox.fontSmall );
             item.setEditable(false);
             item.setFocusable(false);
 
-            image = Screen.getRes().getAnimation("wait2");
+            image = Screen.getRes().getImage("wait2");
             l = new Label(image);
             l.setAlignment(Component.CENTER);
             firstcreation = false;
@@ -59,7 +55,13 @@ public class TestConnectionNewUI extends Screen implements ActionListener {
             form.addCommand(OkTestConnectionCommand.getInstance().getCommand());
         }
 
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -72,5 +74,4 @@ public class TestConnectionNewUI extends Screen implements ActionListener {
             OkTestConnectionCommand.getInstance().execute(null);
         }
     }
-
 }

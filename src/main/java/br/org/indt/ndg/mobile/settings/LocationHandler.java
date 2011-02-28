@@ -1,12 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.mobile.settings;
 
 
-import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import javax.microedition.location.Criteria;
 import javax.microedition.location.Location;
@@ -69,7 +63,7 @@ public class LocationHandler implements LocationListener {
         locationPresent = false;
     }
 
-    public boolean getLocationObtained() {
+    public boolean locationObtained() {
         return locationPresent;
     }
     

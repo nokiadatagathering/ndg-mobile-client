@@ -238,6 +238,44 @@ public class Local {
     public final static short QTJ_CATEGORYVIEW = 189;
     public final static short QTJ_NOTPROPERINTEGER = 190;
     public final static short QTJ_NOTPROPRDECIMAL = 191;
+    public final static short QTJ_RESTORE_DEFAULT = 192;
+    public final static short QTJ_RELOAD = 193;
+    public final static short QTJ_UI_SETTINGS = 194;
+    public final static short QTJ_APPLY = 195;
+    public final static short QTJ_LOADING_STYLE = 196;
+    public final static short QTJ_LOADING_STYLE_ERROR = 197;
+    public final static short QTJ_UI_CUSTOMIZE = 198;
+    public final static short QTJ_SELECTED = 199;
+    public final static short QTJ_UNSELECTED = 200;
+    public final static short QTJ_PREVIEW = 201;
+    public final static short QTJ_ELEMENT = 202;
+    public final static short QTJ_OBJECT = 203;
+    public final static short QTJ_LIST = 204;
+    public final static short QTJ_MENU = 205;
+    public final static short QTJ_DIALOG_TITLE = 206;
+    public final static short QTJ_BG_SELECTED = 207;
+    public final static short QTJ_BG_UNSELECTED = 208;
+    public final static short QTJ_FONT_SELECTED = 209;
+    public final static short QTJ_FONT_UNSELECTED = 210;
+    public final static short QTJ_ACCESS_DENIED = 211;
+    public final static short QTJ_LOAD_FROM_FILE = 212;
+    public final static short QTJ_MEMORY_OUT = 213;
+    public final static short QTJ_DEFAULT_PHOTO_DIR = 214;
+    public final static short QTJ_CAPTURE_PHOTO = 215;
+    public final static short QTJ_DELETE_PHOTO = 216;
+    public final static short QTJ_PHOTO_RESOLUTION = 217;
+    public final static short QTJ_SHOW_PHOTO = 218;
+    public final static short QTJ_TAKE_PHOTO = 219;
+    public final static short QTJ_JUST_SAVE = 220;
+    public final static short QTJ_UI_PREFERENCES = 221;
+    public final static short QTJ_GEO_TAGGING_CONF = 222;
+    public final static short QTJ_MAX_IMG_NO = 223;
+    public final static short QTJ_RESOLUTIONS = 224;
+    public final static short QTJ_DEFAULT = 225;
+    public final static short QTJ_HIGH_CONTRAST = 226;
+    public final static short QTJ_CUSTOM = 227;
+    public final static short QTJ_STYLES = 228;
+
 
     public static String phoneLang = System.getProperty("microedition.locale");
 
@@ -307,7 +345,7 @@ public class Local {
                 // open resource file depending on the localisation language
                 InputStream is = loc.getClass().getResourceAsStream("/resources/text/lang."+phoneLang.substring(0,2));
                 if( is == null )
-                    is = loc.getClass().getResourceAsStream("/resources/text/lang.xx");
+                    is = loc.getClass().getResourceAsStream("/resources/text/lang.en");
 
                 if (is == null)
                     return "X";

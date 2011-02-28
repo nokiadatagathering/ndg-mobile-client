@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Graphics;
@@ -13,8 +9,6 @@ import com.sun.lwuit.List;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.list.ListCellRenderer;
-import com.sun.lwuit.plaf.Style;
-import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
@@ -22,17 +16,14 @@ import com.sun.lwuit.plaf.UIManager;
  */
 public class MenuCellRenderer extends Label implements ListCellRenderer, Painter{
 
-    private Style commandStyle;
-    private int menuFgColor, commandFgColor, endColor, startColor, borderColor;
+    private BGPainter bgPainter;
 
     public MenuCellRenderer() {
-        commandStyle = UIManager.getInstance().getComponentStyle("Command");
-        setStyle(commandStyle);
-        menuFgColor = UIManager.getInstance().getComponentStyle("Menu").getFgColor();
-        commandFgColor = UIManager.getInstance().getComponentStyle("Command").getFgColor();
-        endColor = UIManager.getInstance().getComponentStyle("").getFgColor();
-        startColor = commandStyle.getBgSelectionColor();
-        borderColor = UIManager.getInstance().getComponentStyle("Menu").getBgColor();
+        bgPainter = new BGPainter();
+        if(com.sun.lwuit.Display.getInstance().isTouchScreenDevice()) {
+            getStyle().setPadding(10, 10, 0, 0);
+            getSelectedStyle().setPadding(10, 10, 0, 0);
+        }
     }
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
@@ -43,12 +34,14 @@ public class MenuCellRenderer extends Label implements ListCellRenderer, Painter
         }
         if (isSelected) {
             setFocus(true);
-            getStyle().setFgColor(menuFgColor);
+            getStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.selectedFontColor );
+            getStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.selectedFont );
             getStyle().setBgPainter(this);
         } else {
-            getStyle().setFgColor(commandFgColor);
+            getStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
+            getStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
             setFocus(false);
-            getStyle().setBgPainter(null);
+            getStyle().setBgPainter(bgPainter);
         }
         return this;
     }
@@ -64,7 +57,12 @@ public class MenuCellRenderer extends Label implements ListCellRenderer, Painter
     public void paint(Graphics g, Rectangle rect) {
         int width = rect.getSize().getWidth();
         int height = rect.getSize().getHeight();
+
+        int startColor = NDGStyleToolbox.getInstance().menuStyle.bgSelectedStartColor;
+        int endColor = NDGStyleToolbox.getInstance().menuStyle.bgSelectedEndColor;
         g.fillLinearGradient(startColor, endColor, rect.getX(), rect.getY(), width, height, false);
+
+        int borderColor = NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor;
         g.setColor(borderColor);
         g.fillRect(rect.getX(), rect.getY(), 1, 1);
         g.fillRect(rect.getX()+width-1, rect.getY(), 1, 1);
@@ -72,4 +70,11 @@ public class MenuCellRenderer extends Label implements ListCellRenderer, Painter
         g.fillRect(rect.getX()+width-1, rect.getY()+height-1, 1, 1);
     }
 
+    class BGPainter implements Painter {
+
+        public void paint(Graphics g, Rectangle rect) {
+            g.setColor(NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor);
+            g.fillRect(rect.getX(), rect.getY(), rect.getSize().getWidth(),rect.getSize().getHeight());
+        }
+    }
 }

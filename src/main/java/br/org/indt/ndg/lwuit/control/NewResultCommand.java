@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
@@ -42,19 +37,17 @@ public class NewResultCommand extends CommandControl {
             try {
                 try { Thread.sleep(200); } catch(Exception e){}
                 AppMIDlet.getInstance().getFileStores().resetQuestions();
-                AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time used to create new survey
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(false);
-
                 AppMIDlet.getInstance().getFileStores().resetResultStructure();
+                
                 SurveysControl.getInstance().reset();
                 SurveysControl.getInstance().resetQuestion();//this is from refactoring IV
 
-
-                AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getInterviewForm());
+                AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time used to create new survey
+                AppMIDlet.getInstance().showInterview();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-
 }

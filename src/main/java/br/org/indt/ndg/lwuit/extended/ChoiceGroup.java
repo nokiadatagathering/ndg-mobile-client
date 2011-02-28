@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.extended;
 
 import com.sun.lwuit.ButtonGroup;
@@ -38,8 +33,8 @@ public class ChoiceGroup extends Container implements ActionListener {
     private ChoiceGroup() {
         super(new BoxLayout(BoxLayout.Y_AXIS));
         getStyle().setBgTransparency(255); // no transparency = solid
-        getStyle().setBorder(Border.createRoundBorder(8, 8, UIManager.getInstance().getComponentStyle("CheckBox").getFgColor()));
-        Style tfStyle = UIManager.getInstance().getComponentStyle("TextField");
+        getStyle().setBorder(Border.createRoundBorder(8, 8, UIManager.getInstance().getComponentStyle("RadioButton").getFgColor()));
+        Style tfStyle = getStyle();
         getStyle().setMargin(tfStyle.getMargin(Component.TOP), tfStyle.getMargin(Component.BOTTOM), tfStyle.getMargin(Component.LEFT), tfStyle.getMargin(Component.RIGHT));
         getStyle().setPadding(tfStyle.getPadding(Component.TOP), tfStyle.getPadding(Component.BOTTOM), tfStyle.getPadding(Component.LEFT), tfStyle.getPadding(Component.RIGHT));
     }
@@ -147,5 +142,14 @@ public class ChoiceGroup extends Container implements ActionListener {
 
     public void setItemFocused(int i) {
         choices[i].requestFocus();
+    }
+
+    public void setVisible( boolean visible ) {
+        if (choices != null) {
+            for (int i = 0; i < choices.length; i++) {
+                choices[i].setVisible(visible);
+            }
+        }
+        super.setVisible(visible);
     }
 }

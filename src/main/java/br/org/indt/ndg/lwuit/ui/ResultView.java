@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.Resources;
@@ -16,11 +11,13 @@ import br.org.indt.ndg.lwuit.extended.TimeField;
 import br.org.indt.ndg.lwuit.model.Answer;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
+import br.org.indt.ndg.lwuit.model.ImageAnswer;
+import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.NumberAnswer;
 import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
-import br.org.indt.ndg.mobile.multimedia.Picture;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -31,6 +28,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.layouts.GridLayout;
 import com.sun.lwuit.plaf.UIManager;
 import java.util.Date;
 import java.util.Vector;
@@ -43,9 +41,9 @@ public class ResultView extends Screen implements ActionListener {
 
     private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;
-    private Font categoryFont = Screen.getRes().getFont("NokiaSansWide14Bold");
-    private Font questionFont = Screen.getRes().getFont("NokiaSansWideItalic14");
-    private Font answerFont = Screen.getRes().getFont("NokiaSansWide14");
+    private Font categoryFont = NDGStyleToolbox.fontMediumBold;
+    private Font questionFont = NDGStyleToolbox.fontMediumItalic;
+    private Font answerFont = NDGStyleToolbox.fontMedium;
     private Survey survey;
     int labelheight = 18;
     int labelheightspace = 8;
@@ -65,36 +63,35 @@ public class ResultView extends Screen implements ActionListener {
 
     protected void customize() {
 
-        int focusableRange = 9;//default value for 240 height
-        if (form.getHeight() == 320)
-            focusableRange = 14;  
-
         form.removeAllCommands();
         form.removeAll();
-        
+
         form.setCyclicFocus(false);
-        
+
         form.addCommand(BackResultViewCommand.getInstance().getCommand());
         form.addCommand(SendResultCommand.getInstance().getCommand());
         form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
         form.addCommand(OpenResultCommand.getInstance().getCommand());
         form.setSmoothScrolling(true);
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
         setTitle(title1, title2);
+        form.setSmoothScrolling(true);
 
         Category[] categories = survey.getCategories();
-        int countFocusable = focusableRange; //first item is focusable
         int length = categories.length;
         for (int i=0; i < length; i++) {
             Category category = categories[i];
             Label labelCategory = new Label(category.getName());
             labelCategory.getStyle().setFont(categoryFont);
+            labelCategory.setSelectedStyle( labelCategory.getUnselectedStyle() );
             setPreferredHeight(labelCategory, labelheight);
-            if (countFocusable == focusableRange) {
-                labelCategory.setFocusable(true);
-                countFocusable = 0;
-            }
-            countFocusable++;
+
             form.addComponent(labelCategory);
             NDGQuestion[] questions = category.getQuestions();
             int size = questions.length;
@@ -108,20 +105,10 @@ public class ResultView extends Screen implements ActionListener {
                 container.addComponent(componentQuestion);
                 container.addComponent(componentAnswer);
                 form.addComponent(container);
-                countFocusable++;
-                if (countFocusable == focusableRange) {
-                    container.setFocusable(true);
-                    countFocusable = 1;
-                }
             }
             Label space = new Label(" ");
             setPreferredHeight(space, labelheightspace);
             form.addComponent(space);
-            countFocusable++;
-            if ((countFocusable == focusableRange)||(i == categories.length-1)) {
-                space.setFocusable(true);
-                countFocusable = 1;
-            }
         }
     }
 
@@ -129,13 +116,29 @@ public class ResultView extends Screen implements ActionListener {
         Component componentAnswer = null;
         Answer answer = question.getAnswer();
         if (question.getType().equals("_img")) {
-            byte[] image = (byte[]) question.getAnswer().getValue();
-            if (image != null) {
-                Picture picture = Picture.createPicture(image);
-                componentAnswer = new Label(picture.getThumbnail());
-            } else {
-                componentAnswer = new Label("");
+            // calculate columns count based on screen width in portrait orientation
+            int width = Math.min(form.getWidth(), form.getHeight());
+            int columns = (int)(width/ImageData.THUMBNAIL_SIZE);
+            Vector images = ((ImageAnswer)(answer)).getImages();
+            // calculate rows count based on images and columns count
+            int imgCount = images.size();
+            int rows = (imgCount%columns == 0? 0 : 1) + imgCount/columns;
+            rows = Math.max(rows, 1); // in case of empty picture list
+            columns = Math.max(columns, 1); // in case of empty picture list
+            Container imgContainer = new Container (new GridLayout(rows, columns));
+            for ( int imgIndex = 0; imgIndex < imgCount; imgIndex++ )
+            {
+                ImageData image = ((ImageData)images.elementAt(imgIndex));
+                Component imgComponenet = null;
+                if (image != null && image.getThumbnail() != null) {
+                    imgComponenet = new Label(image.getThumbnail());
+                } else { // empty label for null images (should not happen)
+                    imgComponenet = new Label(Screen.getRes().getImage("camera-icon"));
+                }
+                imgComponenet.setSize(new Dimension(ImageData.THUMBNAIL_SIZE,ImageData.THUMBNAIL_SIZE));
+                imgContainer.addComponent(imgComponenet);
             }
+            componentAnswer = imgContainer;
         } else {
             if(question.getType().equals("_choice")){
                 ChoiceQuestion cquestion = (ChoiceQuestion) question;
@@ -187,7 +190,7 @@ public class ResultView extends Screen implements ActionListener {
                 }else{
                    tfDate = new TimeField(TimeField.HHMM1);
                 }
-                long timelong = Long.parseLong((String)question.getAnswer().getValue());                     
+                long timelong = Long.parseLong((String)question.getAnswer().getValue());
                 tfDate.setTime(new Date(timelong));
                 String convention = "";
 
@@ -223,25 +226,24 @@ public class ResultView extends Screen implements ActionListener {
 
         private TextArea createWrappedTextArea(String name, Font font) {
         TextArea item = new TextArea();
-        item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
+        item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        item.setSelectedStyle( item.getUnselectedStyle() );
         item.getStyle().setFont(font);
         item.setEditable(false);
-        item.setFocusable(true);
+        item.setFocusable(false);
         item.setColumns(20);
-        item.setRows(1);
-        item.setGrowByContent(false);
+        item.setGrowByContent(true);
         item.setText(name);
 
+        // code below seems uncecessary
         int pw = Display.getInstance().getDisplayWidth();
         int w = item.getStyle().getFont().stringWidth(name);
         if (w > pw)
         {
-            item.setGrowByContent(true);
             item.setRows(2);
         }
         else
         {
-            item.setGrowByContent(false);
             item.setRows(1);
         }
         return item;

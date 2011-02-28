@@ -1,48 +1,98 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.extended;
 
+import br.org.indt.ndg.lwuit.ui.MenuCellRenderer;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Display;
+import com.sun.lwuit.plaf.Style;
+import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
  * @author mluz
  */
 public class Form extends com.sun.lwuit.Form {
+    final static int MIN_MARGIN = 30;
+    final static int LEFT_MARGIN_OFFSET = 10;
 
     protected Command showMenuDialog(Dialog menu) {
-        int minMargin = 30;
-        int width = 224; // 320px width screen
-        int width2 = 180; // 240px width screen
-        int formWidth = Form.this.getWidth();
-        int formHeight = Form.this.getHeight();
+        menu.getDialogStyle().setBgColor(NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor);
 
-        int marginLeft = (formWidth > (width + minMargin)) ? (formWidth - width) /2 : (formWidth - width2)/2;
-        int marginRight = marginLeft;
+        int marginW = calculateMarginW(menu);
+        marginW = marginW < MIN_MARGIN ? MIN_MARGIN : marginW;
 
-        //int calcHeight = 31 * getCommandCount()
+        int marginH = calculateMarginH( menu );
+        marginH = marginH < 0 ? 0 :marginH;
 
-        //int height = 59; // for 4 commands height
-        //int height = 60 + 59; // for 3 cmds height
-
-        //int height = 116 + 59;
-        int sun = 0;
-        int commandCount = getCommandCount();
-        if (commandCount == 3)
-            sun = 60;
-        if (commandCount == 4)
-            sun = 31;
-        int height = 59 + sun;
-        int height2 = 59 + 80 + sun;
-
-        int top = (formHeight == 240) ? height : height2;
-
-        return menu.show(top,0, marginLeft, marginRight, true);
+        return menu.show( marginH,0, LEFT_MARGIN_OFFSET, marginW - LEFT_MARGIN_OFFSET, true );
     }
 
+    private int calculateMarginW( Dialog menuDialog ) {
+         String longestDesc = "";
+         for ( int i = 0; i< getCommandCount(); i++ ) {
+             String description = getCommand(i).getCommandName();
+             longestDesc = description.length() < longestDesc.length() ? longestDesc : description;
+         }
+         Style style = UIManager.getInstance().getComponentStyle("Command");
+         int commandGap = 0;
+         if ( style != null ) {
+             commandGap = style.getMargin(Component.LEFT)
+                        + style.getMargin(Component.RIGHT)
+                        + style.getPadding(Component.LEFT)
+                        + style.getPadding(Component.RIGHT);
+         }
+         //there is no wey to get cell renderer from form
+         //creating temporary one to calculete margins and offsets
+         MenuCellRenderer mcr = new MenuCellRenderer();
 
+         return Display.getInstance().getDisplayWidth() - menuDialog.getStyle().getMargin(Component.LEFT)
+                                                        - menuDialog.getStyle().getMargin(Component.RIGHT)
+                                                        - menuDialog.getStyle().getPadding(Component.LEFT)
+                                                        - menuDialog.getStyle().getPadding(Component.RIGHT)
+                                                        - mcr.getStyle().getMargin(Component.LEFT)
+                                                        - mcr.getStyle().getMargin(Component.RIGHT)
+                                                        - mcr.getStyle().getPadding(Component.LEFT)
+                                                        - mcr.getStyle().getPadding(Component.RIGHT)
+                                                        - NDGStyleToolbox.getInstance().menuStyle.selectedFont.stringWidth( longestDesc )
+                                                        - getSideGap()
+                                                        - menuDialog.getSideGap()
+                                                        - commandGap
+                                                        - 10;
+    }
+
+    private int calculateMarginH( Dialog menuDialog ) {
+         //there is no way to get cell renderer from form
+         //creating temporary one to calculete margins and offsets
+        MenuCellRenderer rendererItem = new MenuCellRenderer();
+        int itemTopMargin = rendererItem.getStyle().getMargin(Component.TOP);
+        int itemBottonMargin = rendererItem.getStyle().getMargin(Component.BOTTOM);
+        int itemTopPadding = rendererItem.getStyle().getPadding(Component.TOP);
+        int itemBottonPadding = rendererItem.getStyle().getPadding(Component.BOTTOM);
+        int fontHigh = NDGStyleToolbox.getInstance().menuStyle.selectedFont.getHeight();//this font is used in cell
+
+        List list = new List();
+        Style style = list.getStyle();
+        int listGap = 0;
+        if ( style != null ) {
+            listGap = style.getMargin(Component.LEFT)
+                    + style.getMargin(Component.RIGHT)
+                    + style.getPadding(Component.LEFT)
+                    + style.getPadding(Component.RIGHT)
+                    + getCommandCount() * list.getItemGap()
+                    + 2 * list.getBorderGap();
+        }
+        return  Display.getInstance().getDisplayHeight() - menuDialog.getStyle().getMargin( Component.TOP )
+                                                         - menuDialog.getStyle().getMargin( Component.BOTTOM )
+                                                         - menuDialog.getStyle().getPadding( Component.BOTTOM )
+                                                         - menuDialog.getStyle().getPadding( Component.TOP )
+                                                         - Display.getInstance().getCurrent().getSoftButton(0).getPreferredH()
+                                                         - getCommandCount() * ( fontHigh
+                                                                                + itemTopMargin
+                                                                                + itemBottonMargin
+                                                                                + itemTopPadding
+                                                                                + itemBottonPadding)
+                                                         - listGap;
+    }
 }

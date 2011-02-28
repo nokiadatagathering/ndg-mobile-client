@@ -1,13 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.BackSimpleLocationCommand;
 import br.org.indt.ndg.lwuit.control.OkSimpleLocationCommand;
-import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.TextArea;
@@ -32,13 +27,19 @@ public class SimpleLocation extends Screen implements ActionListener {
         form.removeAllCommands();
         form.addCommand(BackSimpleLocationCommand.getInstance().getCommand());
         form.addCommand(OkSimpleLocationCommand.getInstance().getCommand());
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
 
         setTitle(title1, title2);
         questionName = new TextArea(5,20);
         questionName.setText(strText);
-        questionName.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-        questionName.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+        questionName.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        questionName.getStyle().setFont(NDGStyleToolbox.fontSmall);
         questionName.setRows(questionName.getLines()-1);
         questionName.setEditable(false);
         questionName.setFocusable(false);
@@ -75,7 +76,5 @@ public class SimpleLocation extends Screen implements ActionListener {
                 }
             }
         }
-
     }
-
 }

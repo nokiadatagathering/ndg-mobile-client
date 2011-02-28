@@ -16,6 +16,7 @@ public abstract class Screen {
     private static Resources res;
 
     protected Form form;
+    private TitleBar titlebar;
 
     static Hashtable screens = new Hashtable();
 
@@ -55,6 +56,8 @@ public abstract class Screen {
 
         s.loadData();
         s.customize();
+        s.form.refreshTheme();
+        s.form.getTitleStyle().setBgPainter(s.titlebar);
 
         if (WaitingScreen.isShowed())
             WaitingScreen.dispose();
@@ -82,9 +85,9 @@ public abstract class Screen {
     }
 
     final void setTitle(String title1, String title2) {
-        form.getTitleStyle().setBgPainter(new TitleBar(title1, title2));
+        titlebar.setTitle1(title1);
+        titlebar.setTitle2(title2);
         form.setTitle(" ");
-
     }
 
     private final void show() {
@@ -94,11 +97,11 @@ public abstract class Screen {
 
     protected final void createScreen() {
         form = new Form();
-        
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-
+        titlebar = new TitleBar( " ", " " );
         MenuCellRenderer mlcr = new MenuCellRenderer();
         form.setMenuCellRenderer(mlcr);
+        form.getMenuStyle().setFont( UIManager.getInstance().getComponentStyle("Command").getFont());
     }
 
 

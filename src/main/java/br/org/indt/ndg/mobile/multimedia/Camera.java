@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.mobile.multimedia;
 
 import br.org.indt.ndg.mobile.logging.Logger;
@@ -45,7 +40,7 @@ public class Camera {
             player.realize();
             vc = (VideoControl) player.getControl("VideoControl");
             mediaComp = new MediaComponent(player);
-            mediaComp.setFullScreen(true);
+            mediaComp.setFullScreen(false);
             player.start();
             init = true;
         } catch (IOException ex) {
@@ -82,14 +77,6 @@ public class Camera {
                 Logger.getInstance().logException("General exception: " + e.getMessage());
             }
         }
-    }
-
-    /**
-     *
-     * @return the last picture or null, if there is none.
-     */
-    public byte[] getLastPictureTaken(){
-        return imageData;
     }
 
     public byte[] takePicture(int width, int height){
@@ -161,11 +148,10 @@ public class Camera {
         return thumb;
     }
 
-
-        /**
-     * @deprecated only for use with LWUIT
-     * @return
-     */
+    /**
+    * @deprecated only for use with LWUIT
+    * @return
+    */
     public MediaComponent getViewFinderLWUIT(){
         if(!init){
             initCamera();

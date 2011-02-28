@@ -5,22 +5,21 @@ import java.io.PrintStream;
 import br.org.indt.ndg.mobile.Resources;
 
 public class SettingsStructure {
-    
-   
     private String server_normal_url = null;
     private String server_compress_url = null;
     private String receive_survey_url;
     private boolean compress_state = false;
     
     private int splash_time = Resources.splashCountdown; //just set default
-    private int agree_flag = 1; //just set default
+    private int isRegistered_flag = 1; //just set default
     
     private boolean gps_configured = false;
+    private boolean geoTagging_configured = false;
     
+    private int selectedResolution = 0;
+    private PhotoSettings photoSettings = new PhotoSettings();
+    private int selectedStyle = 0;
 
-    private boolean categoriesEnabled = false;
-    
-    
     private boolean logSupport = false;
     private String language = "";
     private String appVersion = "";
@@ -51,12 +50,12 @@ public class SettingsStructure {
         else _out.println("no\"/>");
     }
 
-    public void writeCategoryEnableSettings(PrintStream _out) {
-        _out.print("<categoryView enabled=\"");
-        if (categoriesEnabled) _out.println("yes\"/>");
+    public void writeGeoTaggingSettings(PrintStream _out) {
+        _out.print("<geotagging configured=\"");
+        if (geoTagging_configured) _out.println("yes\"/>");
         else _out.println("no\"/>");
     }
-       
+
     void writeLogSettings(PrintStream _out) {
         String strLogSupport = logSupport ? "yes" : "no";
         _out.println("<log active=\"" + strLogSupport + "\"" + "/>");
@@ -64,6 +63,18 @@ public class SettingsStructure {
     
     void writeVersionSettings(PrintStream _out) {
         _out.println("<version application=\"" + appVersion + "\"/>");
+    }
+    
+    void writePhotoResolutionSettings(PrintStream output) {
+        output.print("<photoResolution configId=\"");
+        output.print( String.valueOf(selectedResolution) );
+        output.println( "\"/>" );
+    }
+
+    void writeStyleSettings(PrintStream output) {
+        output.print("<style id=\"");
+        output.print( String.valueOf(selectedStyle) );
+        output.println( "\"/>" );
     }
     
     void setLogSupport(boolean _logSupport) {
@@ -104,7 +115,7 @@ public class SettingsStructure {
     public String getUpdateCheckURL() {
         return update_check_url;
     }
-        
+
     public void setServerCompression(boolean _state) { compress_state = _state; }
     public boolean getServerCompression() { return compress_state; }
     
@@ -129,8 +140,8 @@ public class SettingsStructure {
         this.register_imei_url = url;
     }
     
-    public void setAgreeFlag(int _flag) { agree_flag = _flag; }
-    public int getAgreeFlag() { return agree_flag; }
+    public void setRegisteredFlag(int _flag) { isRegistered_flag = _flag; }
+    public int getRegisteredFlag() { return isRegistered_flag; }
 
     public void setSplashTime(int _time) { splash_time = _time; }
     public int getSplashTime() { return splash_time; }
@@ -138,13 +149,24 @@ public class SettingsStructure {
     public void setGpsConfigured(boolean _state) { gps_configured = _state; }
     public boolean getGpsConfigured() { return gps_configured; }
 
+    public void setGeoTaggingConfigured(boolean _state) { geoTagging_configured = _state; }
+    public boolean getGeoTaggingConfigured() { return geoTagging_configured; }
 
-    public boolean getCategoriesEnabled() {
-        return categoriesEnabled;
+    public void setPhotoResolutionId(int _resConf ) { selectedResolution = _resConf; }
+    public int getPhotoResolutionId() { return selectedResolution; }
+
+    public void setStyleId(int styleId ) { selectedStyle = styleId; }
+    public int getStyleId() { return selectedStyle; }
+
+    public int getPhotoX( ) {
+        return photoSettings.getX( selectedResolution );
     }
 
-    public void setCategoriesEnabled(boolean enabled) {
-        categoriesEnabled = enabled;
+    public int getPhotoY( ) {
+        return photoSettings.getY( selectedResolution );
     }
 
+    public String[] getResolutionList() {
+        return photoSettings.getResolutionList();
+    }
 }

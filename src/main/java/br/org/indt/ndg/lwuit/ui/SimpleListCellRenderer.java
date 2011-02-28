@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.List;
@@ -30,36 +26,30 @@ abstract class SimpleListCellRenderer extends DefaultNDGListCellRenderer {
         if (isSelected) {
             setFocus(true);
             label.setFocus(true);
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-            styleContainer.setBgPainter(focusBGPainter);
+            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+            getStyle().setBgPainter(focusBGPainter);
         } else {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
+            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             setFocus(false);
             label.setFocus(false);
-            styleContainer.setBgPainter(bgPainter);
+            getStyle().setBgPainter(bgPainter);
         }
         
         if(!contains(label))
             addComponent(BorderLayout.CENTER, label);
         
-
         return this;
     }
 
     public Component getListFocusComponent(List list) {
         label.setText(" ");
         label.setFocus(true);
-
-        styleContainer.setBgPainter(focusBGPainter);
         this.setFocus(true);
-
         return this;
     }
 
     protected Label getLabel(DisplayableModel disp){
         Label l = new Label(disp.getDisplayableName());
-        l.setStyle(styleLabel);        
         return l;
     }
-
 }

@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.extended;
 
+import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Component;
@@ -55,6 +51,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         addFocusListener(this);
         this.dateFormat = dateFormat;
         setDate(date);
+        setUseSoftkeys(false);      //we don't need T9 for numeric field, do we?
     }
 
     public void setDate(Date date) {
@@ -122,21 +119,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
     
     private String formatDate() {
         return dateFields[0] + separator + dateFields[1] + separator + dateFields[2];
-    }
-
-    protected Command installCommands(Command clear, Command t9) {
-        Form f = getComponentForm();
-        Command[] originalCommands = new Command[f.getCommandCount()];
-        for(int iter = 0 ; iter < originalCommands.length ; iter++) {
-            originalCommands[iter] = f.getCommand(iter);
-        }
-        Command retVal = super.installCommands(clear, t9);
-        f.removeAllCommands();
-        for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
-            f.addCommand(originalCommands[iter]);
-        }
-        return retVal;
-    }
+    }    
 
     private char convertToNumber(char c) {
         if (!(c >= '0' && c <= '9')) {
@@ -166,17 +149,14 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         } else return c;
     }
 
-    protected void deleteChar() {
+    public void deleteChar() {
         // to do here backspace handle key
     }
 
     public void dataChanged(int type, int index) {
-        if (type == 0) {
-            // to do here backspace handle key
-        }
-        if (type == 1) {
+        if (type == DataChangedListener.ADDED) {
             if (selectMode) {
-                char c = getText().charAt(index-1);
+                char c = getText().charAt(index);
                 c = convertToNumber(c);
                 if (c == '\0') {
                     setField(getFieldSelected(), getField(getFieldSelected()));
@@ -206,7 +186,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
                 }
             } else {
                 if (dateFormat == DDMMYYYY || dateFormat == MMDDYYYY) {
-                    char c = getText().charAt(index-1);
+                    char c = getText().charAt(index);
                     c = convertToNumber(c);
                     if (c == '\0') {
                         setField(getFieldSelected(), getField(getFieldSelected()));
@@ -253,6 +233,8 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
                     }
                 }
             }
+        }  else if (type == DataChangedListener.REMOVED || type == DataChangedListener.CHANGED) {
+            // do nothing
         }
     }
 

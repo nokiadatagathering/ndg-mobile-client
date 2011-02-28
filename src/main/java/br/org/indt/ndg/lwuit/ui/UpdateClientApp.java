@@ -1,12 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelUpdateClientAppCommand;
-import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
@@ -26,17 +20,16 @@ public class UpdateClientApp extends Screen implements ActionListener {
 
 
     protected void loadData() {
-        strText1 = "Check for Update";//SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText1();
-        strText2 = Resources.CONNECTING;//SurveysControl.getInstance().getCurrentOldUpdateClientApp().getFormContentText2();
+        strText1 = Resources.CHECK_FOR_UPDATE_TITLE;
+        strText2 = Resources.CONNECTING;
 
         if (firstcreation) {
             item = new TextArea(3,20);
-            item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-            item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+            item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
             item.setEditable(false);
             item.setFocusable(false);
 
-            image = Screen.getRes().getAnimation("wait2");
+            image = Screen.getRes().getImage("wait2");
             l = new Label(image);
             l.setAlignment(Component.CENTER);
             firstcreation = false;
@@ -54,7 +47,13 @@ public class UpdateClientApp extends Screen implements ActionListener {
 
         form.addCommand(CancelUpdateClientAppCommand.getInstance().getCommand());
         
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -63,5 +62,4 @@ public class UpdateClientApp extends Screen implements ActionListener {
             CancelUpdateClientAppCommand.getInstance().execute(null);
         }
     }
-
 }

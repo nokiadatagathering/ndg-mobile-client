@@ -6,9 +6,8 @@ import java.io.IOException;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Image;
 
-public class Resources {          
+public class Resources {
     /** Internationalized Resources */
-
 
     //****************************************************************************
     // TO BE INTERNATIONALIZED
@@ -30,7 +29,7 @@ public class Resources {
     public static final String NEWUI_DELETE_CURRENT_RESULT = Local.getText(Local.QTJ_CMD_DELETE);
     public static final String NEW_IU_OK = Local.getText(Local.QTJ_CMD_OK);
     //****************************************************************************
-    
+
     public static final String DELETE_SURVEY = Local.getText(Local.QTJ_CMD_DELETE_SURVEY);
     public static final String CHECK_NEW_SURVEYS = Local.getText(Local.QTJ_CHECK_NEW_SURVEYS);
     public static final String DOWNLOAD = Local.getText(Local.QTJ_CMD_DOWNLOAD);
@@ -44,7 +43,7 @@ public class Resources {
     public static final String CMD_DELETE = Local.getText(Local.QTJ_CMD_DELETE);
     public static final String CMD_SAVE = Local.getText(Local.QTJ_CMD_SAVE);
     public static final String CMD_VIEW = Local.getText(Local.QTJ_CMD_VIEW);
-   
+
     public static final String QUESTION_LIST_TITLE = Local.getText(Local.QTJ_QUESTION_LIST_TITLE);
     public static final String RESULTS_LIST_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_TITLE);
     public static final String SUBMIT_LIST_TITLE = Local.getText(Local.QTJ_SUBMIT_LIST_TITLE);
@@ -53,9 +52,7 @@ public class Resources {
     public static final String SURVEY_LIST_TITLE = Local.getText(Local.QTJ_SURVEY_LIST_TITLE);
     public static final String QUESTIONS = Local.getText(Local.QTJ_QUESTIONS);
     public static final String QUESTION = Local.getText(Local.QTJ_QUESTION);
-    
-    
-    
+
     public static final String RANGE = Local.getText(Local.QTJ_RANGE);
     public static final String LARGE = Local.getText(Local.QTJ_LARGE);
     public static final String MEDIUM = Local.getText(Local.QTJ_MEDIUM);
@@ -69,7 +66,7 @@ public class Resources {
     
     public static final String SUBMIT_SERVER = Local.getText(Local.QTJ_SUBMIT_SERVER);
     public static final String SUBMIT_FILE = Local.getText(Local.QTJ_SUBMIT_FILE);
-    
+
     //these strings are for custom widgets bool1 & bool2
     public static final String YES = Local.getText(Local.QTJ_YES);
     public static final String NO = Local.getText(Local.QTJ_NO);
@@ -80,10 +77,10 @@ public class Resources {
     
     public static final String MALE = Local.getText(Local.QTJ_MALE);
     public static final String FEMALE = Local.getText(Local.QTJ_FEMALE);
-    
+
     public static final String APPNAME = Local.getText(Local.QTJ_APPNAME);
     public static final String CATEGORY = Local.getText(Local.QTJ_CATEGORY);
-    
+
     public static final String LOADING_SURVEYS = Local.getText(Local.QTJ_LOADING_SURVEY);
     public static final String PROCESSING = Local.getText(Local.QTJ_PROCESSING);
     public static final String WAIT = Local.getText(Local.QTJ_WAIT);
@@ -178,32 +175,71 @@ public class Resources {
     public static final String CATEGORYVIEW = Local.getText(Local.QTJ_CATEGORYVIEW);
     public static final String NOTPROPERINTEGER = Local.getText(Local.QTJ_NOTPROPERINTEGER);
     public static final String NOTPROPERDECIMAL= Local.getText(Local.QTJ_NOTPROPRDECIMAL);
+    public static final String RESTORE_DEFAULT = Local.getText(Local.QTJ_RESTORE_DEFAULT);
+    public static final String RELOAD = Local.getText(Local.QTJ_RELOAD);
+    public static final String UI_SETTINGS = Local.getText(Local.QTJ_UI_SETTINGS);
+    public static final String APPLY = Local.getText(Local.QTJ_APPLY);
+    public static final String LOADING_STYLE = Local.getText(Local.QTJ_LOADING_STYLE);
+    public static final String LOADING_STYLE_ERROR = Local.getText(Local.QTJ_LOADING_STYLE_ERROR);
+    public static final String UI_CUSTOMIZE = Local.getText( Local.QTJ_UI_CUSTOMIZE );
+    public static final String SELECTED = Local.getText( Local.QTJ_SELECTED);
+    public static final String UNSELECTED = Local.getText( Local.QTJ_UNSELECTED);
+    public static final String PREVIEW = Local.getText( Local.QTJ_PREVIEW );
+    public static final String ELEMENT = Local.getText( Local.QTJ_ELEMENT );
+    public static final String OBJECT = Local.getText( Local.QTJ_OBJECT );
+    public static final String LIST = Local.getText( Local.QTJ_LIST );
+    public static final String MENU = Local.getText( Local.QTJ_MENU );
+    public static final String DIALOG_TITLE = Local.getText( Local.QTJ_DIALOG_TITLE );
+    public static final String BG_SELECTED = Local.getText( Local.QTJ_BG_SELECTED );
+    public static final String BG_UNSELECTED = Local.getText( Local.QTJ_BG_UNSELECTED );
+    public static final String FONT_SELECTED = Local.getText( Local.QTJ_FONT_SELECTED );
+    public static final String FONT_UNSELECTED = Local.getText( Local.QTJ_FONT_UNSELECTED );
+    public static final String ACCESS_DENIED = Local.getText( Local.QTJ_ACCESS_DENIED );
+    public static final String LOAD_FROM_FILE = Local.getText( Local.QTJ_LOAD_FROM_FILE );
+    public static final String MEMORY_OUT = Local.getText( Local.QTJ_MEMORY_OUT );
+    public static final String DEFAULT_PHOTO_DIR = Local.getText( Local.QTJ_DEFAULT_PHOTO_DIR );
 
+    public static final String CAPTURE_PHOTO = Local.getText( Local.QTJ_CAPTURE_PHOTO );
+    public static final String DELETE_PHOTO = Local.getText( Local.QTJ_DELETE_PHOTO );
+    public static final String PHOTO_RESOLUTION = Local.getText( Local.QTJ_PHOTO_RESOLUTION );
+    public static final String SHOW_PHOTO = Local.getText( Local.QTJ_SHOW_PHOTO );
+    public static final String TAKE_PHOTO = Local.getText( Local.QTJ_TAKE_PHOTO );
 
+    public static final String JUST_SAVE = Local.getText( Local.QTJ_JUST_SAVE );
+    public static final String UI_PREFERENCES = Local.getText( Local.QTJ_UI_PREFERENCES );
+    public static final String GEO_TAGGING_CONF = Local.getText( Local.QTJ_GEO_TAGGING_CONF );
+    public static final String MAX_IMG_NO = Local.getText( Local.QTJ_MAX_IMG_NO );
+    public static final String RESOLUTIONS = Local.getText( Local.QTJ_RESOLUTIONS );
+
+    public static final String DEFAULT = Local.getText( Local.QTJ_DEFAULT );
+    public static final String HIGH_CONTRAST = Local.getText( Local.QTJ_HIGH_CONTRAST );
+    public static final String CUSTOM = Local.getText( Local.QTJ_CUSTOM );
+    public static final String STYLES = Local.getText( Local.QTJ_STYLES );
 
     public static final int NOENTRY = -99999;
-    
-    /** General */   
+
+    /** General */
     //
-        
+
     //deploy wtk
     public static String ROOT_DIR_PHONE;
     public static String ROOT_DIR_CARD;
     public static String ROOT_DIR;
-    
+
     //public static final String URL_SERVLET_RESULTS = "http://200.141.73.235:8180/mobisus/PostResults";
     //public static final String URL_SERVLET_RESULTS = "http://localhost:8080/mobisus/PostResults";
-    
+
     //public static final String ENCODE_TYPE = "UTF-8";
-    
+
     public static final String SETTINGS_FILE = "settings.xml";
+    public static final String STYLE_FILE = "style.xml";
     public static final String SURVEY_NAME = "survey.xml";
     public static final String NEW_SURVEYS_LIST = "new_surveys_list.xml";
     public static final String TMP_DOWNLOAD_SURVEY = "tmp_download_survey.xml";
     public static final String XML_TAG_END_SURVEY = "</survey>";
     public static final String SURVEY = "survey";
     public static final String NDG_PROPERTIES_FILE = "ndg.properties";
-    
+
     /** Messages */
     public static final String MSG_SERVER_CANT_WRITE_RESULTS = Local.getText(Local.QTJ_MSG_SERVER_CANT_WRITE_RESULTS);
     //public static final String CONT_WITHOUT_SAVE = Local.getText(Local.CONT_WITHOUT_SAVE);
@@ -237,35 +273,32 @@ public class Resources {
     public static final String EDOWNLOAD_ACK_ERROR = Local.getText(Local.QTJ_EDOWNLOAD_ACK_ERROR);
     public static final String EINVALID_SURVEYS = Local.getText(Local.QTJ_EINVALID_SURVEYS);
     public static final String EINVALID_XML_FILE = Local.getText(Local.QTJ_EINVALID_XML_FILE);
-       
+
     public static int splashCountdown = 8000;
-    
+
     private boolean error = false;
 
-    public static Image splashLWUID;
+    public static Image splashPortrait;
+    public static Image splashLandscape;
     public static Image check;
     public static Image question;
+    public static Image logo;
 
-    public Resources() {        
+    public Resources() {
         try {
             question = Image.createImage("/resources/images/redquestion.png");
             check = Image.createImage("/resources/images/greencheck.png");
-            splashLWUID = Image.createImage("/resources/images/splashEN.jpg");
-//            if (Local.phoneLang.substring(0,2).equals("pt"))
-//                splash = Image.createImage("/resources/images/splashPT.jpg");
-//            else if (Local.phoneLang.substring(0,2).equals("es"))
-//                splash = Image.createImage("/resources/images/splashES.jpg");
-//            else 
-//                splash = Image.createImage("/resources/images/splashEN.jpg");
+            splashPortrait = Image.createImage("/resources/images/splash_screen_portrait.jpg");
+            splashLandscape = Image.createImage("/resources/images/splash_screen_landscape.jpg");
+            logo = Image.createImage("/resources/images/icon_Finlandia.png");
         } catch (IOException ex) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_IMAGES, GeneralAlert.ERROR );
         }
     }
-    
+
     public boolean getError() {
         return error;
     }
-    
 }

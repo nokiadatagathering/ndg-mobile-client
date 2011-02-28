@@ -31,6 +31,7 @@ public class ViewResultCommand extends CommandControl {
         }
         
         WaitingScreen.show(Resources.CMD_VIEW);
+        
         ViewResultRunnable vrr = new ViewResultRunnable();
         Thread t = new Thread(vrr);  //create new thread to compensate for waitingform
         t.setPriority(Thread.MIN_PRIORITY);
@@ -58,5 +59,4 @@ public class ViewResultCommand extends CommandControl {
             }
         }
     }
-
 }

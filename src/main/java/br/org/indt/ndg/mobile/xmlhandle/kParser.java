@@ -145,11 +145,14 @@ public class kParser {
         getQuestionAttributes(parser);
         
         String elemName = "";
+        Vector defaultAnswers = new Vector();
+        int itemIndex = 0;
         while (parser.nextTag() != XmlPullParser.END_TAG) {
             //Posiciona em uma tag "START". Ex: <description> <length> <item> <select> <SkipLogic>
             parser.require(XmlPullParser.START_TAG, null, null);
             elemName = parser.getName();
             String text = "";
+            String strIsDefault = "";
 
 
             if (elemName.equals("description")){
@@ -189,11 +192,19 @@ public class kParser {
             }
             else if (elemName.equals("item")) {
                 if (currentQuestion instanceof ChoiceQuestion) {
+                    strIsDefault = parser.getAttributeValue(parser.getNamespace(), "def");
                     currentOther = parser.getAttributeValue(parser.getNamespace(), "otr");
                     text = parser.nextText();
                     ((ChoiceQuestion) currentQuestion).addChoice(text);
                     ((ChoiceQuestion) currentQuestion).addOther( currentOther );
                     ((ChoiceQuestion) currentQuestion).addOthersText( text );
+                    
+                    if(strIsDefault != null && strIsDefault.compareTo("1") == 0) {
+                        defaultAnswers.addElement(new Integer(itemIndex).toString());
+                    }
+
+                    itemIndex++;
+
                 } else if (currentQuestion instanceof DescriptiveQuestion) {
                     currentOther = parser.getAttributeValue(parser.getNamespace(), "otr");
                     text = parser.nextText();
@@ -203,6 +214,12 @@ public class kParser {
             //Posiciona no fim da tag <description> <length> <item> <select> <SkipLogic>
             parser.require(XmlPullParser.END_TAG, null, elemName);
         }
+        
+        if (currentQuestion instanceof ChoiceQuestion && defaultAnswers.size() > 0 ){
+            ChoiceQuestion chQuestion = (ChoiceQuestion) currentQuestion;
+            chQuestion.setDefaultAnswers(defaultAnswers);
+        }
+        
         questions.addElement(currentQuestion);
     }
     
@@ -232,9 +249,10 @@ public class kParser {
     
     private void getQuestionAttributes(KXmlParser parser) throws Exception {
         String namespace = parser.getNamespace();
-        String field = parser.getAttributeValue(namespace, "field");
-        String direction = parser.getAttributeValue(namespace, "direction");
-        String editable = parser.getAttributeValue(namespace, "editable");
+//        not used:
+//        String field = parser.getAttributeValue(namespace, "field");
+//        String direction = parser.getAttributeValue(namespace, "direction");
+//        String editable = parser.getAttributeValue(namespace, "editable");
 
         String _type = parser.getAttributeValue(namespace, "type");
         String _id = parser.getAttributeValue(namespace, "id");
@@ -255,7 +273,7 @@ public class kParser {
             currentQuestion.setEdit(strEditable);
 
         if (_type.equals("_time")) {
-            String convention = parser.getAttributeValue(namespace, "convention");            
+            String convention = parser.getAttributeValue(namespace, "convention");
             ((TimeQuestion) currentQuestion).setConvention(convention);
         }
 
@@ -274,6 +292,18 @@ public class kParser {
                 ((NumericQuestion) currentQuestion).setLowConstraint(min);
                 ((NumericQuestion) currentQuestion).setHighConstraint(max);
             }
+        }
+        if(_type.equals("_img")){
+            String maxCount = parser.getAttributeValue(namespace, "maxCount");
+            int count = 1;
+            if ( maxCount != null ) {
+                try {
+                    count = Integer.parseInt(maxCount);
+                } catch ( NumberFormatException nex) {
+                    count = 1;
+                }
+            }
+            ((ImageQuestion)currentQuestion).setMaxCount( count < 1 ? 1 : count );
         }
     }
     

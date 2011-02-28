@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.CheckBox;
 import com.sun.lwuit.Component;
+import com.sun.lwuit.Label;
 import com.sun.lwuit.List;
 import com.sun.lwuit.layouts.BorderLayout;
 import java.util.Vector;
@@ -18,10 +15,11 @@ import java.util.Vector;
  */
 public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
 
-    protected CheckBox checkbox;
+    protected Label label;
     protected Vector checkboxes = new Vector();
     protected DisplayableModel disp;
     protected int realSize;
+    static final int TOUCH_SCREEN_VERTICAL_PADDING = 10;
 
     public CheckableListCellRenderer(int realSize) {
         super();
@@ -34,37 +32,36 @@ public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
     }
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
+        if ( list.size() == 0 ) return this;
+        
         disp = (DisplayableModel) value;
-        checkbox = getCheckBox(disp, index);
-        checkbox.setStyle(styleLabel);
-        checkbox.setVisible(true);
+        label = getCheckBox(disp, index);
+        label.setVisible(true);
         
         if (isSelected) {
             setFocus(true);
-            checkbox.setFocus(true);
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-            styleContainer.setBgPainter(focusBGPainter);
+            label.setFocus(true);
+            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+            label.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            getStyle().setBgPainter(focusBGPainter);
         } else {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
             setFocus(false);
-            checkbox.setFocus(false);
-            styleContainer.setBgPainter(bgPainter);
+            label.setFocus(false);
+            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
+            label.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            getStyle().setBgPainter(bgPainter);
         }
 
-        addComponent(BorderLayout.CENTER, checkbox);
+        addComponent(BorderLayout.CENTER, label);
 
         return this;
     }
 
     public Component getListFocusComponent(List list) {
-        if (checkbox != null) {
-            checkbox.setText(" ");
-            checkbox.setFocus(true);
-            checkbox.setVisible(false);
+        if (label != null) {
+            label.setText(" ");
         }
-        styleContainer.setBgPainter(focusBGPainter);
         this.setFocus(true);
-
         return this;
     }
 
@@ -119,7 +116,7 @@ public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
         }
     }
 
-    CheckBox getCheckBox(DisplayableModel disp, int index){
+    protected CheckBox getCheckBox(DisplayableModel disp, int index){
         CheckBox c, cBox;
         try{
             c = (CheckBox) checkboxes.elementAt(index);
@@ -131,7 +128,6 @@ public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
             c = new CheckBox(disp.getDisplayableName());
             checkboxes.addElement(c);
             return c;
-        }        
+        }
     }
-
 }

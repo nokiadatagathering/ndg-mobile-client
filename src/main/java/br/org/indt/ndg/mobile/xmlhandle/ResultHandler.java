@@ -5,10 +5,12 @@ import br.org.indt.ndg.lwuit.model.ChoiceAnswer;
 import br.org.indt.ndg.lwuit.model.DateAnswer;
 import br.org.indt.ndg.lwuit.model.DecimalAnswer;
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
+import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.model.IntegerAnswer;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.StringAnswer;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
+import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -19,6 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import java.util.Calendar;
+import javax.microedition.location.Coordinates;
 
 public class ResultHandler extends DefaultHandler {
     private ResultStructure result;
@@ -27,6 +30,7 @@ public class ResultHandler extends DefaultHandler {
     private Hashtable answers=null;
     
     private String currentOtherIndex = null;
+    private Coordinates currentCoordinates = null;
     
     public ResultHandler() {}
     
@@ -39,14 +43,8 @@ public class ResultHandler extends DefaultHandler {
     
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {        
         if (qName.equals("result")) {
-            result.setResultId(attributes.getValue(attributes.getIndex("r_id")));
-            result.setSurveyId(Integer.parseInt(attributes.getValue(attributes.getIndex("s_id"))));
-            result.setUserId(attributes.getValue(attributes.getIndex("u_id")));
-            result.setTimeTaken(Long.parseLong(attributes.getValue(attributes.getIndex("time"))));
         } else if (qName.equals("category")) {
             answers = new Hashtable();
-            result.addCatName(attributes.getValue(attributes.getIndex("name")));
-            result.addCatId(attributes.getValue(attributes.getIndex("id")));
         } else if (qName.equals("answer")) {
             String _type = attributes.getValue(attributes.getIndex("type"));
             String _id = attributes.getValue(attributes.getIndex("id"));
@@ -78,8 +76,13 @@ public class ResultHandler extends DefaultHandler {
             currentAnswer.setVisited(_visted);
         } else if (qName.equals("other")) {
             currentOtherIndex = attributes.getValue(0);
-        }
-             
+        } else if (qName.equals("img_data")) {
+            String latitude = attributes.getValue(attributes.getIndex("latitude")) ;
+            String longitude = attributes.getValue(attributes.getIndex("longitude")) ;
+            if( latitude != null && longitude != null ) {
+                currentCoordinates = new Coordinates(Double.parseDouble(latitude), Double.parseDouble(longitude), 0);
+            }
+        }    
         tagStack.push(qName);
     }
     private long timeStamp2Long(String time,long convention){
@@ -103,6 +106,11 @@ public class ResultHandler extends DefaultHandler {
             String qName = (String)tagStack.peek();
             
             if (qName.equals("str")) ((StringAnswer) currentAnswer).setValue(chars);
+            else if (qName.equals("longitude")) {
+                result.setLongitude(chars);
+            } else if (qName.equals("latitude")) {
+                result.setLatitude(chars);
+            }
             else if (qName.equals("date")) ((DateAnswer) currentAnswer).setDate(Long.parseLong(chars));
             else if (qName.equals("time")) ((TimeAnswer) currentAnswer).setTime(timeStamp2Long(chars,((TimeAnswer) currentAnswer).getAmPm24()));
             else if (qName.equals("int")) {
@@ -137,16 +145,20 @@ public class ResultHandler extends DefaultHandler {
                 //This is necessary from version 2.0 on.
                 if (qName.equals("img_data")){
                     if(chars != null && chars.length() > 0 && !chars.equals(" ") )
-                    ((ImageAnswer) currentAnswer).setValue(Base64Coder.decode(chars));
+                    {
+                        byte[] imgData = Base64Coder.decode(chars);
+                        ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(imgData, currentCoordinates) );
+                        currentCoordinates = null;
+                    }
                 }
             }
         }
     }
     
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        
+
         if (qName.equals("category")) {
-            result.addCategory(answers);
+            result.addAnswer(answers);
         } else if (qName.equals("answer")) {
             answers.put(String.valueOf(currentAnswer.getId()), currentAnswer);
         }

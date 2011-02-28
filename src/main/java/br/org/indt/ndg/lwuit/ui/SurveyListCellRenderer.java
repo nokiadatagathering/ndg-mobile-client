@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.model.DisplayableModel;
 import br.org.indt.ndg.lwuit.model.Survey;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.List;
@@ -32,20 +28,19 @@ class SurveyListCellRenderer extends SimpleListCellRenderer {
         if (isSelected) {
             setFocus(true);
             label.setFocus(true);
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-            styleContainer.setBgPainter(focusBGPainter);
+            label.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.selectedFont );
+            label.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            getStyle().setBgPainter(focusBGPainter);
         } else {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
             setFocus(false);
             label.setFocus(false);
-            styleContainer.setBgPainter(bgPainter);
+            label.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.unselectedFont );
+            label.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            getStyle().setBgPainter(bgPainter);
         }
-
         if(!contains(label))
             addComponent(BorderLayout.CENTER, label);
 
         return this;
     }
 }
-
-

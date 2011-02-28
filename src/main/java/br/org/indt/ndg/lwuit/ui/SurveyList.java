@@ -1,12 +1,13 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.DisplayCategoryViewCommand;
+import br.org.indt.ndg.lwuit.control.ResolutionSelectionViewCommand;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.CheckNewSurveysCommand;
 import br.org.indt.ndg.lwuit.control.DeleteSurveyCommand;
 import br.org.indt.ndg.lwuit.control.ExitCommand;
 import br.org.indt.ndg.lwuit.control.GPSCommand;
 import br.org.indt.ndg.lwuit.control.OpenSurveyCommand;
+import br.org.indt.ndg.lwuit.control.SelectStyleViewCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.TestConnectionCommand;
 import br.org.indt.ndg.lwuit.control.UpdateCommand;
@@ -46,12 +47,19 @@ public class SurveyList extends Screen implements ActionListener{
         form.addCommand(UpdateCommand.getInstance().getCommand());
         form.addCommand(TestConnectionCommand.getInstance().getCommand());
         form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
-        form.addCommand(DisplayCategoryViewCommand.getInstance().getCommand());
+        form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
+        form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
         form.addCommand(GPSCommand.getInstance().getCommand());
         if (surveys.length > 0)
             form.addCommand(OpenSurveyCommand.getInstance().getCommand());
 
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
 
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(surveys);
@@ -67,8 +75,8 @@ public class SurveyList extends Screen implements ActionListener{
         list.setFixedSelection(List.FIXED_NONE_CYCLIC);
         form.addComponent(list);
         form.setScrollable(false);
-
     }
+
     private int getSelectedIndex() {
         return list.getSelectedIndex() - 1;
     }
@@ -96,8 +104,10 @@ public class SurveyList extends Screen implements ActionListener{
                 DeleteSurveyCommand.getInstance().execute(new Integer(getSelectedIndex()));
             } else if (cmd == TestConnectionCommand.getInstance().getCommand()) {
                 TestConnectionCommand.getInstance().execute(null);
-            } else if ( cmd == DisplayCategoryViewCommand.getInstance().getCommand() ){
-                DisplayCategoryViewCommand.getInstance().execute(null);
+            } else if ( cmd == ResolutionSelectionViewCommand.getInstance().getCommand() ){
+                ResolutionSelectionViewCommand.getInstance().execute(null);
+            }else if ( cmd == SelectStyleViewCommand.getInstance().getCommand()) {
+                SelectStyleViewCommand.getInstance().execute(null);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +133,8 @@ public class SurveyList extends Screen implements ActionListener{
                 form.addCommand(TestConnectionCommand.getInstance().getCommand());
                 form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
                 form.addCommand(DeleteSurveyCommand.getInstance().getCommand());
-                form.addCommand(DisplayCategoryViewCommand.getInstance().getCommand());
+                form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
+                form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
                 form.addCommand(GPSCommand.getInstance().getCommand());
                 if (surveys.length > 0)
                     form.addCommand(OpenSurveyCommand.getInstance().getCommand());

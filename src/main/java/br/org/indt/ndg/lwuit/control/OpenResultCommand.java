@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
@@ -57,13 +52,11 @@ public class OpenResultCommand extends CommandControl {
                     GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
                     GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
                 } else {
-                    AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time increment used to create new survey
                     AppMIDlet.getInstance().getFileStores().loadAnswers();
-                    AppMIDlet.getInstance().setDisplayable(AppMIDlet.getInstance().getInterviewForm());
+                    AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time increment used to create new survey
+                    AppMIDlet.getInstance().showInterview();
                 }
             }
         }
     }
-
-
 }

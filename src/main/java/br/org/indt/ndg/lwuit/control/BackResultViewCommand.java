@@ -24,7 +24,9 @@ public class BackResultViewCommand extends BackCommand {
 
     protected void doAction(Object parameter) {
         AppMIDlet.getInstance().getFileStores().resetQuestions();
+        AppMIDlet.getInstance().getFileStores().resetResultStructure();
         AppMIDlet.getInstance().setResultList( new ResultList());
+        System.gc(); 
         AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 

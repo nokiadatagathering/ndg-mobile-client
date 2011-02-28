@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.camera.ViewFinderForm;
@@ -32,5 +27,4 @@ public class TakePictureAgainCommand extends CommandControl{
             instance = new TakePictureAgainCommand();
         return instance;
     }
-
 }

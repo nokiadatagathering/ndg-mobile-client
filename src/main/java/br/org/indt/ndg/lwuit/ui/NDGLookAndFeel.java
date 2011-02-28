@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.extended.DateField;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
@@ -88,7 +84,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
         if (df.isSelectMode() && df.getFieldSelected() == 1 && df.hasFocus() && df.isFocusPainted()) {
             setFG(g, df);
             g.fillRect(xString-1, yString, f.stringWidth(field1)+2, f.getHeight());
-            g.setColor(df.getStyle().getBgSelectionColor());
+            //DF:g.setColor(df.getStyle().getBgSelectionColor());
+            g.setColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
         } else
             setFG(g, df);
         g.drawString(field1, xString, yString);
@@ -103,7 +100,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
         if (df.isSelectMode() && df.getFieldSelected() == 2 && df.hasFocus() && df.isFocusPainted()) {
             setFG(g, df);
             g.fillRect(xString-1, yString, f.stringWidth(field2)+2, f.getHeight());
-            g.setColor(df.getStyle().getBgSelectionColor());
+            //DF:g.setColor(df.getStyle().getBgSelectionColor());
+            g.setColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
         } else
             setFG(g, df);
         g.drawString(field2, xString, df.getY() + style.getPadding(Component.TOP));
@@ -118,7 +116,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
         if (df.isSelectMode() && df.getFieldSelected() == 3 && df.hasFocus() && df.isFocusPainted()) {
             setFG(g, df);
             g.fillRect(xString-1, yString, f.stringWidth(field3)+2, f.getHeight());
-            g.setColor(df.getStyle().getBgSelectionColor());
+             //DF:g.setColor(df.getStyle().getBgSelectionColor());
+            g.setColor(NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
         } else
             setFG(g, df);
         g.drawString(field3, xString, df.getY() + style.getPadding(Component.TOP));
@@ -137,7 +136,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
                     // draw on the right side
                     drawXPos = drawXPos + df.getWidth() - inputModeWidth - style.getPadding(Component.RIGHT) - style.getPadding(Component.LEFT)+2;
                 }
-                g.setColor(style.getFgSelectionColor());
+                //DF:g.setColor(style.getFgSelectionColor());
+                g.setColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
                 // unfurtanally g.fillroundrect does not suppport alpha
                 //g.fillRoundRect(drawXPos, ta.getY() + style.getPadding(Component.TOP)-1, inputModeWidth, ta.getHeight()-4, 4, 4);
                 // so a work around is required
@@ -146,7 +146,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
                         df.getHeight()-4, alphaLevel);
                 //g.setColor(0xFF0000);
 
-                g.setColor(style.getBgSelectionColor());
+                //DF:g.setColor(style.getBgSelectionColor());
+                g.setColor( NDGStyleToolbox.getInstance().listStyle.bgSelectedStartColor );
 
                 g.fillRect(drawXPos, df.getY() + style.getPadding(Component.TOP)-1, 1, 1, alphaLevel);
                 g.fillRect(drawXPos + inputModeWidth -1, df.getY() + style.getPadding(Component.TOP)-1, 1, 1, alphaLevel);
@@ -200,7 +201,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
                     // draw on the right side
                     drawXPos = drawXPos + ta.getWidth() - inputModeWidth - style.getPadding(Component.RIGHT) - style.getPadding(Component.LEFT);
                 }
-                g.setColor(style.getFgSelectionColor());
+                //DF:g.setColor(style.getFgSelectionColor());
+                g.setColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
                 // unfurtanally g.fillroundrect does not suppport alpha
                 //g.fillRoundRect(drawXPos, ta.getY() + style.getPadding(Component.TOP)-1, inputModeWidth, ta.getHeight()-4, 4, 4);
                 // so a work around is required
@@ -209,7 +211,8 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
                         ta.getHeight()-4, alphaLevel);
                 //g.setColor(0xFF0000);
 
-                g.setColor(style.getBgSelectionColor());
+                //DF:g.setColor(style.getBgSelectionColor());
+                g.setColor( NDGStyleToolbox.getInstance().listStyle.bgSelectedStartColor );
 
                 g.fillRect(drawXPos, ta.getY() + style.getPadding(Component.TOP)-1, 1, 1, alphaLevel);
                 g.fillRect(drawXPos + inputModeWidth +1, ta.getY() + style.getPadding(Component.TOP)-1, 1, 1, alphaLevel);

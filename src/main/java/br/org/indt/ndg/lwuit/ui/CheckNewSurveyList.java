@@ -1,18 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelCheckSurveyListCommand;
 import br.org.indt.ndg.lwuit.control.DownloadCheckSurveyListCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.plaf.UIManager;
 
 public class CheckNewSurveyList extends Screen implements ActionListener {
 
@@ -33,8 +28,9 @@ public class CheckNewSurveyList extends Screen implements ActionListener {
         setTitle(Resources.NEWUI_NOKIA_DATA_GATHERING, Resources.DOWNLOAD_SURVEYS);
 
         TextArea item = new TextArea(5,20);
-        item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-        item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+        item.getSelectedStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
+        item.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+        item.getStyle().setFont( NDGStyleToolbox.fontSmall );
         item.setEditable(false);
         item.setFocusable(true);
         item.setText(strSurveys);
@@ -45,7 +41,13 @@ public class CheckNewSurveyList extends Screen implements ActionListener {
         if (!strSurveys.equals("\n")) {
             form.addCommand(DownloadCheckSurveyListCommand.getInstance().getCommand());
         }
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {

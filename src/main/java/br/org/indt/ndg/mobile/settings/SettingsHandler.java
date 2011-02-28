@@ -23,12 +23,12 @@ public class SettingsHandler extends DefaultHandler {
         if (qName.equals("settings")) {
             structure.setSplashTime(Integer.parseInt(attributes.getValue(attributes.getIndex("splash"))));
             structure.setLanguage(attributes.getValue(attributes.getIndex("language")));
-            String agree_flag = attributes.getValue(attributes.getIndex("agree"));
-            if (agree_flag != null) {
-                structure.setAgreeFlag(Integer.parseInt(agree_flag));
+            String isRegisteredFlag = attributes.getValue(attributes.getIndex("registered"));
+            if (isRegisteredFlag != null) {
+                structure.setRegisteredFlag(Integer.parseInt(isRegisteredFlag));
             }
             else {
-                structure.setAgreeFlag(1);
+                structure.setRegisteredFlag(0);
             }
         }
         else if (qName.equals("server")) {
@@ -43,11 +43,11 @@ public class SettingsHandler extends DefaultHandler {
             else
                 structure.setGpsConfigured(false);
         }
-        else if (qName.equals("categoryView")) {
-            if (attributes.getValue(attributes.getIndex("enabled")).equals("yes"))
-                structure.setCategoriesEnabled(true);
+        else if (qName.equals("geotagging")) {
+            if (attributes.getValue(attributes.getIndex("configured")).equals("yes"))
+                structure.setGeoTaggingConfigured(true);
             else
-                structure.setCategoriesEnabled(false);
+                structure.setGeoTaggingConfigured(false);
         }
         else if(qName.equals("log")){
             String logSupport = attributes.getValue(attributes.getIndex("active"));
@@ -62,6 +62,24 @@ public class SettingsHandler extends DefaultHandler {
                 appVersion = "-1";
             }
             structure.setAppVersion(appVersion);
+        }
+        else if (qName.equals("photoResolution")) {
+            String config = attributes.getValue(attributes.getIndex("configId"));
+            try {
+                int configInt = Integer.parseInt(config);
+                structure.setPhotoResolutionId(configInt);
+            } catch ( Exception ex ){
+                structure.setPhotoResolutionId(0);
+            }
+        }
+        else if (qName.equals("style")) {
+            String config = attributes.getValue(attributes.getIndex("id"));
+            try {
+                int configInt = Integer.parseInt(config);
+                structure.setStyleId(configInt);
+            } catch ( Exception ex ){
+                structure.setStyleId(0);
+            }
         }
 
         tagStack.push(qName);

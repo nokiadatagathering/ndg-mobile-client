@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.DeleteResultNowCommand;
 import br.org.indt.ndg.lwuit.control.OpenResultCommand;
 import br.org.indt.ndg.lwuit.control.SendResultNowCommand;
 import br.org.indt.ndg.lwuit.control.ViewResultCommand;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
@@ -47,7 +44,7 @@ public class ResultListContextMenu extends ContextMenu{
 
         optionsModel = new DefaultListModel(options);
         optionsList.setModel(optionsModel);
-        
+
         optionsList.setListCellRenderer(new MenuCellRenderer());
 
         optionsList.addActionListener(new ActionListener() {
@@ -73,7 +70,7 @@ public class ResultListContextMenu extends ContextMenu{
         }
                 
         /** Commands Listeners **/
-        menuDialog.setCommandListener(new ActionListener() {
+        menuDialog.addCommandListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent evt) {
 
@@ -111,5 +108,22 @@ public class ResultListContextMenu extends ContextMenu{
         }
     }
 
+    public void show() {
+        int fontHigh = NDGStyleToolbox.getInstance().menuStyle.selectedFont.getHeight();//this font is used in cell
 
+        MenuCellRenderer rendererItem = (MenuCellRenderer)optionsList.getRenderer();
+        int itemTopMargin = rendererItem.getStyle().getMargin(Component.TOP);
+        int itemBottonMargin = rendererItem.getStyle().getMargin(Component.BOTTOM);
+        int itemTopPadding = rendererItem.getStyle().getPadding(Component.TOP);
+        int itemBottonPadding = rendererItem.getStyle().getPadding(Component.BOTTOM);
+
+        int marginH = calculateMarginH() - optionsList.size() * ( fontHigh
+                                                                + itemTopMargin
+                                                                + itemBottonMargin
+                                                                + itemTopPadding
+                                                                + itemBottonPadding
+                                                                + optionsList.getItemGap() )
+                                                                - 2 * optionsList.getBorderGap();
+        menuDialog.show( marginH/2, marginH/2,calculateMarginW(), 0, true );
+    }
 }

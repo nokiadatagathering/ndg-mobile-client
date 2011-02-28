@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import com.sun.lwuit.Command;
@@ -26,5 +21,4 @@ public class TestConnectionCommand extends CommandControl {
     protected void doAction(Object parameter) {
         TestConnection.getInstance().doTest();
     }
-
 }

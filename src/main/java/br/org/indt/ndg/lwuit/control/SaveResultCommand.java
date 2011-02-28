@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.model.ImageData;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import java.util.Vector;
@@ -16,14 +12,20 @@ import java.util.Vector;
 public class SaveResultCommand extends CommandControl {
 
     private static SaveResultCommand instance;
+    private SaveResultsObserver m_observer = null;
 
     protected Command createCommand() {
         return new Command(Local.getText(Local.QTJ_CMD_SAVE));
     }
 
+    public void setObserver( SaveResultsObserver observer ) {
+        m_observer = observer;
+    }
+
     protected void doAction(Object parameter) {
         Vector questions = (Vector)parameter;
-        PersistenceManager.getInstance().save(questions);//to be checked or refactored
+        PersistenceManager.getInstance().save(questions, m_observer );
+        m_observer = null;
     }
 
     public static SaveResultCommand getInstance() {

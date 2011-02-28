@@ -208,6 +208,10 @@ public class SurveysControl {
         return newModelSurvey.getCategories();
     }
 
+    public boolean hasMoreThenOneCategory() {
+        return (getCategoriesFromOpenedSurvey().length > 1);
+    }
+
     // Get Question
     public NDGQuestion getNextQuestion() {
         NDGQuestion question = null;

@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CommandControl;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.NetworkErrCode;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
@@ -23,9 +20,7 @@ import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
-import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
-import java.util.Enumeration;
 import java.util.Vector;
 
 /**
@@ -35,18 +30,21 @@ import java.util.Vector;
 public class GeneralAlert extends Screen implements ActionListener {
 
     public static final int DIALOG_OK = 0;
-    CommandControl cmdOk = new OkCommandControl();
-
     public static final int DIALOG_YES_NO = 1;
+    public static final int RESULT_YES = 100;
+    public static final int RESULT_NO = 101;
+    public static final int ERROR = 1001;
+    public static final int CONFIRMATION = 1002;
+    public static final int INFO = 1003;
+    public static final int WARNING = 1004;
+    public static final int ALARM = 1005;
+
+    CommandControl cmdOk = new OkCommandControl();
     CommandControl cmdYes = new YesCommandControl();
     CommandControl cmdNo = new NoCommandControl();
 
-    public static final int RESULT_YES = 100;
-    public static final int RESULT_NO = 101;
-
     private static GeneralAlert instance;
     private Dialog dialog;
-    private Style dialogStyle = UIManager.getInstance().getComponentStyle("Dialog");
     private TitlePainter tp = new TitlePainter();
 
     private static String title;
@@ -55,11 +53,7 @@ public class GeneralAlert extends Screen implements ActionListener {
 
     private int resultCmdIndex;
 
-    public static final int ERROR = 1001;
-    public static final int CONFIRMATION = 1002;
-    public static final int INFO = 1003;
-    public static final int WARNING = 1004;
-    public static final int ALARM = 1005;
+
     private int alertType;
 
     public static GeneralAlert getInstance() {
@@ -105,6 +99,8 @@ public class GeneralAlert extends Screen implements ActionListener {
         createScreen();
         dialog = new Dialog();
         dialog.getTitleStyle().setBgPainter(tp);
+        dialog.setDialogStyle( NDGStyleToolbox.getInstance().menuStyle.getBaseStyle() );
+        dialog.getDialogStyle().setBgColor( NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor );
         dialog.setTitle(" ");
         dialog.setLayout(new BorderLayout());
         dialog.setScrollable(false);
@@ -113,22 +109,54 @@ public class GeneralAlert extends Screen implements ActionListener {
         Image img = getIcon(alertType);
         Label imgLabel= new Label(img);
         imgLabel.setAlignment( Label.LEFT );
-        c.addComponent(new Label(img));
+        c.addComponent( imgLabel );
         dialog.addComponent(BorderLayout.NORTH, c);
         c.setScrollable(false);
 
         Container c2 = new Container( new BoxLayout(BoxLayout.Y_AXIS));
-        TextArea msg = new TextArea(2,12);
-        msg.setText(label);
-        msg.setStyle(UIManager.getInstance().getComponentStyle("Label"));
+
+
+        int displayW = Display.getInstance().getDisplayWidth();
+        int displayH = Display.getInstance().getDisplayHeight();
+
+
+        TextArea msg = new TextArea( );
+        msg.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
+        msg.getSelectedStyle().setBgTransparency(0x00);
+        int textWidth = msg.getSelectedStyle().getFont().stringWidth(label) + 5;
+        int lineHeight = msg.getSelectedStyle().getFont().getHeight() + msg.getRowsGap();
+        msg.setText(label);                
+        msg.setIsScrollVisible(false);
+                        
+        if (textWidth > displayW)
+        {
+            msg.setPreferredW( textWidth / ( textWidth/displayW + 1) + 2 );//to fill equally to all lines
+            msg.setRows(textWidth / msg.getPreferredW() + 2);
+            int preferredH = lineHeight * msg.getRows() + 2;
+            if(preferredH > (displayH * 0.5) ) {
+                msg.setIsScrollVisible(true);
+                preferredH = (int) (  displayH * 0.5);
+            }
+            msg.setPreferredH(preferredH);
+            msg.setGrowByContent(true);
+            dialog.setScrollable(true);
+        }
+        else
+        {            
+            msg.setGrowByContent(false);
+            msg.setRows(1);
+            msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );
+            dialog.setScrollable(false);
+        }
+
         msg.setEditable(false);
 
-        int rows = msg.getLines();
+        int rows = msg.getRows();
         if( rows < 4)
         {
            c2.addComponent( new Label( Screen.getRes().getImage("dialogspace")));
         }
-        msg.setRows(rows);
+
         c2.addComponent(msg);
         dialog.addComponent(BorderLayout.CENTER,c2);
 
@@ -136,7 +164,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             dialog.addCommand( ((CommandControl)hCommands.elementAt(i)).getCommand());
         }
 
-        dialog.setCommandListener(this);
+        dialog.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -189,44 +217,53 @@ public class GeneralAlert extends Screen implements ActionListener {
     }
 
     private void showDialog() {
-        dialog.showPacked(BorderLayout.CENTER, true);
+        Container cont1 = dialog.getContentPane();
+        int hi = 0;
+        int wi = cont1.getPreferredW() + 2*5;
+        int wi2 = dialog.getTitleStyle().getFont().stringWidth( title ) + 2*5 + TitlePainter.TITLE_LEFT_MARGIN;
+        wi = Math.max(wi, wi2);
+
+        for( int i = 0 ; i< dialog.getComponentCount() ; i ++ ){
+            hi += dialog.getComponentAt(i).getPreferredH();
+        }
+
+        int disH = Display.getInstance().getDisplayHeight();
+        int disW = Display.getInstance().getDisplayWidth();
+
+        int H_Margin = hi < disH ? (disH - hi)/2 : 0;
+        int V_Margin =  wi < disW ? (disW - wi)/2 : 0;
+        dialog.show( H_Margin, H_Margin, V_Margin, V_Margin, true);
     }
 
     class TitlePainter implements Painter {
-
-        private Style dialogTitleStyle = UIManager.getInstance().getComponentStyle("DialogTitle");
+        static final public int TITLE_LEFT_MARGIN = 10;
 
         public void paint(Graphics g, Rectangle rect) {
             int width = rect.getSize().getWidth();
             int height = rect.getSize().getHeight();
 
-            int bgColor = dialogStyle.getBgColor();
+            int bgColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgUnselectedColor;
             g.setColor(bgColor);
             g.fillRect(rect.getX(), rect.getY(), width, height);
 
-            int endColor = dialogTitleStyle.getBgColor();
-            int startColor = dialogTitleStyle.getBgSelectionColor();
-            g.fillLinearGradient(startColor, endColor, rect.getX()+1, rect.getY()+1, width-3, height, false);
-
+            int endColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedEndColor;
+            int startColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedStartColor;
+            g.fillLinearGradient(startColor, endColor, rect.getX()+1, rect.getY()+1, width-2, height, false);
 
             // curve left side
             g.fillRect(rect.getX()+1, rect.getY()+1, 1, 1);
-            //g.fillRect(rect.getX()+1, rect.getY()+1, 1, 2);
 
             // curve right side
             g.fillRect(rect.getX()+width-2, rect.getY()+1, 1, 1);
-            //g.fillRect(rect.getX()+width-2, rect.getY()+1, 1, 2);
 
             int tintColor = UIManager.getInstance().getLookAndFeel().getDefaultFormTintColor();
             g.setColor(tintColor);
             g.fillRect(rect.getX(), rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
             g.fillRect(rect.getX()+width-1, rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
 
-            Font titleFont = Screen.getRes().getFont("NokiaSansWideBold15");
-            g.setFont(titleFont);
-            g.setColor(dialogTitleStyle.getFgColor());
-            g.drawString(title, rect.getX()+5, rect.getY()+3);
-
+            g.setFont( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont );
+            g.setColor( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFontColor );
+            g.drawString(title, rect.getX() + TITLE_LEFT_MARGIN, rect.getY()+5);
         }
     }
 
@@ -236,10 +273,8 @@ public class GeneralAlert extends Screen implements ActionListener {
             return new Command(br.org.indt.ndg.mobile.Resources.OK);
         }
 
-        protected void doAction(Object parameter) {
-            
+        protected void doAction(Object parameter) {   
         }
-
     }
 
     class YesCommandControl extends CommandControl {
@@ -249,9 +284,7 @@ public class GeneralAlert extends Screen implements ActionListener {
         }
 
         protected void doAction(Object parameter) {
-
         }
-
     }
 
     class NoCommandControl extends CommandControl {
@@ -261,9 +294,6 @@ public class GeneralAlert extends Screen implements ActionListener {
         }
 
         protected void doAction(Object parameter) {
-
         }
-
     }
-
 }

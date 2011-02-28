@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.List;
@@ -14,8 +10,6 @@ import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.sun.lwuit.plaf.Style;
-import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
@@ -23,8 +17,9 @@ import com.sun.lwuit.plaf.UIManager;
  */
 class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
 
-    private Label categoryLabel, questionsLabel, iconLabel;
-    private Style styleSecondLabel = UIManager.getInstance().getComponentStyle("List");
+    private Label categoryLabel;
+	private Label questionsLabel;
+	private Label iconLabel;
 
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
@@ -33,15 +28,12 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         Container centerContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 
         categoryLabel = new Label(category.getName());
-        categoryLabel.setStyle(styleLabel);
         categoryLabel.setIcon(null);
 
         questionsLabel = new Label(category.getTotalQuestions() + (category.getTotalQuestions() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION));
-        questionsLabel.setStyle(styleSecondLabel);
         questionsLabel.setIcon(null);
 
         iconLabel = new Label("");
-        iconLabel.setStyle(styleLabel);
 
         Dimension dQuestionsLabel = questionsLabel.getPreferredSize();
         dQuestionsLabel.setHeight(dQuestionsLabel.getHeight()-8);
@@ -52,40 +44,39 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         categoryLabel.setPreferredSize(dcategoryLabel);
 
         if (isSelected) {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold15"));
-            styleSecondLabel.setFont(Screen.getRes().getFont("NokiaSansWideBold13"));
-            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
             setFocus(true);
             categoryLabel.setFocus(true);
             questionsLabel.setFocus(true);
             iconLabel.setFocus(true);
-            styleContainer.setBgPainter(focusBGPainter);
-        } else {
-            styleLabel.setFont(Screen.getRes().getFont("NokiaSansWide15"));
-            styleSecondLabel.setFont(Screen.getRes().getFont("NokiaSansWide13"));
+            categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.selectedFont );
+            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.selectedFont.getHeight() );
+            categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont );
+            questionsLabel.setPreferredH(NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont.getHeight() );
+            questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
+            getStyle().setBgPainter(focusBGPainter);
+        } else {
             setFocus(false);
             categoryLabel.setFocus(false);
             questionsLabel.setFocus(false);
             iconLabel.setFocus(false);
-            styleContainer.setBgPainter(bgPainter);
+            categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.unselectedFont );
+            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.unselectedFont.getHeight() );
+            questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont );
+            questionsLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont.getHeight() );
+            categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
+            getStyle().setBgPainter(bgPainter);
         }
 
-        Label topAlign = new Label(" ");
         Label bottonAlign = new Label(" ");
-
-        topAlign.setStyle(styleSecondLabel);
-        bottonAlign.setStyle(styleSecondLabel);
-
-        Dimension dTopAlign = topAlign.getPreferredSize();
-        dTopAlign.setHeight(3);
-        topAlign.setPreferredSize(dTopAlign);
-
         Dimension dBottonAlign = bottonAlign.getPreferredSize();
-        dBottonAlign.setHeight(5);
+        dBottonAlign.setHeight(2);
         bottonAlign.setPreferredSize(dBottonAlign);
 
-        centerContainer.addComponent(topAlign);
         centerContainer.addComponent(categoryLabel);
         centerContainer.addComponent(questionsLabel);
         centerContainer.addComponent(bottonAlign);
@@ -107,9 +98,7 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         iconLabel.setIcon(null);
         iconLabel.setFocus(true);
 
-        styleContainer.setBgPainter(focusBGPainter);
         this.setFocus(true);
-
         return this;
     }
 }

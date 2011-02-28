@@ -5,7 +5,9 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Camera;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
@@ -32,7 +34,9 @@ public class BackPhotoFormCommand extends CommandControl{
 
     protected void doAction(Object parameter) {
         Camera.getInstance().shutDown();
-        NDGCameraManager.getInstance().updateInterviewForm();
+        if (!NDGCameraManager.getInstance().showLastInterviewForm()) {
+            AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
+        }
     }
 
 }

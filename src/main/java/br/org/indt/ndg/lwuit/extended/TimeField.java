@@ -1,12 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.extended;
 
 import com.sun.lwuit.Command;
-import com.sun.lwuit.Form;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
@@ -90,26 +84,17 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
         calendar.setTime(time);
         if ((timeFormat == HHMM)) {
             h = calendar.get(Calendar.HOUR);
-
             if (h == 0) {
                 h =12;
             }
-
-            hh = (h < 10 ? "0"+h : ""+h);
-            //m = calendar.get(Calendar.MINUTE) +1;
-            m = calendar.get(Calendar.MINUTE);
-            mm = (m < 10 ? "0"+m : ""+m);
-            timeFields[0] = hh;
-            timeFields[1] = mm;
         } else {
             h = calendar.get(Calendar.HOUR_OF_DAY);
-            hh = (h < 10 ? "0"+h : ""+h);
-            //m = calendar.get(Calendar.MINUTE) +1;
-            m = calendar.get(Calendar.MINUTE);
-            mm = (m < 10 ? "0"+m : ""+m);
-            timeFields[0] = hh;
-            timeFields[1] = mm;
         }
+        hh = (h < 10 ? "0"+h : ""+h);
+        m = calendar.get(Calendar.MINUTE);
+        mm = (m < 10 ? "0"+m : ""+m);
+        timeFields[0] = hh;
+        timeFields[1] = mm;
     }
 
     private String formatTime() {
@@ -117,17 +102,8 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
     }
 
     protected Command installCommands(Command clear, Command t9) {
-        Form f = getComponentForm();
-        Command[] originalCommands = new Command[f.getCommandCount()];
-        for(int iter = 0 ; iter < originalCommands.length ; iter++) {
-            originalCommands[iter] = f.getCommand(iter);
-        }
-        Command retVal = super.installCommands(clear, t9);
-        f.removeAllCommands();
-        for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
-            f.addCommand(originalCommands[iter]);
-        }
-        return retVal;
+        // do not install T9 nor CLEAR
+        return null;
     }
 
     private char convertToNumber(char c) {
@@ -158,17 +134,14 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
         } else return c;
     }
 
-    protected void deleteChar() {
+    public void deleteChar() {
         // to do here backspace handle key
     }
 
     public void dataChanged(int type, int index) {
-        if (type == 0) {
-            // to do here backspace handle key
-        }
-        if (type == 1) {
+        if (type == DataChangedListener.ADDED) {
             if (selectMode) {
-                char c = getText().charAt(index-1);
+                char c = getText().charAt(index);
                 c = convertToNumber(c);
                 if (c == '\0') {
                     setField(getFieldSelected(), getField(getFieldSelected()));
@@ -185,7 +158,7 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
                     }
                 }
             }else{
-                    char c = getText().charAt(index-1);
+                    char c = getText().charAt(index);
                     c = convertToNumber(c);
                     if (c == '\0') {
                         setField(getFieldSelected(), getField(getFieldSelected()));
@@ -206,6 +179,8 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
                         }
                     }
             }
+        } else if ( type == DataChangedListener.REMOVED || type == DataChangedListener.CHANGED ) {
+            //do nothing
         }
     }
 
@@ -221,22 +196,24 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
 
     private void validTime() {
         if (timeFormat == HHMM) {
-            // hora
-            
-            if (Integer.parseInt(timeFields[0]) < 1)
+            // validate hours
+            try {
+                if (Integer.parseInt(timeFields[0]) < 1)
+                    timeFields[0] = "01";
+                else if(Integer.parseInt(timeFields[0]) > 12)
+                    timeFields[0] = "12";
+            } catch ( NumberFormatException e ) {
                 timeFields[0] = "01";
-            if (Integer.parseInt(timeFields[0]) > 12)
-                timeFields[0] = "12";
-
-            //min
-            //if (Integer.parseInt(timeFields[0]) == 12) {
-            //    timeFields[1] = "00";
-            //} else {
+            }
+            // validate minutes
+            try {
                 if (Integer.parseInt(timeFields[1]) < 1)
                     timeFields[1] = "00";
-                if (Integer.parseInt(timeFields[1]) > 59)
+                else if (Integer.parseInt(timeFields[1]) > 59)
                     timeFields[1] = "59";
-            //}
+            } catch ( NumberFormatException e ) {
+                timeFields[1] = "00";
+            }
 
             Calendar c = Calendar.getInstance();
             c.set(Calendar.HOUR, Integer.parseInt(timeFields[0])-1);
@@ -244,24 +221,31 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
             timeFields[0] = formatDayOrMonth((c.get(Calendar.HOUR) + 1) + "");
             timeFields[1] = formatDayOrMonth(c.get(Calendar.MINUTE) + "");
         } else if (timeFormat == HHMM1) {
-            // mim
-            if (Integer.parseInt(timeFields[1]) < 1)
-                timeFields[1] = "00";
-            if (Integer.parseInt(timeFields[1]) > 59)
-                timeFields[1] = "59";
-
-            //hora
-            if (Integer.parseInt(timeFields[0]) < 1)
+            // validate hours
+            try {
+                if (Integer.parseInt(timeFields[0]) < 1)
+                    timeFields[0] = "00";
+                else if (Integer.parseInt(timeFields[0]) > 24)
+                    timeFields[0] = "23";
+            } catch ( NumberFormatException e ) {
                 timeFields[0] = "00";
-            if (Integer.parseInt(timeFields[0]) > 24)
-                timeFields[0] = "23";
+            }
+            // validate minutes
+            try {
+                if (Integer.parseInt(timeFields[1]) < 1)
+                    timeFields[1] = "00";
+                if (Integer.parseInt(timeFields[1]) > 59)
+                    timeFields[1] = "59";
+            } catch ( NumberFormatException e ) {
+                timeFields[1] = "00";
+            }
+
             Calendar c = Calendar.getInstance();
             c.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeFields[0]));
             c.set(Calendar.MINUTE, Integer.parseInt(timeFields[1]));
             timeFields[0] = formatDayOrMonth(c.get(Calendar.HOUR_OF_DAY) + "");
             timeFields[1] = formatDayOrMonth((c.get(Calendar.MINUTE)) + "");
         }
-
     }
 
     private void setField(int field, String value) {

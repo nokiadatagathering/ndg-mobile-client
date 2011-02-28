@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelSSDownloadCommand;
-import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.download.DownloadNewSurveys;
 import com.sun.lwuit.Component;
@@ -29,12 +24,12 @@ public class StatusScreenDownload extends Screen implements ActionListener {
         strText =  DownloadNewSurveys.getInstance().ServerStatus();
         if (firstcreation) {
             item = new TextArea(3,20);
-            item.setStyle(UIManager.getInstance().getComponentStyle("Label"));
-            item.getStyle().setFont(Screen.getRes().getFont("NokiaSansWide13"));
+            item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+            item.getStyle().setFont( NDGStyleToolbox.fontSmall );
             item.setEditable(false);
             item.setFocusable(false);
 
-            image = Screen.getRes().getAnimation("wait2");
+            image = Screen.getRes().getImage("wait2");
             l = new Label(image);
             l.setAlignment(Component.CENTER);
             firstcreation = false;
@@ -50,7 +45,13 @@ public class StatusScreenDownload extends Screen implements ActionListener {
         form.addComponent(l);
 
         form.addCommand(CancelSSDownloadCommand.getInstance().getCommand());
-        form.setCommandListener(this);
+        try{
+            form.removeCommandListener(this);
+        } catch (NullPointerException npe ) {
+            //during first initialisation remove throws exception.
+            //this ensure that we have registered listener once
+        }
+        form.addCommandListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
