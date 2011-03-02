@@ -1,11 +1,10 @@
 package br.org.indt.ndg.lwuit.ui;
 
-
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.List;
-import com.sun.lwuit.list.ListCellRenderer;
+import com.sun.lwuit.layouts.BorderLayout;
 
 /**
  *
@@ -13,27 +12,28 @@ import com.sun.lwuit.list.ListCellRenderer;
  */
 class FileBrowserCellRenderer extends DefaultNDGListCellRenderer {
 
-    public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
-        String text = value.toString();
-        Label label = new Label();
-        label.setText(text);
-        label.setTickerEnabled(isSelected);
-        if (isSelected) {
-            label.setFocus(true);
-            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
-            label.getStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
-            label.getStyle().setBgPainter(focusBGPainter);
-        } else {
-            label.setFocus(false);
-            label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
-            label.getStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.unselectedFontColor);
-            label.getStyle().setBgPainter(bgPainter);
-        }
-        return label;
-    }
+    protected final Label m_rendererLabel = new Label();
 
-        public Component getListFocusComponent(List list) {
-        return null;
+    public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
+        removeAll();
+        if (value != null) {
+            String text = value.toString();
+            m_rendererLabel.setText(text);
+            m_rendererLabel.setTickerEnabled(isSelected);
+            if (isSelected) {
+                m_rendererLabel.setFocus(true);
+                m_rendererLabel.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+                m_rendererLabel.getStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
+                getStyle().setBgPainter(m_focusBGPainter);
+            } else {
+                m_rendererLabel.setFocus(false);
+                m_rendererLabel.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
+                m_rendererLabel.getStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.unselectedFontColor);
+                getStyle().setBgPainter(m_bgPainter);
+            }
+        }
+        addComponent(BorderLayout.CENTER, m_rendererLabel);
+        return this;
     }
 
 }

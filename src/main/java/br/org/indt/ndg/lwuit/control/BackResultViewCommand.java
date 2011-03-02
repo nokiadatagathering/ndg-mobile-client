@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -26,7 +21,6 @@ public class BackResultViewCommand extends BackCommand {
         AppMIDlet.getInstance().getFileStores().resetQuestions();
         AppMIDlet.getInstance().getFileStores().resetResultStructure();
         AppMIDlet.getInstance().setResultList( new ResultList());
-        System.gc(); 
         AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 
@@ -35,6 +29,4 @@ public class BackResultViewCommand extends BackCommand {
             instance = new BackResultViewCommand();
         return instance;
     }
-
-
 }

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
@@ -32,6 +27,7 @@ public class DeleteCurrentResultCommand extends CommandControl {
             FileSystem fs = AppMIDlet.getInstance().getFileSystem();
             String resultFilename = AppMIDlet.getInstance().getFileSystem().getResultFilename();
             fs.deleteFile(resultFilename);
+            fs.deleteDir( "b_" + resultFilename );
             AppMIDlet.getInstance().setResultList(new ResultList());
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
         }

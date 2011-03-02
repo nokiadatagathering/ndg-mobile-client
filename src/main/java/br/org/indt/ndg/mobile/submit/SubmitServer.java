@@ -25,9 +25,9 @@ public class SubmitServer {
     private final int SERVER_CANNOT_WRITE_RESULT = -1;
     private static final int NO_SURVEY_IN_SERVER = 2;
     private final int SUCCESS = 1;
-    
+
     private static final String ENCODING = "UTF-8";
-    
+
     private HttpConnection httpConn = null;
     //private FileConnection fileConn = null;
     private InputStreamReader fileInput = null;
@@ -35,29 +35,25 @@ public class SubmitServer {
     private DataInputStream httpInput = null;
     private boolean stop = false;
     private String urlServlet = "";
-    
-   
 
-    
     public SubmitServer() {
-
     }
-    
+
     public void cancel() {
         stop = true;
     }
-    
+
     public void submitResult(String resultFilename){
         Vector resultsToSend = new Vector();
         resultsToSend.addElement(resultFilename);
         send(resultsToSend);
     }
-    
+
     public void submit( Vector resultFilenames ) {
         send(resultFilenames);
     }
-    
-    private void send(Vector resultFilenames){      
+
+    private void send(Vector resultFilenames){
             boolean compression_on = AppMIDlet.getInstance().getSettings().getStructure().getServerCompression();
             urlServlet = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl();
 
@@ -72,8 +68,8 @@ public class SubmitServer {
                     finalizeGPRSTransmission();
                     break;
                 }
-                
-                String file = null;   
+
+                String file = null;
                 String buffer = "";
                 file = (String) e.nextElement();
                 buffer = loadFile(file);
@@ -122,9 +118,7 @@ public class SubmitServer {
             AppMIDlet.getInstance().setResultList(new ResultList());
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
-    
-    
-    
+
     private void finalizeGPRSTransmission(){
         try {
             if (httpOutput != null) httpOutput.close();
@@ -137,11 +131,10 @@ public class SubmitServer {
             }
         }
     }
-         
+
     private void submitFile(String buffer) {
         try {
             httpOutput.writeInt(buffer.length());
-            
             httpOutput.write(buffer.getBytes(), 0, buffer.length());
             httpOutput.flush();
         } catch (IOException ioe) {
@@ -155,51 +148,49 @@ public class SubmitServer {
         try {
             ByteArrayOutputStream out=new ByteArrayOutputStream();
             out.reset();
-            
+
             ZOutputStream zOut=new ZOutputStream(out, JZlib.Z_BEST_COMPRESSION);
             DataOutputStream objOut=new DataOutputStream(zOut);
-            
+
             byte [] bytes = buffer.getBytes(ENCODING);
-            objOut.write(bytes);   
+            objOut.write(bytes);
             zOut.close();
-            
+
             httpOutput.writeInt(bytes.length);
-            httpOutput.writeInt(out.size());                        
+            httpOutput.writeInt(out.size());
             httpOutput.write(out.toByteArray(), 0, out.size());
-            httpOutput.flush();            
+            httpOutput.flush();
         } catch (IOException ioe) {
             Logger.getInstance().log(ioe.getMessage());
         }
     }
-    
+
     private String loadFile(String _filename) {
         ByteArrayOutputStream baos=null;
-       
+
         String SURVEY_ROOT = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String strTemp = "";
         try {
-            FileConnection fc = (FileConnection) Connector.open(Resources.ROOT_DIR + SURVEY_ROOT + _filename);
-            
+            FileConnection fc = (FileConnection) Connector.open(Resources.ROOT_DIR + SURVEY_ROOT + "b_"+ _filename + "/" + "b_"+ _filename );//here is file with image data
+
             DataInputStream dos = fc.openDataInputStream();
-            
+
             baos = new ByteArrayOutputStream();
-            
+
             int data = dos.read();
-            
+
             while (data != -1) {
                 baos.write((byte) data);
                 data = dos.read();
             }
-            
+
             strTemp = baos.toString();
             baos.close();
             fc.close();
             dos.close();
-            
         } catch (IOException ioe) {
             Logger.getInstance().log(ioe.getMessage());
         }
-       
         return strTemp;
-    }          
+    }
 }

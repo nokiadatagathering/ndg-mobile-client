@@ -56,7 +56,7 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
             questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
-            getStyle().setBgPainter(focusBGPainter);
+            getStyle().setBgPainter(m_focusBGPainter);
         } else {
             setFocus(false);
             categoryLabel.setFocus(false);
@@ -69,7 +69,7 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
             categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
-            getStyle().setBgPainter(bgPainter);
+            getStyle().setBgPainter(m_bgPainter);
         }
 
         Label bottonAlign = new Label(" ");
@@ -84,21 +84,6 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         addComponent(BorderLayout.CENTER, centerContainer);
         addComponent(BorderLayout.WEST, iconLabel);
 
-        return this;
-    }
-
-
-    public Component getListFocusComponent(List list) {
-        categoryLabel.setText(" ");
-        categoryLabel.setFocus(true);
-
-        questionsLabel.setText(" ");
-        questionsLabel.setFocus(true);
-
-        iconLabel.setIcon(null);
-        iconLabel.setFocus(true);
-
-        this.setFocus(true);
         return this;
     }
 }

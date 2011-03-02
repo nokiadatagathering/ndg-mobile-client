@@ -1,4 +1,3 @@
-
 package br.org.indt.ndg.mobile.structures;
 
 import java.util.Vector;
@@ -59,7 +58,7 @@ public class FileSystemResultStructure {
     public Vector getXmlResultFile() {
         return xmlResultFile;
     }
-   
+
     public String getFilename() {
         if (xmlResultFile.size() > 0) {
             XmlResultFile obj = (XmlResultFile) xmlResultFile.elementAt(currentIndex);
@@ -73,11 +72,12 @@ public class FileSystemResultStructure {
             return obj.getFileName();
         } else return null;
     }
-    
+
     public void addXmlResultFileObj(String _displayName, String _filename) {
         xmlResultFile.addElement(new XmlResultFile(_displayName, _filename));
+        setCurrentIndex( xmlResultFile.size() - 1 );
     }
-    
+
     public void setCurrentIndex(int _index) {
         currentIndex = _index;
     }

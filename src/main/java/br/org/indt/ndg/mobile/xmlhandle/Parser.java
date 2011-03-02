@@ -61,24 +61,23 @@ public class Parser {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            
+
             FileConnection fc = (FileConnection) Connector.open(filename);
-            
             InputStream is = fc.openInputStream();
-            
+
             try {
                 saxParser.parse(is, handler);
             } catch (DoneParsingException e) {
-                
+
             } catch (SAXParseException e) {
                 Logger.getInstance().logException("SAXParseException on parsing: " + e.getMessage());
                 e.printStackTrace();
                 error = true;
                 AppMIDlet.getInstance().getFileSystem().setError(true);
-            } 
-            is.close();
-            fc.close();
-            
+            } finally {
+                if( is != null ) is.close();
+                if( fc != null ) fc.close();
+            }
         } catch(Exception e) {
             Logger.getInstance().logException("Exception on parsing: " + e.getMessage());
             e.printStackTrace();

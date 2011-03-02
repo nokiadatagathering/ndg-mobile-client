@@ -81,6 +81,7 @@ public class NDGCameraManager {
         if(imageIndex >= ((ImageAnswer)imageQuestion.getAnswer()).getImages().size()){
             ((ImageAnswer)imageQuestion.getAnswer()).getImages().addElement(imageData);
         } else {
+            ((ImageData)((ImageAnswer)imageQuestion.getAnswer()).getImages().elementAt(imageIndex)).delete();
             ((ImageAnswer)imageQuestion.getAnswer()).getImages().setElementAt(imageData, imageIndex);
         }
     }

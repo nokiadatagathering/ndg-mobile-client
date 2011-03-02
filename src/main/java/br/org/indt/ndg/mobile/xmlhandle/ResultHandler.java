@@ -28,20 +28,21 @@ public class ResultHandler extends DefaultHandler {
     private Stack tagStack = new Stack();
     private NDGAnswer currentAnswer;
     private Hashtable answers=null;
-    
+
     private String currentOtherIndex = null;
     private Coordinates currentCoordinates = null;
-    
+    boolean binary = false;
+
     public ResultHandler() {}
-    
+
     public void setResultStructure(ResultStructure _structure) {
         this.result = _structure;
     }
-    
+
     public void startDocument() throws SAXException {
     }
-    
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {        
+
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equals("result")) {
         } else if (qName.equals("category")) {
             answers = new Hashtable();
@@ -52,7 +53,7 @@ public class ResultHandler extends DefaultHandler {
             
             if (_type.equals("_str")) currentAnswer = new StringAnswer();
             else if (_type.equals("_date")) currentAnswer = new DateAnswer();
-            else if (_type.equals("_time")){               
+            else if (_type.equals("_time")){
                 currentAnswer = new TimeAnswer();
                 String sconvention = attributes.getValue(attributes.getIndex("convention")) ;
                 long convention  = 0;
@@ -63,7 +64,6 @@ public class ResultHandler extends DefaultHandler {
                 }
 
                 ((TimeAnswer)currentAnswer).setAmPm24(convention);
-
 
             }
             else if (_type.equals("_int")) currentAnswer = new IntegerAnswer();
@@ -77,12 +77,19 @@ public class ResultHandler extends DefaultHandler {
         } else if (qName.equals("other")) {
             currentOtherIndex = attributes.getValue(0);
         } else if (qName.equals("img_data")) {
-            String latitude = attributes.getValue(attributes.getIndex("latitude")) ;
-            String longitude = attributes.getValue(attributes.getIndex("longitude")) ;
+            String latitude = attributes.getValue(attributes.getIndex("latitude"));
+            String longitude = attributes.getValue(attributes.getIndex("longitude"));
+            if ( attributes.getIndex("type") >= 0 ) {
+                binary = attributes.getValue(attributes.getIndex("type")).equals("binary");
+            } else {
+                binary = false;
+            }
+
             if( latitude != null && longitude != null ) {
                 currentCoordinates = new Coordinates(Double.parseDouble(latitude), Double.parseDouble(longitude), 0);
             }
-        }    
+        }
+
         tagStack.push(qName);
     }
     private long timeStamp2Long(String time,long convention){
@@ -91,15 +98,15 @@ public class ResultHandler extends DefaultHandler {
         int min  = Integer.parseInt(time.substring(ix+1));
         Calendar calendar = Calendar.getInstance();
         if(convention == 0 || convention == 24 ){
-           calendar.set(Calendar.HOUR_OF_DAY, hour);
-        }else{            
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+        }else{
             calendar.set(Calendar.HOUR, hour);
         }
         calendar.set(Calendar.MINUTE, min);
 
-        
         return calendar.getTime().getTime();
     }
+
     public void characters(char[] ch, int start, int length) throws SAXException {
         String chars = new String(ch, start, length).trim();
         if (chars.length() > 0) {
@@ -130,7 +137,7 @@ public class ResultHandler extends DefaultHandler {
                 {}
             else if (qName.equals("index")) ((BoolAnswer) currentAnswer).setIndex(chars);
             else if (qName.equals("item")){
-                ((ChoiceAnswer) currentAnswer).setSelectedIndex(chars);                
+                ((ChoiceAnswer) currentAnswer).setSelectedIndex(chars);
             }
             else if (qName.equals("other")) {
                 ((ChoiceAnswer) currentAnswer).setSelectedIndex(currentOtherIndex);
@@ -146,15 +153,19 @@ public class ResultHandler extends DefaultHandler {
                 if (qName.equals("img_data")){
                     if(chars != null && chars.length() > 0 && !chars.equals(" ") )
                     {
-                        byte[] imgData = Base64Coder.decode(chars);
-                        ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(imgData, currentCoordinates) );
-                        currentCoordinates = null;
+                        if( !binary ) {
+                            byte[] imgData = Base64Coder.decode(chars);
+                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(imgData, currentCoordinates) );
+                            currentCoordinates = null;
+                        } else {
+                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData( chars, currentCoordinates) );
+                        }
                     }
                 }
             }
         }
     }
-    
+
     public void endElement(String uri, String localName, String qName) throws SAXException {
 
         if (qName.equals("category")) {
@@ -162,10 +173,8 @@ public class ResultHandler extends DefaultHandler {
         } else if (qName.equals("answer")) {
             answers.put(String.valueOf(currentAnswer.getId()), currentAnswer);
         }
-        
         tagStack.pop();
     }
     
     public void endDocument() throws SAXException {}
-    
 }

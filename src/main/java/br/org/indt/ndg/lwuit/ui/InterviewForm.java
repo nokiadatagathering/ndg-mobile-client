@@ -4,6 +4,8 @@ import br.org.indt.ndg.lwuit.control.AcceptQuestionListFormCommand;
 import br.org.indt.ndg.lwuit.control.BackInterviewFormCommand;
 import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
 import br.org.indt.ndg.lwuit.control.PersistenceManager;
+import br.org.indt.ndg.lwuit.control.RemovePhotoCommand;
+import br.org.indt.ndg.lwuit.control.ShowPhotoCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.TakePhotoCommand;
 import br.org.indt.ndg.lwuit.extended.CheckBox;
@@ -260,6 +262,10 @@ public class InterviewForm extends Screen implements ActionListener {
             OpenFileBrowserCommand.getInstance().execute(null);
         } else if ( cmd == TakePhotoCommand.getInstance().getCommand() ) {
             TakePhotoCommand.getInstance().execute(null);
+        } else if ( cmd == ShowPhotoCommand.getInstance().getCommand() ) {
+            ShowPhotoCommand.getInstance().execute(null);
+        } else if ( cmd == RemovePhotoCommand.getInstance().getCommand() ) {
+            RemovePhotoCommand.getInstance().execute(null);
         }
     }
 
@@ -589,10 +595,6 @@ abstract class ContainerUI extends Container implements FocusListener {
         DescriptiveField exclusiveChoiceTextField;
         ListModel underlyingModel;
 
-
-
-
-
         public ExclusiveChoiceFieldAutoCompleteUI(NDGQuestion obj) {
             super(obj);
         }
@@ -607,14 +609,12 @@ abstract class ContainerUI extends Container implements FocusListener {
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
-            
             groupButton = new ButtonGroup();
 
             Vector vChoices = ((ChoiceQuestion)question).getChoices();
             Vector vOthers = ((ChoiceQuestion)question).getOthers();
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
-
 
             underlyingModel = new DefaultListModel();
             final ManagerOptionSelectableRadio managerOptionSelectableRadio = new ManagerOptionSelectableRadio();
@@ -629,7 +629,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                     groupButton.add(rb);
                     maxQuestionLength = (choices[i].length() > maxQuestionLength) ? choices[i].length() : maxQuestionLength;
             }
-            
+
             exclusiveChoiceTextField = new DescriptiveField(maxQuestionLength);
 
             Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
@@ -780,7 +780,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                 }
             }
 
-
             Label spacer = new Label("");
             spacer.setFocusable(false);
             addComponent(spacer);
@@ -831,7 +830,6 @@ abstract class ContainerUI extends Container implements FocusListener {
         private static final int FOUR_ACTIONS_CONTEXT_MENU = 4;//TakePhotoCommand,OpenFileBrowserCommand,ShowPhotoCommand,RemovePhotoCommand
         private static final int TWO_ACTIONS_CONTEXT_MENU = 2;//TakePhotoCommand,OpenFileBrowserCommand
 
-        private Button thumbnailImageButton;
         private Container imageContainer;
 
         public ImageFieldUI(NDGQuestion obj) {
@@ -839,12 +837,17 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void update(){
-            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
-            if(imageContainer.getComponentCount() <= imgAnswer.getImages().size()) {
-                addCameraIconButton();
-            }
-           setModifiedInterview(true);
+           ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
+           if(imageContainer.getComponentCount() <= imgAnswer.getImages().size()) {
+               addCameraIconButton();
+               setModifiedInterview(true);
+           }
+
            form.showBack();
+           //focus last button
+           Component comp = imageContainer.getComponentAt( imageContainer.getComponentCount() - 1 );
+           comp.requestFocus();
+           rebuildOptionsMenu( comp );
         }
 
         public void registerQuestion(){
@@ -891,19 +894,30 @@ abstract class ContainerUI extends Container implements FocusListener {
                 button.addFocusListener(this);
                 imageContainer.addComponent(button);
         }
-        
+
         public void focusGained(Component cmpnt) {
             super.focusGained(cmpnt);
-            form.addCommand(OpenFileBrowserCommand.getInstance().getCommand());
-            form.addCommand(TakePhotoCommand.getInstance().getCommand());
+            rebuildOptionsMenu(cmpnt);
+
             NDGCameraManager.getInstance().sendPostProcessData(this, cmpnt,
                     (ImageQuestion) question, imageContainer);
         }
 
-        public void focusLost(Component cmpnt) {
-            super.focusLost(cmpnt);
+        private void rebuildOptionsMenu( Component cmpnt ) {
             form.removeCommand(OpenFileBrowserCommand.getInstance().getCommand());
             form.removeCommand(TakePhotoCommand.getInstance().getCommand());
+            form.removeCommand(ShowPhotoCommand.getInstance().getCommand());
+            form.removeCommand(RemovePhotoCommand.getInstance().getCommand());
+            if (imageContainer.getComponentIndex(cmpnt) < ((ImageAnswer) question.getAnswer()).getImages().size()) {
+                form.addCommand(RemovePhotoCommand.getInstance().getCommand());
+                form.addCommand(ShowPhotoCommand.getInstance().getCommand());
+            }
+            form.addCommand(OpenFileBrowserCommand.getInstance().getCommand());
+            form.addCommand(TakePhotoCommand.getInstance().getCommand());
+        }
+
+        public void focusLost(Component cmpnt) {
+            super.focusLost(cmpnt);
         }
 
         public void commitValue() {
@@ -929,7 +943,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void setEnabled(boolean enabled) {
             qname.setEnabled(enabled);
-            thumbnailImageButton.setEnabled(enabled);
         }
     }
 

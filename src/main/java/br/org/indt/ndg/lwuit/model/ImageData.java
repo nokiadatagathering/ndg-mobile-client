@@ -1,37 +1,37 @@
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.Screen;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Image;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Coordinates;
-import javax.wireless.messaging.BinaryMessage;
 
 /**
  *
  * @author damian.janicki
  */
 public class ImageData {
-
     final static private String imageExtenstion = ".ndgImg";
-    final static private String imgDir = Resources.ROOT_DIR + "imgTmp/";
-    final private String uniqueId = String.valueOf(System.currentTimeMillis());
-    final private String privPath = Resources.ROOT_DIR + "imgTmp/" + uniqueId + imageExtenstion;
-
     final public static int THUMBNAIL_SIZE = 50;
 
-    Coordinates myLocation;
-    Image thumbnail;
+    private String imgDir = Resources.ROOT_DIR
+                          + AppMIDlet.getInstance().getFileSystem().getSurveyDirName()
+                          + "imgTmp/";
+
+    private String uniqueId = String.valueOf(System.currentTimeMillis()) + imageExtenstion;
+    final private String privPath = imgDir + uniqueId ;
+
+
+    private Coordinates myLocation;
+    private Image thumbnail;
 
     // create directory
-    static {
+    private void createDir() {
         try {
             FileConnection file = (FileConnection) Connector.open(
                     imgDir, Connector.READ_WRITE);
@@ -43,44 +43,63 @@ public class ImageData {
         }
     }
 
-    static public void cleanTemporaryPhotoFiles() {
+    public ImageData( String aPath ){
+        myLocation = null;
+        loadResult( aPath );
+    }
+
+    public ImageData( String aPath, Coordinates location ){
+        myLocation = location;
+        loadResult( aPath );
+    }
+
+    public ImageData( byte[] data ){
+        createDir();
+        saveData(data);
+        myLocation = null;
+    }
+
+    public ImageData( byte[] data, Coordinates location ){
+        createDir();
+        saveData(data);
+        myLocation = location;
+    }
+
+    public String saveResult() {
+        String outPath = null;
+        FileConnection fileout = null;
         try {
-            FileConnection file = (FileConnection) Connector.open(
-                    imgDir, Connector.READ_WRITE);
-            String fileName = null;
-            Enumeration e = file.list();
-            file.close();
-            while (e.hasMoreElements()) {
-                try {
-                    fileName = e.nextElement().toString();
-                    file = (FileConnection) Connector.open(imgDir + fileName, Connector.READ_WRITE);
-                    if (file.exists() && (fileName.endsWith(imageExtenstion))) {
-                        file.delete();
-                    }
-                    file.close();
-                } catch (SecurityException ex) {
-                    // not accessible file or dir is not displayed
-                } catch (Exception ex) {
-                    // bad formatted file or dir is not displayed
-                }
+            outPath = Resources.ROOT_DIR
+                           + AppMIDlet.getInstance().getFileSystem().getSurveyDirName()
+                           + "b_"
+                           + AppMIDlet.getInstance().getFileSystem().getResultFilename()
+                           + "/";
+            fileout = (FileConnection) Connector.open(outPath, Connector.READ_WRITE);
+
+            if( !fileout.exists() ) {
+                fileout.mkdir();
+                fileout.close();
+                fileout = null;
             }
-        } catch (IOException ex) {
+
+            fileout = (FileConnection) Connector.open( outPath + uniqueId, Connector.READ_WRITE );
+            if ( fileout.exists()) {
+                fileout.delete();
+            }
+            fileout.create();
+
+            fileout.openOutputStream().write( getData() );
+        } catch (IOException ex ) {
             ex.printStackTrace();
+        } finally {
+            if( fileout != null )
+                try {
+                fileout.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-    }
-
-    public ImageData(){
-        myLocation = null;
-    }
-
-    public ImageData(byte[] data){
-        saveData(data);
-        myLocation = null;
-    }
-
-    public ImageData(byte[] data, Coordinates location){
-        saveData(data);
-        this.myLocation = location;
+        return outPath + uniqueId;
     }
 
     public byte[] getData() {
@@ -100,6 +119,36 @@ public class ImageData {
             createThumbnail(readData());
         }
         return thumbnail;
+    }
+
+    private void loadResult( String aPath ) {
+        FileConnection file = null;
+        InputStream input = null;
+        try {
+            file = (FileConnection) Connector.open( aPath, Connector.READ);
+            if(!file.exists()) {
+               throw new IllegalStateException("Missing binary file");
+            }
+            input = file.openInputStream();
+            long fileSize = file.fileSize();
+            byte[] data = new byte[(int)fileSize];
+            input.read( data);
+            uniqueId = aPath.substring( aPath.lastIndexOf('/'), aPath.length() );
+            saveData(data);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if ( input != null ) {
+                try {
+                    input.close();
+                } catch (IOException ex) {}
+            }
+            if ( file != null ) {
+                try {
+                    file.close();
+                } catch (IOException ex) {}
+            }
+        }
     }
 
     private void saveData(byte[] data) {

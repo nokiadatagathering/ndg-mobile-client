@@ -31,32 +31,32 @@ public class FileSystem {
     private String root = null;
     private boolean error = false;
     private int resultListIndex;
-    
+
     private FileSystemSurveyStructure fsSurveyStructure;
     private FileSystemResultStructure fsResultStructure;
     private FileSystemResultStructure fsSentStructure;
-    
+
     public void setResultListIndex(int _index)
     {
         resultListIndex = _index;
     }
-    
+
     public int getResultListIndex() {
         return resultListIndex;
     }
-    
+
     public void storeFilename(String displayName, String fileName) {
         fsResultStructure.addXmlResultFileObj(displayName, fileName);
     }
-    
+
     public void removeDisplayName(String _fileName) {
         fsResultStructure.removeDisplay(_fileName);
     }
-    
+
     public void removeFile(String _filename) {
         fsResultStructure.removeFile(_filename);
     }
-    
+
     public void removeSelectedResult() {
         fsResultStructure.removeSelectedResult();
     }
@@ -65,63 +65,63 @@ public class FileSystem {
     public FileSystem(String _root) {
         root = _root;
         resultListIndex = 0;
-        
+
         fsSurveyStructure = new FileSystemSurveyStructure();
         fsResultStructure = new FileSystemResultStructure();
         fsSentStructure = new FileSystemResultStructure();
-        
+
         this.loadSurveyFiles();
     }
-    
+
     public void setLocalFile(boolean _bool) {
         fsResultStructure.setLocalFile(_bool);
     }
-    
+
     public boolean getError() {
         return error;
     }
-    
+
     public void setError(boolean _bool) {
         error = _bool;
     }
-    
+
     public boolean isLocalFile() {
         return fsResultStructure.isLocalFile();
     }
-    
+
     public void setSurveyCurrentIndex(int _index) {
         fsSurveyStructure.setCurrentIndex(_index);
     }
-    
+
     public void setResultCurrentIndex(int _index) {
         fsResultStructure.setCurrentIndex(_index);
     }
-    
+
     public Vector SurveyNames() {  //these are local mappings not real filenames
         return fsSurveyStructure.getNames();
     }
-    
+
     public int getSurveysCount(){
         return fsSurveyStructure.getSurveysCount();
     }
-    
+
     public Vector getXmlResultFile() {
         return fsResultStructure.getXmlResultFile();
     }
-    
+
     public Vector getXmlSentFile() {
         return fsSentStructure.getXmlResultFile();
     }
-    
+
     public String getSurveyDirName() { //surveys located within this directory
         return fsSurveyStructure.getDirName();
     }
-    
+
     //returns filename using current index of list
     public String getResultFilename() {
         return fsResultStructure.getFilename();
     }
-    
+
     //returns filename given index
     public String getResultFilename(int _index) {
         return fsResultStructure.getFilename(_index);
@@ -131,12 +131,12 @@ public class FileSystem {
         FileSystemSurveyHandler sh = new FileSystemSurveyHandler();
         fsSurveyStructure.addFileName(_dirName);
         sh.setFileSystemSurveyStructure(fsSurveyStructure);
-    
+
         kParser kparser = new kParser();
         kparser.setFileSystemSurveyStructure(fsSurveyStructure);
         kparser.parserSurveyFileInfo(root + _dirName + Resources.SURVEY_NAME);
     }
-    
+
     public void deleteFile(String filename) {
         delete(filename, true);
     }
@@ -148,19 +148,20 @@ public class FileSystem {
         }
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + filename);
-            if (fc.exists()) {                
+            if (fc.exists()) {
                 fc.delete();
             }
-            if(fc != null)
+            if(fc != null) {
                 fc.close();
-        } 
+            }
+        }
         catch (IOException ioe) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EDELETE_RESULT, GeneralAlert.ERROR );
         }
     }
-    
+
     public void deleteSurveyDir(String dirname) {
         FileConnection fcFile = null;
         try {
@@ -170,19 +171,24 @@ public class FileSystem {
             while(filelist.hasMoreElements()) {
                 fileName = (String) filelist.nextElement();
                 fcFile = (FileConnection) Connector.open(root + dirname + fileName);
-                if (fcFile.exists()) {
-                    fcFile.delete();
+                if ( fcFile.exists()) {
+                    if( fcFile.isDirectory() ) {
+                        fcFile.close();
+                        deleteDir( fileName );
+                    } else {
+                        fcFile.delete();
+                        fcFile.close();
+                    }
                 }
-                if(fcFile != null)
-                    fcFile.close();
             }
-            
-            if (fc.exists()) {                
+
+            if (fc.exists()) {
                 fc.delete();
             }
-            if(fc != null)
+            if(fc != null) {
                 fc.close();
-            
+            }
+
             fsSurveyStructure.removeNameAndFileNameAtCurrentIndex();
         }
         catch (IOException ioe) {
@@ -191,26 +197,58 @@ public class FileSystem {
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EDELETE_RESULT, GeneralAlert.ERROR );
         }
     }
-    
-    public void moveToPendingACKResult(String xmlFileName){
-        String path = root + fsSurveyStructure.getDirName() + xmlFileName;
-        moveResult(path, xmlFileName, "p_");
+
+    public void deleteDir(String dirname) {
+        FileConnection fcFile = null;
+        FileConnection fc = null;
+        if( !dirname.endsWith("/")) {
+            dirname = dirname + '/';
+        }
+        try {
+            fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname);
+            if( fc.exists() ) {
+                Enumeration filelist = fc.list("*", true);
+                String fileName = null;
+                while(filelist.hasMoreElements()) {
+                    fileName = (String) filelist.nextElement();
+                    fcFile = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname + fileName);
+                    if (fcFile.exists()) {
+                        try{ fcFile.delete(); }catch (IOException ex){}
+                    }
+                    if(fcFile != null) {
+                        fcFile.close();
+                        fcFile = null;
+                    }
+                }
+                fc.delete();
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            Logger.getInstance().logException( ioe.getMessage() );
+        }
+        finally {
+            if(fc != null) {
+                try {
+                    fc.close();
+                } catch (IOException ex) {}
+            }
+        }
     }
-    
+
     public void moveSentResult(String _filename) {
         String path = root + fsSurveyStructure.getDirName() + _filename;
         moveResult(path, _filename, "s_");
     }
-    
+
     public void moveSentResult(String fileDir, String fileName){
-        String path = root + fileDir + fileName;//FileConnection fc = (FileConnection) Connector.open(root + fileDir + fileName);
-        moveResult(path, fileName, "s_");        
+        String path = root + fileDir + fileName;
+        moveResult(path, fileName, "s_");
     }
-    
+
     private void moveResult(String path, String fileName, String prefix){
-        try {           
+        try {
             FileConnection fc = (FileConnection) Connector.open(path);
-            if (fc.exists()) {              
+            if (fc.exists()) {
                 this.removeDisplayName(fileName);
                 this.removeFile(fileName);
                 fc.rename(prefix + fileName);
@@ -222,45 +260,26 @@ public class FileSystem {
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
-        
     }
-    
-    public void movePendingACKToSentResult(String fileDir, String fileName){
-        Logger.getInstance().log("move to sent. Dir:  " + fileDir + " fileName: " + fileName);
-        try {
-            FileConnection fc = (FileConnection) Connector.open(root + fileDir + fileName);
-            if (fc.exists()) {
-                if (fileName.startsWith("p_")) {
-                    String newname = fileName.substring(2);
-                    fc.rename("s_" + newname);
-                }
-            }
-            if(fc != null){
-                fc.close();
-            }
-        } catch (IOException ioe) {
-            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
-        }
-    }
-    
+
     public void moveUnsentResult(String _filename) {
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + _filename);
-            if (fc.exists()) {                
-                if (_filename.startsWith("s_") || _filename.startsWith("p_")) {                    
+            if (fc.exists()) {
+                if (_filename.startsWith("s_") ) {
                     String newname = _filename.substring(2);
                     fc.rename(newname);
                 }
             }
-            if(fc != null)
+            if(fc != null) {
                 fc.close();
+            }
         } catch (IOException ioe) {
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
     }
-    
+
     public void moveCorruptedResult(String _filename) {
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + _filename);
@@ -273,7 +292,7 @@ public class FileSystem {
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
         }
     }
-    
+
     public Vector getSentFilenames() {
         Vector sentFilenames = new Vector();
         
@@ -287,16 +306,15 @@ public class FileSystem {
                 if (fileName.startsWith("s_")) {
                     sentFilenames.addElement(fileName);
                 }
-            }         
+            }
             fc.close();
-            
         } catch (IOException ioe) {}
 
         return sentFilenames;
     }
-    
+
     public void loadSurveyFiles() {
-        try {            
+        try {
             FileConnection fc1 = (FileConnection) Connector.open(root);
             FileConnection fc2 = null;
             FileConnection fc3 = null;
@@ -304,56 +322,54 @@ public class FileSystem {
             
             Enumeration filelist1 = fc1.list("*", true);
             while(filelist1.hasMoreElements()) {
-                dirName = (String) filelist1.nextElement();                 
+                dirName = (String) filelist1.nextElement();
                 fc2 = (FileConnection) Connector.open(root + dirName);
                 if (fc2.isDirectory() && dirName.substring(0, 6).equalsIgnoreCase("survey")){//(dirName.startsWith("survey")  || dirName.startsWith("SURVEY") || dirName.startsWith("Survey")) ) {
                     fc3 = (FileConnection) Connector.open(root + dirName + Resources.SURVEY_NAME);
-                    if (fc3.exists()) {                                  
+                    if (fc3.exists()) {
                         this.loadSurveyInfo(dirName);
                     } else {
 //                        error = true;
                     }
                 }
             }
-            
             if(fc1 != null)
                 fc1.close();
             if(fc2 != null)
                 fc2.close();
             if(fc3 != null)
-                fc3.close();            
+                fc3.close();
             
         } catch (IOException ioe) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_SURVEYS, GeneralAlert.ERROR );
-        }      
+        }
     }
-    
+
     public void loadResultInfo(String _filename) {
         FileSystemResultHandler rh = new FileSystemResultHandler();
         rh.setFileSystemResultStructure(fsResultStructure);
         rh.setFileSystemResultFilename(_filename);
-        
+
         Parser parser = new Parser(rh);
-        parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);      
+        parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);
     }
-    
+
     private void loadSentInfo(String _filename) {
         FileSystemResultHandler rh = new FileSystemResultHandler();
         rh.setFileSystemResultStructure(fsSentStructure);
         rh.setFileSystemResultFilename(_filename);
-        
+
         Parser parser = new Parser(rh);
-        parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);   
+        parser.parseFile(root + fsSurveyStructure.getDirName() + _filename);
     }
-    
+
     public void loadSentFiles() {
         fsSentStructure.reset();
         loadSentFiles("s_");
-        loadSentFiles("p_");
     }
-    
+
     private void loadSentFiles(String filter){
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName());
@@ -362,18 +378,18 @@ public class FileSystem {
             while(filelist.hasMoreElements()) {
                 fileName = (String) filelist.nextElement();
                 if (fileName.startsWith(filter)) this.loadSentInfo(fileName);
-            }                                 
-            fc.close();                      
+            }
+            fc.close();
         } catch (IOException ioe) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_RESULTS, GeneralAlert.ERROR );
         }
     }
-        
+
     public void loadResultFiles() {
-        fsResultStructure.reset();       
-        
+        fsResultStructure.reset();
+
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName());
             Enumeration filelist = fc.list("r_*", true);
@@ -381,26 +397,26 @@ public class FileSystem {
             while(filelist.hasMoreElements()) {
                 if (!getError()) {
                     fileName = (String) filelist.nextElement();
-                    if ( (fileName.startsWith("r_")) || (fileName.startsWith("s_")) || (fileName.startsWith("p_"))) {
+                    if ( ( fileName.startsWith("r_")) || (fileName.startsWith("s_") ) ) {
                         this.loadResultInfo(fileName);
                     }
                     if (getError()){ 
-                        moveCorruptedResult(fileName);                    
+                        moveCorruptedResult(fileName);
                     }
                 } else {
                     break;
                 }
             }
-            
+
             if (!getError()) {
                 fsResultStructure.sortDisplayNames();
             }
-            
+
             fc.close();
         } catch (IOException ioe) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_RESULTS, GeneralAlert.ERROR );
         }
-    }    
+    }
 }

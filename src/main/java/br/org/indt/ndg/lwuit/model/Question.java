@@ -11,7 +11,7 @@ import java.io.PrintStream;
  *
  * @author mluz
  */
-public class Question extends NDGQuestion implements DisplayableModel{
+public class Question extends NDGQuestion implements DisplayableItem {
 
     private String name;
     private Answer answer;

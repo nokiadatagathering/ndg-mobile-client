@@ -78,7 +78,7 @@ public class FileBrowserView extends Screen implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        if (evt.getSource() == myList ||
+        if (evt.getSource() == myList && myList.getSelectedItem() != null ||
                 evt.getKeyEvent() == Display.GAME_RIGHT) {
             handleEnterDirectory();
         } else if (evt.getSource() == localBackCommand ||

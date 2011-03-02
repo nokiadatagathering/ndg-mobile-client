@@ -33,7 +33,7 @@ public class BackPhotoFormCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        Camera.getInstance().shutDown();
+        Camera.getInstance().stopCamera();
         if (!NDGCameraManager.getInstance().showLastInterviewForm()) {
             AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
         }

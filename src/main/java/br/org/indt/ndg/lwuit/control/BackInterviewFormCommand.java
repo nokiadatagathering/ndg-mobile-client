@@ -21,16 +21,18 @@ public class BackInterviewFormCommand extends BackCommand {
 
     protected void doAction(Object parameter) {
         InterviewForm view = (InterviewForm)parameter;
-        // ask to save modifications if any
+        // ask whether chanes shall be discarded or saved (in memory, NOT in file)
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-        if ( view.isModifiedInterview() && GeneralAlert.getInstance().show(Resources.CMD_SAVE, Resources.SAVE_MODIFICATIONS, GeneralAlert.CONFIRMATION) == GeneralAlert.RESULT_YES ) {
+        if ( view.isModifiedInterview() &&
+                GeneralAlert.getInstance().show( Resources.CMD_SAVE,
+                "Discard all the ansers?", GeneralAlert.CONFIRMATION) // TODO localization, it would be better to ask qustion where save = Yes
+                    == GeneralAlert.RESULT_NO ) {
             // if accepted proceed as if 'Next' was clicked
             view.actionPerformed(new ActionEvent(AcceptQuestionListFormCommand.getInstance().getCommand()));
         } else {
             if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
             } else {
-                // discard results and leave Interview
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
             }
         }

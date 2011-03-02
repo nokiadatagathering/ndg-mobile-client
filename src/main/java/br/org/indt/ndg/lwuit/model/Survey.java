@@ -9,7 +9,7 @@ package br.org.indt.ndg.lwuit.model;
  *
  * @author mluz
  */
-public class Survey implements DisplayableModel{
+public class Survey implements DisplayableItem{
 
     private String name;
     private int totalQuestions;

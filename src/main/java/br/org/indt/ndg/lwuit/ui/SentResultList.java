@@ -8,12 +8,12 @@ import br.org.indt.ndg.lwuit.control.MarkAllResultsCommand;
 import br.org.indt.ndg.lwuit.control.MoveToUnsentCommand;
 import br.org.indt.ndg.lwuit.control.ResultControl;
 import br.org.indt.ndg.lwuit.control.UnmarkAllResultsCommand;
+import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.list.DefaultListModel;
-import com.sun.lwuit.list.ListModel;
 
 
 /**
@@ -25,26 +25,15 @@ public class SentResultList extends Screen implements ActionListener{
     private Result[] results;
     private String path = Resources.SENT_LIST_TITLE;
     private String title;
-    //REMOVE LATER.
-    //private SentList sentList;
 
     private List list;
-    private ListModel underlyingModel;
-    private CheckableListCellRenderer renderer;
-
-    public CheckableListCellRenderer getRenderer() {
-        return renderer;
-    }
+    private CheckableListModel underlyingModel;
 
     protected void loadData() {
         title = AppMIDlet.getInstance().getFileStores().getSurveyStructure().getTitle();
         results = ResultControl.getInstance().getSentResults();
         //sentList = new SentList();
     }
-
-//    public SentList getSentList(){
-//        return sentList;
-//    }
 
     protected void customize() {
         setTitle(title, path);
@@ -70,14 +59,12 @@ public class SentResultList extends Screen implements ActionListener{
         }
         form.addCommandListener(this);
 
-        underlyingModel = new DefaultListModel(results);
+        underlyingModel = new CheckableListModel(results, CheckableListModel.ALL_ITEMS_CHECKABLE);
 
         list = new List(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
-
-        renderer = new SentResultListCellRenderer(list.size());
-        list.setListCellRenderer(renderer);
+        list.setListCellRenderer(new SentResultListCellRenderer());
 
         list.setFixedSelection(List.FIXED_NONE);
         form.addComponent(list);
@@ -88,23 +75,23 @@ public class SentResultList extends Screen implements ActionListener{
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
         if (cmd == MoveToUnsentCommand.getInstance().getCommand()) {
-            MoveToUnsentCommand.getInstance().execute(this);
+            MoveToUnsentCommand.getInstance().execute(underlyingModel);
         }
         else if (cmd == MarkAllResultsCommand.getInstance().getCommand()) {
-            MarkAllResultsCommand.getInstance().execute(renderer);
+            MarkAllResultsCommand.getInstance().execute(underlyingModel);
         }
         else if (cmd == UnmarkAllResultsCommand.getInstance().getCommand()) {
-            UnmarkAllResultsCommand.getInstance().execute(renderer);
+            UnmarkAllResultsCommand.getInstance().execute(underlyingModel);
         }
         else if (cmd == DeleteSentResultCommand.getInstance().getCommand()) {
-            DeleteSentResultCommand.getInstance().execute(renderer);
+            DeleteSentResultCommand.getInstance().execute(underlyingModel);
         }
         else if (cmd == BackSentResultListCommand.getInstance().getCommand()) {
             BackSentResultListCommand.getInstance().execute(this);
         }
         else if(cmd == list){
             //CREATE COMMAND FOR THIS ACTION
-            renderer.updateCheckbox(list.getSelectedIndex());
+            underlyingModel.updateCheckbox(list.getSelectedIndex());
         }
         else
             throw new IllegalArgumentException("Invalid command");

@@ -1,8 +1,7 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.model.CheckableItem;
 import br.org.indt.ndg.lwuit.model.Result;
-import com.sun.lwuit.CheckBox;
 
 /**
  *
@@ -10,16 +9,15 @@ import com.sun.lwuit.CheckBox;
  */
 public class SentResultListCellRenderer extends CheckableListCellRenderer{
 
-    protected CheckBox getCheckBox(DisplayableModel disp, int index){
-        CheckBox c = super.getCheckBox(disp, index);
-        Result result = (Result) disp;
-        if(result.getPhisicallyFileName().startsWith("p_")){
-            c.setIcon(Screen.getRes().getImage("hourglass"));
-        }
-        return c;
+    public SentResultListCellRenderer() {
+        super();
     }
 
-    public SentResultListCellRenderer(int realSize) {
-        super(realSize);
+    protected void prepareCheckBox(CheckableItem disp){
+        super.prepareCheckBox(disp);
+        Result result = (Result) disp;
+        if(result.getPhisicallyFileName().startsWith("p_")){
+            m_rendererCheckbox.setIcon(Screen.getRes().getImage("hourglass"));
+        }
     }
 }

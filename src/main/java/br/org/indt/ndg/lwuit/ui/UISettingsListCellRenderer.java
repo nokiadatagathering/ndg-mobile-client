@@ -24,11 +24,11 @@ public class UISettingsListCellRenderer extends SimpleListCellRenderer {
         if (isSelected) {
             setFocus(true);
             label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
-            getStyle().setBgPainter(focusBGPainter);
+            getStyle().setBgPainter(m_focusBGPainter);
         } else {
             label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             setFocus(false);
-            getStyle().setBgPainter(bgPainter);
+            getStyle().setBgPainter(m_bgPainter);
         }
 
         if(!contains(label))

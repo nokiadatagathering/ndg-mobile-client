@@ -1,4 +1,3 @@
-
 package br.org.indt.ndg.mobile;
 
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
@@ -13,34 +12,34 @@ import br.org.indt.ndg.mobile.xmlhandle.ResultHandler;
 import br.org.indt.ndg.mobile.xmlhandle.kParser;
 
 public class FileStores {
-    
+
     private SurveyStructure surveyStructure = null;
     private ResultStructure resultStructure = null;
-    
+
     private Parser parser=null;
-    kParser kparser = null;
-    
+    private kParser kparser = null;
+
     public FileStores() {
     }
-    
+
     public boolean getError() {
         if (parser!=null) return parser.getError();
         else return false;
     }
-    
+
     public boolean getErrorkParser() {
         if (kparser!=null) return kparser.getError();
         else return false;
     }
-    
+
     public SurveyStructure getSurveyStructure() {
         return surveyStructure;
     }
-    
+
     public ResultStructure getResultStructure() {
         return resultStructure;
     }
-    
+
     public void resetResultStructure()
     {
         resultStructure = null;
@@ -63,28 +62,28 @@ public class FileStores {
         }
         getSurveyStructure().initVisitedArray();
     }
-    
+
     public void parseSurveyFile() {
         surveyStructure =  new SurveyStructure();
-        
+
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        
+
         kparser = new kParser();
         kparser.setSurveyStructure(surveyStructure);
         kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);
     }
-    
+
     public void parseResultFile() {
         resultStructure = new ResultStructure();
-        
+
         ResultHandler handler = new ResultHandler();
         handler.setResultStructure(resultStructure);
-        
+
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String fileName = AppMIDlet.getInstance().getFileSystem().getResultFilename();
-        
+
         if (fileName!=null) {
-            parser = new Parser(handler);    
+            parser = new Parser(handler);
             parser.parseFile(Resources.ROOT_DIR + dirName + fileName);
         }
     }
@@ -130,7 +129,6 @@ public class FileStores {
                 currentAnswer = (NDGAnswer) tempanswer;
                 question.setVisited(currentAnswer.getVisited(), i);
             }
-        }        
+        }
     }
-
 }

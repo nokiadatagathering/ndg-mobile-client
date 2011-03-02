@@ -9,10 +9,11 @@ package br.org.indt.ndg.lwuit.model;
  *
  * @author mluz
  */
-public class Result implements DisplayableModel{
+public class Result implements DisplayableItem, CheckableItem {
 
     private String name;
     private String fileName;
+    private boolean isChecked = false;
 
     public String getName() {
         return name;
@@ -31,6 +32,14 @@ public class Result implements DisplayableModel{
 
     public String getDisplayableName() {
         return getName();
+    }
+
+    public void setChecked( boolean check ) {
+        isChecked = check;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
     }
 
 }

@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
@@ -34,10 +35,10 @@ public class MoveToUnsentCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        SentResultList list = (SentResultList) parameter;
+        CheckableListModel model = (CheckableListModel) parameter;
+        boolean[] listFlags = model.getSelectedFlags();
         FileSystem fs = AppMIDlet.getInstance().getFileSystem();
         Vector xmlResultFile = fs.getXmlSentFile();
-        boolean[] listFlags = list.getRenderer().getSelectedFlags();
         int size = listFlags.length;
         for (int i=0; i < size; i++){
             if (listFlags[i]) {

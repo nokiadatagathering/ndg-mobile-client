@@ -1,13 +1,13 @@
 package br.org.indt.ndg.lwuit.extended;
 
-import br.org.indt.ndg.mobile.logging.Logger;
-import com.sun.lwuit.Command;
-import com.sun.lwuit.Form;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.DataChangedListener;
 import com.sun.lwuit.events.FocusListener;
+import com.sun.lwuit.impl.midp.VirtualKeyboard;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -51,7 +51,12 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         addFocusListener(this);
         this.dateFormat = dateFormat;
         setDate(date);
-        setUseSoftkeys(false);      //we don't need T9 for numeric field, do we?
+        setUseSoftkeys(false);
+        if(Display.getInstance().isTouchScreenDevice()) {
+            VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
+            onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
+            VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);
+        }
     }
 
     public void setDate(Date date) {
@@ -61,6 +66,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
     }
 
     public Date getDate() {
+        validDate(true);
         buildDate();
         return date;
     }
@@ -68,19 +74,18 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
     private void buildDate() {
         Calendar calendar = Calendar.getInstance();
         if (dateFormat == DDMMYYYY) {
-            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[0]));
-            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
             calendar.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
+            calendar.set(Calendar.DAY_OF_MONTH, getDayOfMonth(calendar, Integer.parseInt(dateFields[0])));
         } else if (dateFormat == MMDDYYYY) {
-            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[1]));
-            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[0])-1);
             calendar.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[0])-1);
+            calendar.set(Calendar.DAY_OF_MONTH, getDayOfMonth(calendar, Integer.parseInt(dateFields[1])));
         } else if (dateFormat == YYYYMMDD) {
-            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[2]));
-            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
             calendar.set(Calendar.YEAR, Integer.parseInt(dateFields[0]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
+            calendar.set(Calendar.DAY_OF_MONTH, getDayOfMonth(calendar, Integer.parseInt(dateFields[2])));
         }
-
         date = calendar.getTime();
     }
 
@@ -90,6 +95,28 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
 
     public String getField(int i) {
         return dateFields[i-1];
+    }
+
+    public void setCurrentDate() {
+        Calendar c = Calendar.getInstance();
+        String day = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
+        String month = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
+        String year = formatDayOrMonth(c.get(Calendar.YEAR) + "");
+        if (dateFormat == MMDDYYYY) {
+            dateFields[0] = month;
+            dateFields[1] = day;
+            dateFields[2] = year;
+        } else if (dateFormat == DDMMYYYY) {
+            dateFields[0] = day;
+            dateFields[1] = month;
+            dateFields[2] = year;
+        } else if (dateFormat == YYYYMMDD) {
+            dateFields[0] = year;
+            dateFields[1] = month;
+            dateFields[2] = day;
+        }
+        setText(formatDate());
+        setFieldSelected(1);
     }
 
     private void splitDate(Date date) {
@@ -154,6 +181,10 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
     }
 
     public void dataChanged(int type, int index) {
+
+        if (index < 0)
+            return;
+
         if (type == DataChangedListener.ADDED) {
             if (selectMode) {
                 char c = getText().charAt(index);
@@ -250,73 +281,121 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         }
     }
 
-    private void validDate() {
-        if (dateFormat == MMDDYYYY) {
-            // month
-            if (Integer.parseInt(dateFields[0]) < 1)
-                dateFields[0] = "01";
-            if (Integer.parseInt(dateFields[0]) > 12)
-                dateFields[0] = "12";
+    private void validDate( boolean parseTextFirst ) {
+        try {
+            if ( parseTextFirst )
+                parseDate();
 
-            //day
-            if (Integer.parseInt(dateFields[1]) < 1)
-                dateFields[1] = "01";
-            if (Integer.parseInt(dateFields[1]) > 31)
-                dateFields[1] = "31";
+            if (dateFormat == MMDDYYYY) {
+                // month
+                if (Integer.parseInt(dateFields[0]) < 1)
+                    dateFields[0] = "01";
+                if (Integer.parseInt(dateFields[0]) > 12)
+                    dateFields[0] = "12";
 
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.MONTH, Integer.parseInt(dateFields[0])-1);
-            c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[1]));
-            c.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
-            dateFields[0] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
-            dateFields[1] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
-            dateFields[2] = formatYear(c.get(Calendar.YEAR) + "");
-        } else if (dateFormat == DDMMYYYY) {
-            // month
-            if (Integer.parseInt(dateFields[1]) < 1)
-                dateFields[1] = "01";
-            if (Integer.parseInt(dateFields[1]) > 12)
-                dateFields[1] = "12";
+                //day
+                if (Integer.parseInt(dateFields[1]) < 1)
+                    dateFields[1] = "01";
+                if (Integer.parseInt(dateFields[1]) > 31)
+                    dateFields[1] = "31";
 
-            //day
-            if (Integer.parseInt(dateFields[0]) < 1)
-                dateFields[0] = "01";
-            if (Integer.parseInt(dateFields[0]) > 31)
-                dateFields[0] = "31";
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[0]));
-            c.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
-            c.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
-            dateFields[0] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
-            dateFields[1] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
-            dateFields[2] = formatYear(c.get(Calendar.YEAR) + "");
-        } else if (dateFormat == YYYYMMDD) {
-            // month
-            if (Integer.parseInt(dateFields[1]) < 1)
-                dateFields[1] = "01";
-            if (Integer.parseInt(dateFields[1]) > 12)
-                dateFields[1] = "12";
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
+                c.set(Calendar.MONTH, Integer.parseInt(dateFields[0])-1);
+                c.set(Calendar.DAY_OF_MONTH, getDayOfMonth(c, Integer.parseInt(dateFields[1])));
+                dateFields[0] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
+                dateFields[1] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
+                dateFields[2] = formatYear(c.get(Calendar.YEAR) + "");
+            } else if (dateFormat == DDMMYYYY) {
+                // month
+                if (Integer.parseInt(dateFields[1]) < 1)
+                    dateFields[1] = "01";
+                if (Integer.parseInt(dateFields[1]) > 12)
+                    dateFields[1] = "12";
 
-            //day
-            if (Integer.parseInt(dateFields[2]) < 1)
-                dateFields[2] = "01";
-            if (Integer.parseInt(dateFields[2]) > 31)
-                dateFields[2] = "31";
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, Integer.parseInt(dateFields[0]));
-            c.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
-            c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateFields[2]));
-            dateFields[0] = formatYear(c.get(Calendar.YEAR) + "");
-            dateFields[1] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
-            dateFields[2] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
+                //day
+                if (Integer.parseInt(dateFields[0]) < 1)
+                    dateFields[0] = "01";
+                if (Integer.parseInt(dateFields[0]) > 31)
+                    dateFields[0] = "31";
+
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.YEAR, Integer.parseInt(dateFields[2]));
+                c.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
+                c.set(Calendar.DAY_OF_MONTH, getDayOfMonth(c, Integer.parseInt(dateFields[0])) );
+                dateFields[0] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
+                dateFields[1] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
+                dateFields[2] = formatYear(c.get(Calendar.YEAR) + "");
+            } else if (dateFormat == YYYYMMDD) {
+                // month
+                if (Integer.parseInt(dateFields[1]) < 1)
+                    dateFields[1] = "01";
+                if (Integer.parseInt(dateFields[1]) > 12)
+                    dateFields[1] = "12";
+
+                //day
+                if (Integer.parseInt(dateFields[2]) < 1)
+                    dateFields[2] = "01";
+                if (Integer.parseInt(dateFields[2]) > 31)
+                    dateFields[2] = "31";
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.YEAR, Integer.parseInt(dateFields[0]));
+                c.set(Calendar.MONTH, Integer.parseInt(dateFields[1])-1);
+                c.set(Calendar.DAY_OF_MONTH, getDayOfMonth(c, Integer.parseInt(dateFields[2])));
+                dateFields[0] = formatYear(c.get(Calendar.YEAR) + "");
+                dateFields[1] = formatDayOrMonth((c.get(Calendar.MONTH) + 1) + "");
+                dateFields[2] = formatDayOrMonth(c.get(Calendar.DAY_OF_MONTH) + "");
+            }
+        } catch ( Exception e) {
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(Resources.WARNING, "Could not parse date", GeneralAlert.INFO); // TODO localize
+            setCurrentDate();
         }
+    }
 
+    /*
+     * This method determines if currently set month has actually that much days
+     * If not tries to determine the maximum day
+     * Calendar has to have current year and month already set
+     */
+    private int getDayOfMonth(Calendar c, int dayOfMonth ) {
+        while(dayOfMonth >= 28) {
+            try {
+                c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                c.getTime(); // will throw if day does not exist
+                break;
+            } catch (Exception e) {
+                --dayOfMonth;
+            }
+        }
+        return dayOfMonth;
     }
 
     private void setField(int field, String value) {
         dateFields[field-1] = value;
-        if (selectMode) validDate();
+        if (selectMode) validDate(false);
         setText(formatDate());
+    }
+
+    /*
+     * WORKAROUND for touch
+     * WARN: This is only a quick workaround method for touch devices.
+     * Most probbaly some better solution will be needed
+     */
+    private void parseDate() throws Exception {
+        String dateString = getText();
+        String fieldOne = "", fieldTwo = "", fieldThree = "";
+        int firstSeparatorIndex = dateString.indexOf(separator);
+        int secondSeparatorIndex = dateString.indexOf(separator, firstSeparatorIndex+1);
+
+        fieldOne = dateString.substring(0, firstSeparatorIndex);
+        if ( secondSeparatorIndex >= 0 && (firstSeparatorIndex+1 < dateString.length()) ) {
+            fieldTwo = dateString.substring(firstSeparatorIndex+1, secondSeparatorIndex);
+            fieldThree = dateString.substring(secondSeparatorIndex+1, dateString.length());
+        }
+        dateFields[0] = fieldOne;
+        dateFields[1] = fieldTwo;
+        dateFields[2] = fieldThree;
     }
 
     public void focusGained(Component cmp) {
@@ -429,24 +508,8 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
     }
 
     public void focusLost(Component cmp) {
-        if (dateFormat == MMDDYYYY || dateFormat == DDMMYYYY) {
-            if (getFieldSelected() == 1) {
-                setField(1, formatDayOrMonth(getField(1)));
-            } else if (getFieldSelected() == 2) {
-                setField(2, formatDayOrMonth(getField(2)));
-            } else if (getFieldSelected() == 3) {
-                setField(3, formatYear(getField(3)));
-            }
-        } else if (dateFormat == YYYYMMDD) {
-            if (getFieldSelected() == 1) {
-                setField(1, formatYear(getField(1)));
-            } else if (getFieldSelected() == 2) {
-                setField(2, formatDayOrMonth(getField(2)));
-            } else if (getFieldSelected() == 3) {
-                setField(3, formatDayOrMonth(getField(3)));
-            }
-        }
-
+        validDate(true);
+        setText(formatDate());
     }
 
     public int getFieldSelected() {

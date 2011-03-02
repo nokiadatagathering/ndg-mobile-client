@@ -6,6 +6,7 @@ import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
+import com.sun.lwuit.Label;
 import com.sun.lwuit.List;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.geom.Rectangle;
@@ -20,23 +21,30 @@ import com.sun.lwuit.painter.BackgroundPainter;
  */
 abstract class DefaultNDGListCellRenderer extends Container implements ListCellRenderer {
 
-    protected BackgroundPainter bgPainter;
-    protected Painter focusBGPainter;
-    protected Image hr;
+    protected final BackgroundPainter m_bgPainter;
+    protected final Painter m_focusBGPainter;
+    protected final Image m_bottomLine;
+    protected final Label m_transitionLabel = new Label();
 
-    protected final int TOUCH_SCREEN_VERTICAL_PADDING = 10;
+    protected static final int TOUCH_SCREEN_VERTICAL_PADDING = 10;
 
     public DefaultNDGListCellRenderer() {
         super(new BorderLayout());
 
-        bgPainter = new BGPainter(this);
-        focusBGPainter = new FocusBGPainter(this);
-        hr = Screen.getRes().getImage("bottom");
+        m_bgPainter = new BGPainter(this);
+        m_focusBGPainter = new FocusBGPainter(this);
+        m_bottomLine = Screen.getRes().getImage("bottom");
+        m_transitionLabel.setCellRenderer(true);
     }
 
     public abstract Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected);
 
-    public abstract Component getListFocusComponent(List list);
+    public Component getListFocusComponent(List list) {
+        m_transitionLabel.setFocus(true);
+        m_transitionLabel.getStyle().setMargin(0,0,0,0);
+        m_transitionLabel.getStyle().setBgPainter(m_focusBGPainter);
+        return m_transitionLabel;
+    }
 
     public void addComponent(Object constraints, Component cmp) {
         super.addComponent(constraints, cmp);
@@ -67,7 +75,7 @@ abstract class DefaultNDGListCellRenderer extends Container implements ListCellR
             g.fillRect(rect.getX(), rect.getY()+height-4, 1, 1);
             g.fillRect(rect.getX()+width-1, rect.getY()+height-4, 1, 1);
 
-            g.drawImage( hr.scaled( Display.getInstance().getDisplayWidth(),
+            g.drawImage( m_bottomLine.scaled( Display.getInstance().getDisplayWidth(),
                                     Screen.getRes().getImage("bottom").getHeight() ),
                         rect.getX(), rect.getY() + height -2);
         }
@@ -84,7 +92,7 @@ abstract class DefaultNDGListCellRenderer extends Container implements ListCellR
             g.setColor(NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor);
             g.fillRect(rect.getX(), rect.getY(), rect.getSize().getWidth(), height );
 
-            g.drawImage(hr.scaled( Display.getInstance().getDisplayWidth(),
+            g.drawImage(m_bottomLine.scaled( Display.getInstance().getDisplayWidth(),
                                    Screen.getRes().getImage("bottom").getHeight() ),
                                    rect.getX(), rect.getY() + height - 2);
         }

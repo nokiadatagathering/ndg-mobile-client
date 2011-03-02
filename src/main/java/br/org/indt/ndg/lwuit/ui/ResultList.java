@@ -14,6 +14,7 @@ import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.UnmarkAllResultsCommand;
 import br.org.indt.ndg.lwuit.control.ViewResultCommand;
 import br.org.indt.ndg.lwuit.control.ViewSentResultsCommand;
+import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
@@ -21,7 +22,6 @@ import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.SelectionListener;
-import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
 
 /**
@@ -33,14 +33,12 @@ public class ResultList extends Screen implements ActionListener {
     private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;
 
-    private List list;
-    private ListModel underlyingModel;
-    private ResultListCellRenderer renderer;
+    private ClickableList list = null;
+    private CheckableListModel underlyingModel;
     private Result[] results;
     private boolean checked;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
-    private ResultListContextMenu resultContextMenu = null;
 
 
     protected void loadData() {
@@ -74,15 +72,13 @@ public class ResultList extends Screen implements ActionListener {
         form.addCommandListener(this);
 
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
-        underlyingModel = new DefaultListModel(results);
+        underlyingModel = new CheckableListModel(results, CheckableListModel.FIRST_ITEM_UNCHECKABLE);
 
-        list = new List(underlyingModel);
+        list = new ClickableList(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
         list.addSelectionListener(new HandleSelectedItem());
-
-        renderer = new ResultListCellRenderer(list.size());
-        list.setListCellRenderer(renderer);
+        list.setListCellRenderer(new ResultListCellRenderer());
 
         list.setFixedSelection(List.FIXED_NONE);
         form.addComponent(list);
@@ -92,11 +88,15 @@ public class ResultList extends Screen implements ActionListener {
 
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
-        
+
         if(cmd == list){
             if( (list.size() > 0) && (list.getSelectedIndex() > 0)) {
-                renderer.updateCheckbox(list.getSelectedIndex());
-                setCommands();
+                if (list.getLastPointerPressedCoordinateX() > (int)(0.8*list.getWidth())) {
+                    showContextMenu();
+                }  else {
+                    underlyingModel.updateCheckbox(list.getSelectedIndex());
+                    setCommands();
+                }
             }
             else if (list.getSelectedIndex() == 0) {
                  NewResultCommand.getInstance().execute(null);
@@ -111,23 +111,23 @@ public class ResultList extends Screen implements ActionListener {
         } else if (cmd == ViewResultCommand.getInstance().getCommand()) {
                 ViewResultCommand.getInstance().execute(new Integer(getSelectedResult()));
         } else if (cmd == SendResultNowCommand.getInstance().getCommand()) {
-                if(renderer.getQtSelecteds()==0){
-                    renderer.setSelected(list.getSelectedIndex());
+                if(underlyingModel.getQtSelecteds()==0){
+                    underlyingModel.setChecked(list.getSelectedIndex());
                 }
-                SendResultNowCommand.getInstance().execute(renderer.getSelectedFlags());
+                SendResultNowCommand.getInstance().execute(underlyingModel.getSelectedFlags());
         } else if (cmd == DeleteResultNowCommand.getInstance().getCommand()) {
-                if(renderer.getQtSelecteds()==0){
-                    renderer.setSelected(list.getSelectedIndex());
+                if(underlyingModel.getQtSelecteds()==0){
+                    underlyingModel.setChecked(list.getSelectedIndex());
                 }
-                DeleteResultNowCommand.getInstance().execute(renderer.getSelectedFlags());
+                DeleteResultNowCommand.getInstance().execute(underlyingModel.getSelectedFlags());
                 
         } else if (cmd == ViewSentResultsCommand.getInstance().getCommand()) {
                 ViewSentResultsCommand.getInstance().execute(null);
         } else if (cmd == MarkAllResultsCommand.getInstance().getCommand()) {
-                MarkAllResultsCommand.getInstance().execute(renderer);
+                MarkAllResultsCommand.getInstance().execute(underlyingModel);
                 setCommands();
         } else if (cmd == UnmarkAllResultsCommand.getInstance().getCommand()) {
-                UnmarkAllResultsCommand.getInstance().execute(renderer);
+                UnmarkAllResultsCommand.getInstance().execute(underlyingModel);
                 setCommands();
         } else if (cmd == ExitCommand.getInstance().getCommand()) {
                 ExitCommand.getInstance().execute(null);
@@ -141,13 +141,12 @@ public class ResultList extends Screen implements ActionListener {
     }
 
     private void showContextMenu() {
-        resultContextMenu = new ResultListContextMenu(getSelectedResult(), list.size());
+        ResultListContextMenu resultContextMenu = new ResultListContextMenu(getSelectedResult(), list.size());
         resultContextMenu.show();
-        resultContextMenu = null;
     }
 
     private void setCommands(){
-        if(renderer.getQtSelecteds()>1){
+        if(underlyingModel.getQtSelecteds()>1){
             if(!checked){
                 form.removeCommand(ViewResultCommand.getInstance().getCommand());
                 form.removeCommand(OpenResultCommand.getInstance().getCommand());
@@ -189,5 +188,28 @@ public class ResultList extends Screen implements ActionListener {
         }
 
     }
+
+    /**
+     * List class extension that remembers last pointer press X coordinate
+     * It may be used to perform different actions based on which part of List item was clicked
+     * NOTE: showing context menu in pointerPressed method led to undesired effects
+     */
+    private class ClickableList extends List {
+
+        private int m_x = 0;
+
+        public ClickableList(ListModel model) {
+            super(model);
+        }
+
+        public void pointerPressed(int x, int y) {
+            m_x = x;
+            super.pointerPressed(x,y);
+        }
+
+        public int getLastPointerPressedCoordinateX() {
+            return m_x;
+        }
+    };
 
 }

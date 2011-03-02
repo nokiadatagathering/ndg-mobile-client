@@ -1,15 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.mobile;
 
 /**
  * This class encapsulates a file entity.
  * It contains its
  */
-public class XmlResultFile {            
+public class XmlResultFile {
     private String fileDisplayName;
     private String fileNameInDisc;
     
@@ -17,19 +12,19 @@ public class XmlResultFile {
         this.fileDisplayName = displayName;
         this.fileNameInDisc = fileName;
     }
-    
+
     public String getDisplayName(){
         return fileDisplayName;
     }
-    
+
     public String getFileName(){
         return fileNameInDisc;
     }
-    
+
     public void setDisplayName(String name){
-        fileDisplayName = name;        
+        fileDisplayName = name;
     }
-    
+
     public void setFileName(String name){
         fileNameInDisc = name;
     }

@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.model.DisplayableItem;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Label;
@@ -20,19 +20,19 @@ abstract class SimpleListCellRenderer extends DefaultNDGListCellRenderer {
 
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
-        DisplayableModel disp = (DisplayableModel) value;
+        DisplayableItem disp = (DisplayableItem) value;
         label = getLabel(disp);
 
         if (isSelected) {
             setFocus(true);
             label.setFocus(true);
             label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
-            getStyle().setBgPainter(focusBGPainter);
+            getStyle().setBgPainter(m_focusBGPainter);
         } else {
             label.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             setFocus(false);
             label.setFocus(false);
-            getStyle().setBgPainter(bgPainter);
+            getStyle().setBgPainter(m_bgPainter);
         }
         
         if(!contains(label))
@@ -41,14 +41,7 @@ abstract class SimpleListCellRenderer extends DefaultNDGListCellRenderer {
         return this;
     }
 
-    public Component getListFocusComponent(List list) {
-        label.setText(" ");
-        label.setFocus(true);
-        this.setFocus(true);
-        return this;
-    }
-
-    protected Label getLabel(DisplayableModel disp){
+    protected Label getLabel(DisplayableItem disp){
         Label l = new Label(disp.getDisplayableName());
         return l;
     }

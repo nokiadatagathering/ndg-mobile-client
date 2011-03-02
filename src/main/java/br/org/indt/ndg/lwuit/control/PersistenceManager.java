@@ -61,19 +61,11 @@ public class PersistenceManager {
         t.start();
     }
 
-    public void save2() {
-
+    private void save2() {
         String surveyId = String.valueOf(SurveysControl.getInstance().getSurveyIdNumber());
         try {
             String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
             boolean isLocalFile = AppMIDlet.getInstance().getFileSystem().isLocalFile();
-            String userId = AppMIDlet.getInstance().getIMEI();
-
-            // Old time
-            //long currentTime = (new Date()).getTime();
-            //long timeTaken = currentTime - AppMIDlet.getInstance().getTimeTracker();
-
-            long timeTaken = (new Date()).getTime();
 
             String UID = generateUniqueID();
 
@@ -82,15 +74,18 @@ public class PersistenceManager {
             
             if (isLocalFile) {
                 fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
-                filename = Resources.ROOT_DIR + surveyDir + fname;
-            }
-            else {
-                fname = "r_" + surveyId/*survey.getIdNumber()*/ + "_" + userId + "_" + UID + ".xml";
-                filename = Resources.ROOT_DIR + surveyDir + fname;
+            } else {
+                fname = "r_" + surveyId/*survey.getIdNumber()*/ + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
             }
 
+            AppMIDlet.getInstance().getFileSystem().deleteDir( "b_" + fname );//delete old binaries
+
+            filename = Resources.ROOT_DIR + surveyDir + fname;
+
             resultId = extractResultId(fname);
-            if (!isLocalFile) resultId = UID;
+            if (!isLocalFile) {
+                resultId = UID;
+            }
 
             FileConnection connection = (FileConnection) Connector.open(filename);
             if(!connection.exists()) connection.create();
@@ -107,100 +102,11 @@ public class PersistenceManager {
             AppMIDlet.getInstance().setFileSystem(fs);
 
             OutputStream out = connection.openOutputStream();
-            PrintStream output = new PrintStream(out);
-
-            output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
-            output.print("<result ");
-
-            if (isLocalFile) {
-                output.print("r_id=\"" + resultId + "\" ");
-                
-            } else {
-                output.print("r_id=\"" + UID + "\" ");
-
-                // *****************************   PROTOCOL DEFINITION *************************
-                //
-                //****************************************************************************************************
-                //Type of Msg |      SurveyID			  |      Number of  Msgs  |    	ResultID  	   | UserID
-                //      9           9999999999                          99             a9b9c9d9       999999999999999
-                //****************************************************************************************************
-                //end of header
-            }
-            output.print("s_id=\"" + surveyId + "\" ");
-            output.print("u_id=\"" + userId + "\" ");
-            output.print("time=\"" + String.valueOf(timeTaken)+ "\">");  //convert to seconds
-            output.println();
-
-            if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
-// we do not set new location if it was already in survey and survey is modified
-// it is kept by resultHandler
-                String longitude = null;
-                String latitude = null;
-                if (AppMIDlet.getInstance().getFileStores().getResultStructure() != null) {
-                    latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
-                    longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
-                }
-                
-                if (longitude != null && latitude != null) {
-                    output.println("<latitude>" + latitude + "</latitude>");
-                    output.println("<longitude>" + longitude + "</longitude>");
-                } else {
-                    Location loc = AppMIDlet.getInstance().getLocation();
-                    if (loc != null) {
-                        if (loc.getQualifiedCoordinates() != null) {
-                            output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
-                            output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
-                        }
-                    }
-                }
-            }
-            output.println("<title>" + AppMIDlet.getInstance().u2x(displayName) + "</title>");
-
-            int catId = 0;
-            int qIndex = 0;
-            NDGQuestion question = (NDGQuestion) vQuestions.elementAt(qIndex);
-            while(qIndex < vQuestions.size()) {
-                catId = Integer.parseInt(question.getCategoryId());
-                /** Category **/
-                output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(question.getCategoryName()) + "\" ");
-                output.println("id=\"" + question.getCategoryId()+ "\">");
-                while(catId == Integer.parseInt(question.getCategoryId())){
-                    /** Question **/
-                    String type = getQuestionType(question);
-                    output.print("<answer " + "type=\"" + type + "\" ");
-                    output.print("id=\"" + question.getQuestionId() + "\" ");
-                    output.print("visited=\"" + question.getVisited() + "\"");
-
-                    if (question.getType().equals("_time")) {
-                        if (((TimeQuestion)question).getConvention() == 24 || ((TimeQuestion)question).getConvention() == 0 ) {
-                            output.print(" convention=\"" + "24" + "\"");
-                        } else {
-                            if( ((TimeQuestion)question).getAm_pm() == TimeQuestion.AM )
-                                output.print(" convention=\"" + "am" + "\"");
-                            else
-                                output.print(" convention=\"" + "pm" + "\"");
-                        }
-                    }
-
-                    output.print(">");
-
-                    output.println();
-
-                    question.save(output);
-
-                    output.println("</answer>");
-
-                    qIndex++;
-                    if (qIndex >= vQuestions.size()) break;
-                    question = (NDGQuestion) vQuestions.elementAt(qIndex);
-                }
-                output.println("</category>");
-            }
-            output.println("</result>");
+            writeToStream(out, false);
 
             out.close();
             connection.close();
-
+            save3( fname );//this file is used to send reuslt to server
         } catch( ConnectionNotFoundException e ) {
             error = true;
             Logger.getInstance().log(e.getMessage());
@@ -217,8 +123,123 @@ public class PersistenceManager {
             e.printStackTrace();
         }
         finally {
-            System.gc(); 
+            System.gc();
         }
+    }
+
+    private void save3( String name ) throws IOException {
+        String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+
+        String fname = "b_"+ name;
+        String dirname = Resources.ROOT_DIR + surveyDir + fname;
+
+        FileConnection directory = (FileConnection) Connector.open(dirname);
+        if( !directory.exists() ) {
+            directory.mkdir();
+        }
+        directory.close();
+
+        String filename = Resources.ROOT_DIR + surveyDir + fname + "/" + fname;
+        FileConnection connection = (FileConnection) Connector.open(filename);
+        if( connection.exists() ) {
+            connection.delete();
+        }
+        connection.create();
+
+        OutputStream out = connection.openOutputStream();
+        writeToStream(out, true);
+
+        out.close();
+        connection.close();
+    }
+
+    private void writeToStream( OutputStream out, boolean appendBinaryData ) {
+        PrintStream output = new PrintStream(out);
+        output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
+        output.print("<result ");
+        output.print("r_id=\"" + resultId + "\" ");
+        // *****************************   PROTOCOL DEFINITION *************************
+        //
+        //****************************************************************************************************
+        //Type of Msg |      SurveyID			  |      Number of  Msgs  |    	ResultID  	   | UserID
+        //      9           9999999999                          99             a9b9c9d9       999999999999999
+        //****************************************************************************************************
+        //end of header
+        output.print("s_id=\"" + String.valueOf(SurveysControl.getInstance().getSurveyIdNumber()) + "\" ");
+        output.print("u_id=\"" + AppMIDlet.getInstance().getIMEI() + "\" ");
+
+        long timeTaken = (new Date()).getTime();
+        output.print("time=\"" + String.valueOf(timeTaken)+ "\">");  //convert to seconds
+        output.println();
+        if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
+            // we do not set new location if it was already in survey and survey is modified
+            // it is kept by resultHandler
+            String longitude = null;
+            String latitude = null;
+            if (AppMIDlet.getInstance().getFileStores().getResultStructure() != null) {
+                latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
+                longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
+            }
+            if (longitude != null && latitude != null) {
+                output.println("<latitude>" + latitude + "</latitude>");
+                output.println("<longitude>" + longitude + "</longitude>");
+            } else {
+                Location loc = AppMIDlet.getInstance().getLocation();
+                if (loc != null) {
+                    if (loc.getQualifiedCoordinates() != null) {
+                        output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
+                        output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
+                    }
+                }
+            }
+        }
+        output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName(vQuestions)) + "</title>");
+        int catId = 0;
+        int qIndex = 0;
+        NDGQuestion question = (NDGQuestion) vQuestions.elementAt(qIndex);
+        while (qIndex < vQuestions.size()) {
+            catId = Integer.parseInt(question.getCategoryId());
+            /** Category **/
+            output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(question.getCategoryName()) + "\" ");
+            output.println("id=\"" + question.getCategoryId() + "\">");
+            while (catId == Integer.parseInt(question.getCategoryId())) {
+                /** Question **/
+                String type = getQuestionType(question);
+                output.print("<answer " + "type=\"" + type + "\" ");
+                output.print("id=\"" + question.getQuestionId() + "\" ");
+                output.print("visited=\"" + question.getVisited() + "\"");
+                if (question.getType().equals("_time")) {
+                    if (((TimeQuestion) question).getConvention() == 24 || ((TimeQuestion) question).getConvention() == 0) {
+                        output.print(" convention=\"" + "24" + "\"");
+                    } else {
+                        if (((TimeQuestion) question).getAm_pm() == TimeQuestion.AM) {
+                            output.print(" convention=\"" + "am" + "\"");
+                        } else {
+                            output.print(" convention=\"" + "pm" + "\"");
+                        }
+                    }
+                    output.print(">");
+                    output.println();
+                    question.save(output);
+                } else if ( question.getType().equals("_img") ) {
+                    output.print(">");
+                    output.println();
+                    ((ImageQuestion)question).save( output, appendBinaryData );
+                } else {
+                    output.print(">");
+                    output.println();
+                    question.save(output);
+                }
+                output.println("</answer>");
+                qIndex++;
+                if (qIndex >= vQuestions.size()) {
+                    break;
+                }
+                question = (NDGQuestion) vQuestions.elementAt(qIndex);
+            }
+            output.println("</category>");
+        }
+        output.println("</result>");
     }
 
     private String extractResultId(String filename){
@@ -309,5 +330,4 @@ public class PersistenceManager {
             PersistenceManager.getInstance().resultsSaved();
         }
     }
-
 }

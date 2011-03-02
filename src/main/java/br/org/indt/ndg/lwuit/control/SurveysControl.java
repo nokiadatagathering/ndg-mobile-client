@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 
@@ -425,7 +420,7 @@ public class SurveysControl {
         while (e.hasMoreElements()) {
             fName = (String) e.nextElement();
             fs.deleteFile(fName);
+            fs.deleteDir( "b_" + fName );
         }
-
     }
 }

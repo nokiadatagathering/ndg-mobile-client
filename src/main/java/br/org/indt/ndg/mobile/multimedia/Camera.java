@@ -20,77 +20,76 @@ public class Camera {
     private final String JPEG = "encoding=image/jpeg";
     private final String JPG = "encoding=image/jpg";
 
-    private VideoControl vc;
-    private Player player;
-    private boolean init;
-    private MediaComponent mediaComp;
+    private VideoControl vc = null;
+    private Player player = null;
+    private boolean init = false;
+    private MediaComponent mediaComp = null;
     byte[] imageData = null;
-
-    private Camera(){
-        try {
-            try
-            {//for S40 devices
-                player = Manager.createPlayer("capture://image");
-            }
-            catch(Exception ex)
-            {//for S60 devices
-                player = Manager.createPlayer("capture://video");
-            }
-            player.prefetch();
-            player.realize();
-            vc = (VideoControl) player.getControl("VideoControl");
-            mediaComp = new MediaComponent(player);
-            mediaComp.setFullScreen(false);
-            player.start();
-            init = true;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (MediaException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void shutDown() {
-            mediaComp.stop();
-            mediaComp.setVisible(false);
-            player.deallocate();
-            init = false;
-            imageData = null;
-    }
 
     public static Camera getInstance(){
         return instance;
     }
 
-    public void initCamera(){
-        if(!init){
-            try {
-                player.realize();
-                player.prefetch();
-                player.start();
-                init = true;
-            }
-            catch (MediaException me) {
-                Logger.getInstance().logException(me.getMessage());
-            }
-            catch(Exception e){
-                Logger.getInstance().logException("General exception: " + e.getMessage());
-            }
+    public void startCamera(){
+        try {
+            initializeCamera();
+            player.start();
+        } catch (MediaException ex) {
+            Logger.getInstance().logException("Could not initialize Camera: " + ex.getMessage());
+        } catch (IOException ex) {
+            Logger.getInstance().logException("Could not initialize Camera: " + ex.getMessage());
         }
+    }
+
+    public void stopCamera() {
+        deinitializeCamera();
     }
 
     public byte[] takePicture(int width, int height){
         if(width <= 0 || height <= 0)
             throw new IllegalArgumentException("Invalid width or height");
+        if (!init)
+            throw new IllegalStateException("Camera not initialized");
+
         try {
-            if(vc == null){
-                vc = (VideoControl)player.getControl("VideoControl");
-            }
             imageData = vc.getSnapshot( GetEncoding() + "&width=" + width + "&height=" + height);
         } catch (MediaException ex) {
             Logger.getInstance().logException(ex.getMessage());
         }
         return imageData;
+    }
+
+    private Camera(){
+    }
+
+    private void initializeCamera() throws MediaException, IOException {
+        if(!init){
+            try { //for S40 devices
+                player = Manager.createPlayer("capture://image");
+            } catch(Exception ex) {//for S60 devices
+                player = Manager.createPlayer("capture://video");
+            }
+            player.realize();
+            player.prefetch();
+            vc = (VideoControl) player.getControl("VideoControl");
+            mediaComp = new MediaComponent(player);
+            mediaComp.setFullScreen(false);
+            init = true;
+        }
+    }
+
+    private void deinitializeCamera() {
+        if (init) {
+            init = false;
+            imageData = null;
+            mediaComp.stop();
+            player.deallocate(); // calls stop on player explicitly
+            // FIX for N8 issue with landscapoe blocking, makes player unusable
+            player.close();
+            vc = null;
+            player = null;
+            mediaComp = null;
+        }
     }
 
     private String GetEncoding() {
@@ -154,7 +153,7 @@ public class Camera {
     */
     public MediaComponent getViewFinderLWUIT(){
         if(!init){
-            initCamera();
+            startCamera();
         }
         return mediaComp;
     }

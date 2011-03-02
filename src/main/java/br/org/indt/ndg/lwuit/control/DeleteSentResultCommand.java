@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.ui.SentResultList;
-import br.org.indt.ndg.lwuit.ui.SentResultListCellRenderer;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
@@ -35,14 +30,14 @@ public class DeleteSentResultCommand extends CommandControl{
 
     protected void doAction(Object parameter) {
         // mark the old screen with selected checkboxes
-        SentResultListCellRenderer renderer = (SentResultListCellRenderer) parameter;
-        boolean[] listFlags = renderer.getSelectedFlags();
+        CheckableListModel model = (CheckableListModel) parameter;
+        boolean[] listFlags = model.getSelectedFlags();
 
         FileSystem fs = AppMIDlet.getInstance().getFileSystem();
         Vector xmlResultFile = fs.getXmlSentFile();
         Vector selectedFiles = new Vector();
         
-        int size = listFlags.length;                
+        int size = listFlags.length;
         for (int i=0; i < size; i++){
             if (listFlags[i]) {
                 selectedFiles.addElement(((XmlResultFile) xmlResultFile.elementAt(i)).getFileName());
@@ -52,11 +47,11 @@ public class DeleteSentResultCommand extends CommandControl{
         Thread t = new Thread(drr);
         t.start();
     }
-   
-    
+
+
     class DeleteResultRunnable implements Runnable {
         Vector selectedFiles;
-        
+
         public DeleteResultRunnable( Vector _selectedFiles )
         {
             this.selectedFiles = _selectedFiles;
@@ -69,6 +64,9 @@ public class DeleteSentResultCommand extends CommandControl{
                 fName = (String) e.nextElement();
                 AppMIDlet.getInstance().getFileSystem().removeDisplayName(fName);
                 AppMIDlet.getInstance().getFileSystem().deleteFile(fName);
+
+                String name = fName.substring( "s_".length() );
+                AppMIDlet.getInstance().getFileSystem().deleteDir( "b_" + name );//will delete binary files releated with selected result
             }
             AppMIDlet.getInstance().getFileSystem().loadSentFiles();
             AppMIDlet.getInstance().setDisplayable(SentResultList.class);

@@ -1,7 +1,7 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import com.sun.lwuit.CheckBox;
-import br.org.indt.ndg.lwuit.model.DisplayableModel;
+import br.org.indt.ndg.lwuit.model.CheckableItem;
+import br.org.indt.ndg.lwuit.model.DisplayableItem;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
@@ -17,25 +17,24 @@ import com.sun.lwuit.layouts.BorderLayout;
 
 class ResultListCellRenderer extends CheckableListCellRenderer {
 
-    private int qtSelecteds = 0;
-
-    public ResultListCellRenderer(int realsize){
-        super(realsize);
+    public ResultListCellRenderer(){
+        super();
     }
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
-        disp = (DisplayableModel) value;
+        CheckableItem disp = (CheckableItem)value;
+        removeAll();
+
         Component comp = null;
         if(index>0){
-            label = getCheckBox(disp, index);
-            comp = label;
+            prepareCheckBox(disp);
+            comp = m_rendererCheckbox;
         } else {
-            label = new Label(disp.getDisplayableName());
+            Label label = new Label(((DisplayableItem)disp).getDisplayableName());
             label.setAlignment(CENTER);
             comp = label;
         }
         comp.setVisible(true);
-
 
         if (isSelected) {
             setFocus(true);
@@ -44,10 +43,16 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             if( index > 0 ){
                 Image arrow = Screen.getRes().getImage("right_arrow");
+                if (this.getHeight()>0) { // avoid scaling at first run when height is undetermined
+                    // arrow does not scale too well so it is needed to set a reasonable limit
+                    int newHeight = this.getHeight()/2 > 15 ? 15 : this.getHeight()/2;
+                    arrow = arrow.scaledHeight(newHeight);
+                }
                 Label larrow = new Label(arrow);
+                larrow.getStyle().setMargin(0,0,0,10);
                 addComponent(BorderLayout.EAST,larrow);
             }
-            getStyle().setBgPainter(focusBGPainter);
+            getStyle().setBgPainter(m_focusBGPainter);
         } else {
             setFocus(false);
             comp.setFocus(false);
@@ -55,67 +60,11 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             comp.getStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
             addComponent(BorderLayout.EAST, new Label(" "));
-            getStyle().setBgPainter(bgPainter);
+            getStyle().setBgPainter(m_bgPainter);
         }
 
         addComponent(BorderLayout.CENTER, comp);
 
         return this;
-    }
-
-    public void updateCheckbox(int index) {
-        CheckBox c = (CheckBox) checkboxes.elementAt(index);
-
-        if(c.isSelected()){
-            qtSelecteds+= -1;
-        } else {
-            qtSelecteds+= 1;
-        }
-
-        c.setSelected(!c.isSelected());
-    }
-
-    public void markAll() {
-        super.markAll();
-        qtSelecteds = this.realSize;
-    }
-
-    public void unmarkAll(){
-        super.unmarkAll();
-        qtSelecteds = 0;
-    }
-
-    public int getQtSelecteds(){
-        return qtSelecteds;
-    }
-
-    public void setSelected(int index){
-        if(index < checkboxes.size()){
-            CheckBox c = (CheckBox) checkboxes.elementAt(index);
-
-            if(!c.isSelected()){
-                qtSelecteds+= 1;
-                c.setSelected(true);
-            }
-        }
-    }
-
-    // Re-implemented to handle the first item as New Result. Specially for Result List
-    public boolean[] getSelectedFlags() {
-        if (checkboxes.size() < realSize) {
-            for (int i = 0; i < realSize; i++) {
-                getCheckBox(disp, i);
-            }
-        }
-        int size = checkboxes.size();
-        boolean[] selected = new boolean[size - 1];
-        for(int i = 1; i < size; i++){
-            CheckBox c = (CheckBox) checkboxes.elementAt(i);
-            if(c.isSelected())
-                selected[i-1] = true;
-            else
-                selected[i-1] = false;
-        }
-        return selected;
     }
 }

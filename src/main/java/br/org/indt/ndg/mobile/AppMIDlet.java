@@ -31,9 +31,9 @@ import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
 
 public class AppMIDlet extends MIDlet {
-    
+
     private static AppMIDlet instance = null;
-    
+
     private SurveyList surveyList = null;
     private ResultList resultList = null;
     private FileSystem fileSystem = null;
@@ -42,23 +42,22 @@ public class AppMIDlet extends MIDlet {
 
     private Settings settings = null;
     private Conversor unicode = null;
-    
+
     private LocationHandler locationHandler = null;
     private SubmitServer submitServer;
-    
+
     private long timeTracker = 0;
-    
+
     private String imei = "9999";
 
-    
     public AppMIDlet() throws Exception {
         instance = this;
     }
-    
+
     public LocationHandler getLocationHandler() {
         return this.locationHandler;
     }
-    
+
     public Location getLocation() {
         if (locationHandler == null) return null;
         else return locationHandler.getLocation();
@@ -72,24 +71,24 @@ public class AppMIDlet extends MIDlet {
     public static AppMIDlet getInstance() {
         return instance;
     }
-    
+
     public void setIMEI() {
         imei = System.getProperty("com.nokia.mid.imei");
         //imei = "999966663333";
     } 
-    
+
     public String getIMEI() {
         return imei;
     }
-    
+
     public String getAppVersion() {
         return getAppProperty("MIDlet-Version");
     }
-    
+
     public String getDefaultServerUrl() {
         return getAppProperty("server-url");
     }
-       
+
     public String getDefaultAppLanguage() {
         return getAppProperty("app-language");
     }
@@ -187,9 +186,9 @@ public class AppMIDlet extends MIDlet {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
-        }            
+        }
     }
-    
+
     public void init(boolean showSplashScreen) {
 
         
@@ -209,7 +208,6 @@ public class AppMIDlet extends MIDlet {
         unicode = new Conversor();
         fileSystem = new FileSystem(Resources.ROOT_DIR);
         fileStores = new FileStores();
-        ImageData.cleanTemporaryPhotoFiles();
         registerApp();
     }
     
@@ -287,11 +285,10 @@ public class AppMIDlet extends MIDlet {
         fileStores = null;
         unicode = null;
         settings = null;
-        ImageData.cleanTemporaryPhotoFiles();
     }
     
     protected void startApp() throws MIDletStateChangeException {
-        init(true);          
+        init(true);
     }
 
     public void setDisplayable( Class c ) {

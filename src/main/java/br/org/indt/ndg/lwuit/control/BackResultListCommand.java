@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.SurveyList;
@@ -23,6 +18,7 @@ public class BackResultListCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
+        AppMIDlet.getInstance().getFileSystem().deleteDir( "imgTmp/" );
         AppMIDlet.getInstance().setDisplayable(SurveyList.class);
     }
 
@@ -31,5 +27,4 @@ public class BackResultListCommand extends BackCommand {
             instance = new BackResultListCommand();
         return instance;
     }
-
 }

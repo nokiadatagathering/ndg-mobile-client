@@ -148,7 +148,7 @@ public class NDGIntegerSpinner extends Container implements FocusListener {
     private void validateAndCorrectDisplay() {
         int value = 0;
         try {
-            value = Integer.parseInt(m_valueDisplay.getText());
+            value = Integer.parseInt(m_valueDisplay.getText().trim());
         } catch ( NumberFormatException e ) {
             value = 0;
         }

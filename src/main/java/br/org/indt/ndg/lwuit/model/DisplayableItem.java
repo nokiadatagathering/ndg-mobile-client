@@ -9,7 +9,7 @@ package br.org.indt.ndg.lwuit.model;
  *
  * @author Alexandre Martini
  */
-public interface DisplayableModel {
+public interface DisplayableItem {
 
     public String getDisplayableName();
 

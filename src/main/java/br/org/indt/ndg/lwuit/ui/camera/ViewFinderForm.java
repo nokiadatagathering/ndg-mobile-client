@@ -17,8 +17,7 @@ import com.sun.lwuit.layouts.BorderLayout;
  * @author alexandre martini
  */
 public class ViewFinderForm extends Screen implements ActionListener {
-    private Container container;
-    private MediaComponent comp;
+    private final Container container = new Container(new BorderLayout());
     private boolean enableTakingPicture;
 
     protected void loadData() {
@@ -29,15 +28,11 @@ public class ViewFinderForm extends Screen implements ActionListener {
         createScreen();
         form.setLayout(new BorderLayout());
 
-        comp = Camera.getInstance().getViewFinderLWUIT();
+        MediaComponent comp = Camera.getInstance().getViewFinderLWUIT();
         comp.getStyle().setMargin(0, 0, 0, 0);
 
-        if(container == null) {
-            container = new Container(new BorderLayout());
-        } else {
-            container.removeAll();
-            form.removeComponent(container);
-        }
+        container.removeAll();
+        form.removeComponent(container);
 
         container.addComponent(BorderLayout.CENTER, comp);
         form.removeAll(); // does not always work?
@@ -46,9 +41,7 @@ public class ViewFinderForm extends Screen implements ActionListener {
         form.addGameKeyListener(Display.GAME_FIRE, this);
         form.addCommandListener(this);
         form.setScrollable(false);
-        if(!form.contains(container)) {
-            form.addComponent(BorderLayout.CENTER, container);
-        }
+        form.addComponent(BorderLayout.CENTER, container);
     }
 
     private void capturePicture(){
@@ -56,7 +49,7 @@ public class ViewFinderForm extends Screen implements ActionListener {
         int height = AppMIDlet.getInstance().getSettings().getStructure().getPhotoY();
         byte[]  picture = Camera.getInstance().takePicture(width, height);
         NDGCameraManager.getInstance().updatePhotoForm(picture);
-        Camera.getInstance().shutDown();
+        Camera.getInstance().stopCamera();
     }
 
     public void capturePictureAndShowPhoto() {

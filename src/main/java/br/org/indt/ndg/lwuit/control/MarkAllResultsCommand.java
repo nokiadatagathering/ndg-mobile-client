@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
@@ -28,8 +29,8 @@ public class MarkAllResultsCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        CheckableListCellRenderer renderer = (CheckableListCellRenderer) parameter;
-        renderer.markAll();
+        CheckableListModel model = (CheckableListModel) parameter;
+        model.markAll();
     }
 
 }

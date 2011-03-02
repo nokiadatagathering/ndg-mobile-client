@@ -31,7 +31,7 @@ public class OKPhotoFormCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        Camera.getInstance().shutDown();
+        Camera.getInstance().stopCamera();
         NDGCameraManager.getInstance().updateInterviewForm();
     }
 
