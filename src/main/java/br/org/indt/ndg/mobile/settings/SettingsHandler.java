@@ -63,6 +63,15 @@ public class SettingsHandler extends DefaultHandler {
             }
             structure.setAppVersion(appVersion);
         }
+        else if (qName.equals("protocolSettings")) {
+            String protocolIdAtr = attributes.getValue(attributes.getIndex("protocolId"));
+            try {
+                int protocolId = Integer.parseInt(protocolIdAtr);
+                structure.setProtocolId(protocolId);
+            } catch ( Exception ex ){
+                structure.setProtocolId(0);
+            }
+        }
         else if (qName.equals("photoResolution")) {
             String config = attributes.getValue(attributes.getIndex("configId"));
             try {

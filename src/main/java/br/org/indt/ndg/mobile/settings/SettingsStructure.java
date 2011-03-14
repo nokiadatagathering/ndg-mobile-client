@@ -15,7 +15,8 @@ public class SettingsStructure {
     
     private boolean gps_configured = false;
     private boolean geoTagging_configured = false;
-    
+
+    private int selectedProtocolId = 0;
     private int selectedResolution = 0;
     private PhotoSettings photoSettings = new PhotoSettings();
     private int selectedStyle = 0;
@@ -63,6 +64,12 @@ public class SettingsStructure {
     
     void writeVersionSettings(PrintStream _out) {
         _out.println("<version application=\"" + appVersion + "\"/>");
+    }
+
+    void writeProtocolSettings(PrintStream _out) {
+        _out.print("<protocolSettings protocolId=\"");
+        _out.print( String.valueOf(selectedProtocolId) );
+        _out.println( "\"/>" );
     }
     
     void writePhotoResolutionSettings(PrintStream output) {
@@ -151,6 +158,11 @@ public class SettingsStructure {
 
     public void setGeoTaggingConfigured(boolean _state) { geoTagging_configured = _state; }
     public boolean getGeoTaggingConfigured() { return geoTagging_configured; }
+
+    public void setProtocolId(int _selProtoId ) { selectedProtocolId = _selProtoId; }
+    public int getProtocolId() { return selectedProtocolId; }
+    // 0 == NDG
+    // 1 == XForms
 
     public void setPhotoResolutionId(int _resConf ) { selectedResolution = _resConf; }
     public int getPhotoResolutionId() { return selectedResolution; }

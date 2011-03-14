@@ -2,11 +2,17 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.model.*;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.ResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.logging.Logger;
+import com.nokia.xfolite.xforms.dom.XFormsDocument;
+import com.nokia.xfolite.xforms.submission.XFormsXMLSerializer;
+import com.nokia.xfolite.xml.dom.Element;
+import com.nokia.xfolite.xml.dom.NamedNode;
+import com.nokia.xfolite.xml.dom.Node;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -60,6 +66,43 @@ public class PersistenceManager {
         t.setPriority(Thread.MIN_PRIORITY);
         t.start();
     }
+
+    public void saveXForm(XFormsDocument document){
+
+
+        XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
+
+        //Create path
+        String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+        String UID = generateUniqueID();
+
+        String filename;  //check whether to create new file or use existing filename
+        String fname;  //filename without root/survey directory part
+
+//        if (isLocalFile) {
+//            fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+//        } else {
+            fname = "r_" + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
+//        }
+        filename = Resources.ROOT_DIR + surveyDir + fname;
+
+        try {
+            FileConnection fCon = (FileConnection)Connector.open(filename);
+            if(!fCon.exists()){
+                fCon.create();
+            }
+
+            OutputStream stream = fCon.openOutputStream();
+            serilizer.serialize(stream, document.getDocumentElement(), null);
+            stream.close();
+            fCon.close();
+
+            AppMIDlet.getInstance().setDisplayable(ResultList.class);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
     private void save2() {
         String surveyId = String.valueOf(SurveysControl.getInstance().getSurveyIdNumber());

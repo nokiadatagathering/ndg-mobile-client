@@ -275,6 +275,11 @@ public class Local {
     public final static short QTJ_HIGH_CONTRAST = 226;
     public final static short QTJ_CUSTOM = 227;
     public final static short QTJ_STYLES = 228;
+    public final static short QTJ_TIME_FORMAT_ERROR = 229;
+    public final static short QTJ_DATE_FORMAT_ERROR = 230;
+    public final static short QTJ_DISCARD_CHANGES = 231;
+    public final static short QTJ_APPLICATION_SETTINGS = 232;
+    public final static short QTJ_PROTOCOL_SETTINGS = 233;
 
 
     public static String phoneLang = System.getProperty("microedition.locale");

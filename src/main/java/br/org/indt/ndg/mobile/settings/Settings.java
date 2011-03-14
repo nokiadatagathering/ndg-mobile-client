@@ -44,6 +44,7 @@ public class Settings {
             
             settingsStructure.writeGpsSettings(output);
             settingsStructure.writeGeoTaggingSettings(output);
+            settingsStructure.writeProtocolSettings(output);
             settingsStructure.writePhotoResolutionSettings(output);
             settingsStructure.writeStyleSettings(output);
             settingsStructure.writeLogSettings(output);
@@ -114,6 +115,7 @@ public class Settings {
                         "<settings registered=\"0\" splash=\"8\" language=\"" + defaultAppLanguage + "\">\n" +
                         "<gps configured=\"yes\"/>\n" +
                         "<geotagging configured=\"yes\"/>\n" +
+                        "<protocolSettings protocolId=\"0\"/>\n" +
                         "<photoResolution configId=\"0\"/>\n" +
                         "<style id=\"0\"/>\n" +
                         "<log active=\"no\"/>\n" +

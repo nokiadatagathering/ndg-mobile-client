@@ -1,5 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
+import br.org.indt.ndg.lwuit.control.AppSettingsViewCommand;
 import br.org.indt.ndg.lwuit.control.ResolutionSelectionViewCommand;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.CheckNewSurveysCommand;
@@ -18,6 +19,7 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
+import br.org.indt.ndg.lwuit.extended.AnimatedList;
 
 
 public class SurveyList extends Screen implements ActionListener{
@@ -25,7 +27,7 @@ public class SurveyList extends Screen implements ActionListener{
     private String title2 = Resources.SURVEY_LIST_TITLE;//NEWUI_TITLE_SURVEY_LIST;
     private String title1 = Resources.NEWUI_NOKIA_DATA_GATHERING;
    
-    private List list;
+    private AnimatedList list;
 
     private Survey[] surveys;
     private ListModel underlyingModel;
@@ -38,20 +40,10 @@ public class SurveyList extends Screen implements ActionListener{
     protected void customize() {
         setTitle(title1, title2);
 
-        form.removeAllCommands();
-
         if (list != null)
             form.removeComponent(list);
         
-        form.addCommand(ExitCommand.getInstance().getCommand());
-        form.addCommand(UpdateCommand.getInstance().getCommand());
-        form.addCommand(TestConnectionCommand.getInstance().getCommand());
-        form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
-        form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
-        form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
-        form.addCommand(GPSCommand.getInstance().getCommand());
-        if (surveys.length > 0)
-            form.addCommand(OpenSurveyCommand.getInstance().getCommand());
+        resetAllCommands();
 
         try{
             form.removeCommandListener(this);
@@ -64,15 +56,13 @@ public class SurveyList extends Screen implements ActionListener{
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(surveys);
 
-        list = new List(underlyingModel);
+        list = new AnimatedList(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
-
-        SurveyListCellRenderer slcr = new SurveyListCellRenderer();
-        list.setListCellRenderer(slcr);
         list.addSelectionListener(new HandleSelectedItem());
-
         list.setFixedSelection(List.FIXED_NONE_CYCLIC);
+        list.startAnimation();
+
         form.addComponent(list);
         form.setScrollable(false);
     }
@@ -102,6 +92,8 @@ public class SurveyList extends Screen implements ActionListener{
                 UpdateCommand.getInstance().execute(null);
             } else if (cmd == DeleteSurveyCommand.getInstance().getCommand()) {
                 DeleteSurveyCommand.getInstance().execute(new Integer(getSelectedIndex()));
+            } else if (cmd == AppSettingsViewCommand.getInstance().getCommand()) {
+                AppSettingsViewCommand.getInstance().execute(null);
             } else if (cmd == TestConnectionCommand.getInstance().getCommand()) {
                 TestConnectionCommand.getInstance().execute(null);
             } else if ( cmd == ResolutionSelectionViewCommand.getInstance().getCommand() ){
@@ -114,6 +106,21 @@ public class SurveyList extends Screen implements ActionListener{
         }
     }
 
+    private void resetAllCommands() {
+        form.removeAllCommands();
+        form.addCommand(ExitCommand.getInstance().getCommand());
+        form.addCommand(UpdateCommand.getInstance().getCommand());
+        form.addCommand(TestConnectionCommand.getInstance().getCommand());
+        form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
+        form.addCommand(DeleteSurveyCommand.getInstance().getCommand());
+        form.addCommand(AppSettingsViewCommand.getInstance().getCommand());
+        form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
+        form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
+        form.addCommand(GPSCommand.getInstance().getCommand());
+        if (surveys.length > 0)
+            form.addCommand(OpenSurveyCommand.getInstance().getCommand());
+    }
+
 
     private class HandleSelectedItem implements SelectionListener{
 
@@ -121,23 +128,10 @@ public class SurveyList extends Screen implements ActionListener{
         }
 
         public void selectionChanged(int oldSelected, int newSelected) {
-            if( newSelected == 0)
-            {
+            if( newSelected == 0) {
                 form.removeCommand(DeleteSurveyCommand.getInstance().getCommand());
-            }
-            else
-            {
-                form.removeAllCommands();
-                form.addCommand(ExitCommand.getInstance().getCommand());
-                form.addCommand(UpdateCommand.getInstance().getCommand());
-                form.addCommand(TestConnectionCommand.getInstance().getCommand());
-                form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
-                form.addCommand(DeleteSurveyCommand.getInstance().getCommand());
-                form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
-                form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
-                form.addCommand(GPSCommand.getInstance().getCommand());
-                if (surveys.length > 0)
-                    form.addCommand(OpenSurveyCommand.getInstance().getCommand());
+            } else {
+                resetAllCommands();
             }
         }
     }

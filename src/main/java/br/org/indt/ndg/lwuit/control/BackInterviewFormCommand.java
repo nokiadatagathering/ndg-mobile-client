@@ -25,7 +25,7 @@ public class BackInterviewFormCommand extends BackCommand {
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
         if ( view.isModifiedInterview() &&
                 GeneralAlert.getInstance().show( Resources.CMD_SAVE,
-                "Discard all the ansers?", GeneralAlert.CONFIRMATION) // TODO localization, it would be better to ask qustion where save = Yes
+                Resources.DISCARD_CHANGES, GeneralAlert.CONFIRMATION)
                     == GeneralAlert.RESULT_NO ) {
             // if accepted proceed as if 'Next' was clicked
             view.actionPerformed(new ActionEvent(AcceptQuestionListFormCommand.getInstance().getCommand()));

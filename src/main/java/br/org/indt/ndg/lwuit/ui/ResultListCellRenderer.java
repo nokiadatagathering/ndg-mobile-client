@@ -59,7 +59,6 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             comp.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             comp.getStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
-            addComponent(BorderLayout.EAST, new Label(" "));
             getStyle().setBgPainter(m_bgPainter);
         }
 

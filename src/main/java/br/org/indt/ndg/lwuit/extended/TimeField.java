@@ -39,13 +39,33 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
         this(new Date(), timeFormat, separator);
     }
 
-    public TimeField(Date time, int timeFormat, char separator) {
+    public TimeField(Date timeString, int timeFormat, char separator) {
+        super();
+        setInputMode("123");
+        //addDataChangeListener(this);
+        //addFocusListener(this);
+        this.timeFormat = timeFormat;
+        try {
+            setTime(time);
+            parseDate();
+            buildTime();
+        } catch (Exception ex) {
+            //TODO
+        }
+        if(Display.getInstance().isTouchScreenDevice()) {
+            VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
+            onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
+            VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);
+        }
+    }
+
+    public TimeField(String time, int timeFormat, char separator) {
         super();
         setInputMode("123");
         addDataChangeListener(this);
         addFocusListener(this);
         this.timeFormat = timeFormat;
-        setTime(time);
+        setText(time);
         if(Display.getInstance().isTouchScreenDevice()) {
             VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
             onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
@@ -86,9 +106,9 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
             calendar.set(Calendar.MINUTE, Integer.parseInt(timeFields[1]));
         } else {
             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeFields[0]));
-            calendar.set(Calendar.MINUTE, Integer.parseInt(timeFields[1]));            
+            calendar.set(Calendar.MINUTE, Integer.parseInt(timeFields[1]));
         }
-        time = calendar.getTime();        
+        time = calendar.getTime();
     }
 
     public char getSeparator() {
@@ -254,7 +274,7 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
             }
         } catch ( Exception e) {
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().show(Resources.WARNING, "Could not parse time", GeneralAlert.INFO); // TODO localize
+            GeneralAlert.getInstance().show(Resources.WARNING, Resources.TIME_FORMAT_ERROR, GeneralAlert.WARNING);
             setCurrentDate();
         }
     }
@@ -358,5 +378,4 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
     public boolean isSelectMode() {
         return selectMode;
     }
-
 }

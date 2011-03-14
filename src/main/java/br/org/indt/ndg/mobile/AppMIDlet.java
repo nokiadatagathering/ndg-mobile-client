@@ -3,6 +3,7 @@ package br.org.indt.ndg.mobile;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.ImageData;
+import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
+import br.org.indt.ndg.lwuit.ui.XfoliteInterviewForm;
 
 public class AppMIDlet extends MIDlet {
 
@@ -333,11 +335,31 @@ public class AppMIDlet extends MIDlet {
     }
 
     public void showInterview() {
-        if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
-            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
-        } else {
-            SurveysControl.getInstance().setSelectedCategory( 0 );
-            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.InterviewForm.class);
+        String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+        if(isNdgDir(dirName)){
+            if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
+                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
+            } else {
+                SurveysControl.getInstance().setSelectedCategory( 0 );
+                AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
+            }
+        }else if(isXformDir(dirName)){
+            AppMIDlet.getInstance().setDisplayable(XfoliteInterviewForm.class);
+        }
+    }
+
+    public boolean isNdgDir(String surveyDirName){
+        if(surveyDirName.substring(0, 6).equalsIgnoreCase(Resources.SURVEY)){
+            return true;
+        } else{
+            return false;
+        }
+    }
+    public boolean isXformDir(String surveyDirName){
+        if(surveyDirName.substring(0, 5).equalsIgnoreCase(Resources.XFORM)){
+            return true;
+        } else{
+            return false;
         }
     }
 }

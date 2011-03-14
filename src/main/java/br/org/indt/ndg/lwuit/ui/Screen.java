@@ -84,7 +84,7 @@ public abstract class Screen {
         return false;
     }
 
-    final void setTitle(String title1, String title2) {
+    protected final void setTitle(String title1, String title2) {
         titlebar.setTitle1(title1);
         titlebar.setTitle2(title2);
         form.setTitle(" ");

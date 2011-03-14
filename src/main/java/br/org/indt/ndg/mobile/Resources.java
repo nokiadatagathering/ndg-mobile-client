@@ -216,6 +216,12 @@ public class Resources {
     public static final String CUSTOM = Local.getText( Local.QTJ_CUSTOM );
     public static final String STYLES = Local.getText( Local.QTJ_STYLES );
 
+    public static final String TIME_FORMAT_ERROR = Local.getText( Local.QTJ_TIME_FORMAT_ERROR );
+    public static final String DATE_FORMAT_ERROR = Local.getText( Local.QTJ_DATE_FORMAT_ERROR );
+    public static final String DISCARD_CHANGES = Local.getText( Local.QTJ_DISCARD_CHANGES );
+    public static final String APPLICATION_SETTINGS = Local.getText( Local.QTJ_APPLICATION_SETTINGS );
+    public static final String PROTOCOL_SETTINGS = Local.getText( Local.QTJ_PROTOCOL_SETTINGS );
+
     public static final int NOENTRY = -99999;
 
     /** General */
@@ -237,8 +243,12 @@ public class Resources {
     public static final String NEW_SURVEYS_LIST = "new_surveys_list.xml";
     public static final String TMP_DOWNLOAD_SURVEY = "tmp_download_survey.xml";
     public static final String XML_TAG_END_SURVEY = "</survey>";
+    public static final String XFORMS_TAG_END_SURVEY = "</xforms>";
     public static final String SURVEY = "survey";
+    public static final String NDG_SURVEY_DIR_PREFIX = "survey";
+    public static final String XFORMS_SURVEY_DIR_PREFIX = "xforms";
     public static final String NDG_PROPERTIES_FILE = "ndg.properties";
+    public static final String XFORM = "xform";
 
     /** Messages */
     public static final String MSG_SERVER_CANT_WRITE_RESULTS = Local.getText(Local.QTJ_MSG_SERVER_CANT_WRITE_RESULTS);

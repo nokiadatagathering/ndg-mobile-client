@@ -68,6 +68,10 @@ public class FileStores {
 
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
 
+        if(AppMIDlet.getInstance().isXformDir(dirName)){
+            surveyStructure.setTitle(AppMIDlet.getInstance().getFileSystem().getCurrentSurveyName());
+            return;
+        }
         kparser = new kParser();
         kparser.setSurveyStructure(surveyStructure);
         kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);

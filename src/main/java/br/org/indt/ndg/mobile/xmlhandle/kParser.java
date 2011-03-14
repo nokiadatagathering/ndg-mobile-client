@@ -53,10 +53,32 @@ public class kParser {
             
             parser.nextTag();
  
-            //Posiciona na tag <survey>
-            parser.require(XmlPullParser.START_TAG, null, "survey");
-            
-            structure.addName(parser.getAttributeValue(parser.getNamespace(), "title"));
+            String name = null;
+            int res = -1;
+            if(parser.getName().equals("survey")){
+                name = parser.getAttributeValue(parser.getNamespace(), "title");
+            }else if(parser.getName().equals("xforms") || parser.getName().equals("html")) {
+                name = "xform";
+                boolean bVal = true;
+                try{
+                    while(bVal){
+                        if(parser.getAttributeValue("", "name") != null){
+                            name = parser.getAttributeValue("", "name");
+                            bVal = false;
+                        }
+                        if(parser.next() == KXmlParser.END_DOCUMENT){
+                            name = filename;
+                            bVal = false;
+                        }
+                    }
+                }catch(Exception ex){
+                    name = filename;
+                }
+            }
+
+            if(name != null){
+                structure.addName(name);
+            }
             
             is.close();
             fc.close();
@@ -90,25 +112,25 @@ public class kParser {
             parser.nextTag();
  
             //Posiciona na tag <survey>
-            parser.require(XmlPullParser.START_TAG, null, "survey");
+            parser.require(IXmlPullParser.START_TAG, null, "survey");
             
             getSurveyAttributes(parser);
             
             //Enquanto é diferente de END_TAG
-            while (parser.nextTag () != XmlPullParser.END_TAG)
+            while (parser.nextTag () != IXmlPullParser.END_TAG)
             {
                 //Posiciona na tag <category>
-                parser.require(XmlPullParser.START_TAG, null, "category");
+                parser.require(IXmlPullParser.START_TAG, null, "category");
 
                 parserCategory(parser);
 
-                parser.require(XmlPullParser.END_TAG, null, "category");
+                parser.require(IXmlPullParser.END_TAG, null, "category");
             }
  
-            parser.require(XmlPullParser.END_TAG, null, "survey");
+            parser.require(IXmlPullParser.END_TAG, null, "survey");
             parser.next();
 
-            parser.require(XmlPullParser.END_DOCUMENT, null, null);
+            parser.require(IXmlPullParser.END_DOCUMENT, null, null);
             //issr.show();
             is.close();
             fc.close();
@@ -129,14 +151,14 @@ public class kParser {
         getCategoryAttributes(parser);
         
         //Enquanto é diferente de </question>
-        while (parser.nextTag() != XmlPullParser.END_TAG) {
+        while (parser.nextTag() != IXmlPullParser.END_TAG) {
             //Posiciona em uma tag "START". Ex: <question>
-            parser.require(XmlPullParser.START_TAG, null, "question");
+            parser.require(IXmlPullParser.START_TAG, null, "question");
             
             parserQuestion(parser);
 
             //Posiciona no fim da tag </category>
-            parser.require(XmlPullParser.END_TAG, null, "question");
+            parser.require(IXmlPullParser.END_TAG, null, "question");
         }
         survey.addCategory(questions);
     }
@@ -147,9 +169,9 @@ public class kParser {
         String elemName = "";
         Vector defaultAnswers = new Vector();
         int itemIndex = 0;
-        while (parser.nextTag() != XmlPullParser.END_TAG) {
+        while (parser.nextTag() != IXmlPullParser.END_TAG) {
             //Posiciona em uma tag "START". Ex: <description> <length> <item> <select> <SkipLogic>
-            parser.require(XmlPullParser.START_TAG, null, null);
+            parser.require(IXmlPullParser.START_TAG, null, null);
             elemName = parser.getName();
             String text = "";
             String strIsDefault = "";
@@ -212,7 +234,7 @@ public class kParser {
                 }
             }
             //Posiciona no fim da tag <description> <length> <item> <select> <SkipLogic>
-            parser.require(XmlPullParser.END_TAG, null, elemName);
+            parser.require(IXmlPullParser.END_TAG, null, elemName);
         }
         
         if (currentQuestion instanceof ChoiceQuestion && defaultAnswers.size() > 0 ){

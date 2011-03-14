@@ -95,4 +95,9 @@ public class Form extends com.sun.lwuit.Form {
                                                                                 + itemBottonPadding)
                                                          - listGap;
     }
+
+    public void styleChanged(String propertyName, Style source) {
+        super.styleChanged(propertyName, source);
+        this.invalidate();
+    }
 }

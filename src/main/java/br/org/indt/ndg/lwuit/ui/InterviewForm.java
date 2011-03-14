@@ -19,6 +19,7 @@ import br.org.indt.ndg.lwuit.extended.TimeField;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
 import br.org.indt.ndg.lwuit.model.DateQuestion;
+import br.org.indt.ndg.lwuit.model.DecimalQuestion;
 import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
@@ -433,7 +434,8 @@ abstract class ContainerUI extends Container implements FocusListener {
             qname = createQuestionName(question.getName());
             addComponent(qname);
 
-            nfNumber = new NumericField(((NumericQuestion) question).getLength() );
+            nfNumber = new NumericField(((NumericQuestion) question).getLength(),
+                    question instanceof DecimalQuestion );
             nfNumber.setFocusable(true);
             String value =((NumberAnswer)question.getAnswer()).getValueString();
             nfNumber.setText(value);

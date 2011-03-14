@@ -51,4 +51,8 @@ public class FileSystemSurveyStructure {
         surveyDirNames.removeElementAt(currentIndex);
         surveyNames.removeElementAt(currentIndex);
     }
+
+    public String getCurrentName(){
+        return (String)surveyNames.elementAt(currentIndex);
+    }
 }

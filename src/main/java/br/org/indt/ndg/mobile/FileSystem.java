@@ -101,6 +101,10 @@ public class FileSystem {
         return fsSurveyStructure.getNames();
     }
 
+    public String getCurrentSurveyName(){
+        return fsSurveyStructure.getCurrentName();
+    }
+
     public int getSurveysCount(){
         return fsSurveyStructure.getSurveysCount();
     }
@@ -324,9 +328,10 @@ public class FileSystem {
             while(filelist1.hasMoreElements()) {
                 dirName = (String) filelist1.nextElement();
                 fc2 = (FileConnection) Connector.open(root + dirName);
-                if (fc2.isDirectory() && dirName.substring(0, 6).equalsIgnoreCase("survey")){//(dirName.startsWith("survey")  || dirName.startsWith("SURVEY") || dirName.startsWith("Survey")) ) {
+                if (fc2.isDirectory() && (AppMIDlet.getInstance().isNdgDir(dirName) ||
+                                          AppMIDlet.getInstance().isXformDir(dirName))){//(dirName.startsWith("survey")  || dirName.startsWith("SURVEY") || dirName.startsWith("Survey")) ) {
                     fc3 = (FileConnection) Connector.open(root + dirName + Resources.SURVEY_NAME);
-                    if (fc3.exists()) {
+                    if (fc3.exists() ) {
                         this.loadSurveyInfo(dirName);
                     } else {
 //                        error = true;
