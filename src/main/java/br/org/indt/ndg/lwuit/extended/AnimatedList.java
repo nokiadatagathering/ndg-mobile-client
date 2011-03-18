@@ -1,14 +1,14 @@
 package br.org.indt.ndg.lwuit.extended;
 
 import com.sun.lwuit.list.ListModel;
-import br.org.indt.ndg.lwuit.ui.SurveyListCellRenderer;
+import br.org.indt.ndg.lwuit.ui.renderers.SurveyListCellRenderer;
 import com.sun.lwuit.events.SelectionListener;
 
 public class AnimatedList extends List implements SelectionListener {
 
     final private int ANIMATION_DELAY = 300;
     final private int ANIMATION_START_DELAY = 1000;
-
+    
     private long tickTime = System.currentTimeMillis();
     private int lastSelection = -1;
     private SurveyListCellRenderer slcr;

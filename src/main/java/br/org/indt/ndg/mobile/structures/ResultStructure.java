@@ -1,5 +1,6 @@
 package br.org.indt.ndg.mobile.structures;
 
+import br.org.indt.ndg.lwuit.model.CategoryAnswer;
 import java.util.Vector;
 import java.util.Hashtable;
 
@@ -12,9 +13,21 @@ public class ResultStructure {
     public String getLatitude(){ return latitude; }
     public void setLatitude(String _latitude) { latitude = _latitude; }
 
-    private Vector answers = new Vector();
-    
-    public void addAnswer(Hashtable _answer) { answers.addElement(_answer);}
+    private Vector/*<CategoryAnwser>*/ answers = new Vector();
 
-    public Hashtable getAnswers(int _category) { return (Hashtable) answers.elementAt(_category); }
+    public void addAnswer( CategoryAnswer _answer) {
+        answers.addElement(_answer);
+    }
+
+    public Hashtable getAnswers( int _category ) {
+        return (Hashtable) answers.elementAt(_category );
+    }
+
+    public CategoryAnswer getCategoryAnswers( String _categoryId ) {
+        return (CategoryAnswer) answers.elementAt( Integer.parseInt(_categoryId) - 1 );
+    }
+
+    public Vector/*<CategoryAnwser>*/ getAllAnwsers() {
+        return answers;
+    }
 }

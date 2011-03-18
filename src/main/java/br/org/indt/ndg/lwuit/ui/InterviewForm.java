@@ -16,17 +16,22 @@ import br.org.indt.ndg.lwuit.extended.List;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.extended.TimeField;
+import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.model.CategoryAnswer;
+import br.org.indt.ndg.lwuit.model.ChoiceAnswer;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
+import br.org.indt.ndg.lwuit.model.DateAnswer;
 import br.org.indt.ndg.lwuit.model.DateQuestion;
 import br.org.indt.ndg.lwuit.model.DecimalQuestion;
 import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.model.ImageQuestion;
-import br.org.indt.ndg.lwuit.model.NDGQuestion;
-import br.org.indt.ndg.lwuit.model.NumberAnswer;
+import br.org.indt.ndg.lwuit.model.NumericAnswer;
 import br.org.indt.ndg.lwuit.model.NumericQuestion;
+import br.org.indt.ndg.lwuit.model.NDGQuestion;
+import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManagerListener;
@@ -54,24 +59,23 @@ import com.sun.lwuit.plaf.Border;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
-/**
- *
- * @author mturiel, amartini
- */
+
 public class InterviewForm extends Screen implements ActionListener {
     private String title1;
     private String title2;
 
     private NDGQuestion currentQuestion;
+    private NDGAnswer currentAnswer;
     private Vector vContainers;
     private boolean answerChanged = false;
-    
+
     protected void loadData() {
         createScreen();
         vContainers = new Vector();
-        title1 = SurveysControl.getInstance().getOpenedSurveyTitle();
+        title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.NEW_INTERVIEW;
     }
 
@@ -84,25 +88,33 @@ public class InterviewForm extends Screen implements ActionListener {
         form.setScrollAnimationSpeed(100);
         form.setFocusScrolling(true);
 
-        NDGQuestion[] questions = SurveysControl.getInstance().getSelectedCategory().getQuestions();
+        Vector questions = SurveysControl.getInstance().getSelectedCategory().getQuestions();
 
         ContainerUI lastUI = null;
-        for ( int j=0; j< questions.length; j++ ){
-            currentQuestion = questions[j];
+        for ( int j=0; j< questions.size(); j++ ){
+            currentQuestion = (NDGQuestion)questions.elementAt(j);
+
+            int categoryIndex = SurveysControl.getInstance().getSelectedCategoryIndex();
+            String catIndex  = String.valueOf(categoryIndex+1);
+            int subCategory = SurveysControl.getInstance().getSelectedSubCategoryIndex();
+            CategoryAnswer categoryanswer = SurveysControl.getInstance().getResult().getCategoryAnswers(catIndex);
+            Hashtable table = categoryanswer.getSubCategoryAnswers(subCategory);
+            currentAnswer = (NDGAnswer)table.get( String.valueOf( currentQuestion.getIdNumber()));
+
             if (currentQuestion instanceof DescriptiveQuestion) {
-                 DescriptiveFieldUI df = new DescriptiveFieldUI( currentQuestion );
+                 DescriptiveFieldUI df = new DescriptiveFieldUI( currentQuestion, currentAnswer );
                  df.registerQuestion();
                  form.addComponent(df);
                  lastUI = df;
             }
             else if (currentQuestion instanceof NumericQuestion) {
-                NumericFieldUI  nf = new NumericFieldUI(currentQuestion);
+                NumericFieldUI  nf = new NumericFieldUI(currentQuestion, currentAnswer);
                 nf.registerQuestion();
                 form.addComponent(nf);
                 lastUI = nf;
             }
             else if (currentQuestion instanceof DateQuestion) {
-               DateFieldUI df = new DateFieldUI(currentQuestion);
+               DateFieldUI df = new DateFieldUI(currentQuestion, currentAnswer);
                df.registerQuestion();
                form.addComponent(df);
                lastUI = df;
@@ -110,32 +122,32 @@ public class InterviewForm extends Screen implements ActionListener {
             else if (currentQuestion instanceof ChoiceQuestion) {
                 if (((ChoiceQuestion) currentQuestion).isExclusive()) {
                     if (((ChoiceQuestion) currentQuestion).getChoices().size() <= 4) {
-                        ExclusiveChoiceFieldUI ecf = new ExclusiveChoiceFieldUI(currentQuestion);
+                        ExclusiveChoiceFieldUI ecf = new ExclusiveChoiceFieldUI(currentQuestion, currentAnswer);
                         ecf.registerQuestion();
                         form.addComponent(ecf);
                         lastUI = ecf;
-                    } else { //if there are more 4 choices (radiobutton)
-                        ExclusiveChoiceFieldAutoCompleteUI ecfa = new ExclusiveChoiceFieldAutoCompleteUI(currentQuestion);
+                    } else { //if there are more than 4 choices (radiobutton)
+                        ExclusiveChoiceFieldAutoCompleteUI ecfa = new ExclusiveChoiceFieldAutoCompleteUI(currentQuestion, currentAnswer);
                         ecfa.registerQuestion();
                         form.addComponent(ecfa);
                         lastUI = ecfa;
                     }
-                    updateSkippedQuestion((ChoiceQuestion)currentQuestion);
+                    updateSkippedQuestion((ChoiceQuestion)currentQuestion,(ChoiceAnswer)currentAnswer);
                 } else {
-                    ChoiceFieldUI cf = new ChoiceFieldUI(currentQuestion);
+                    ChoiceFieldUI cf = new ChoiceFieldUI(currentQuestion, currentAnswer);
                     cf.registerQuestion();
                     form.addComponent(cf);
                     lastUI = cf;
                 }
             }
             else if(currentQuestion instanceof ImageQuestion){
-                ImageFieldUI imgf = new ImageFieldUI(currentQuestion);
+                ImageFieldUI imgf = new ImageFieldUI(currentQuestion, currentAnswer);
                 imgf.registerQuestion();
                 form.addComponent(imgf);
                 lastUI = imgf;
             } else if (currentQuestion instanceof TimeQuestion) {
                 if (((TimeQuestion) currentQuestion).getConvention() == 24) {
-                    TimeFieldUI tf = new TimeFieldUI(currentQuestion);
+                    TimeFieldUI tf = new TimeFieldUI(currentQuestion, currentAnswer);
                     tf.registerQuestion();
                     form.addComponent(tf);
                     lastUI = tf;
@@ -143,7 +155,7 @@ public class InterviewForm extends Screen implements ActionListener {
                     if(currentQuestion.getFirstTime()) {
                         ((TimeQuestion) currentQuestion).setAm_pm(-1); // clear
                     }
-                    TimeField12UI tf = new TimeField12UI(currentQuestion);
+                    TimeField12UI tf = new TimeField12UI(currentQuestion, currentAnswer);
                     tf.registerQuestion();
                     form.addComponent(tf);
                     lastUI = tf;
@@ -171,15 +183,6 @@ public class InterviewForm extends Screen implements ActionListener {
             title2 = Resources.EDITING;
         }
         setTitle(title1, title2);
-        //disable skipped questions. needed when user starts survey at random category
-        for( int i=0; i<SurveysControl.getInstance().getQuestionsFlat().size(); i++ )
-        {
-            NDGQuestion question = (NDGQuestion)SurveysControl.getInstance().getQuestionsFlat().elementAt(i);
-            if( question instanceof ChoiceQuestion )
-            {
-                updateSkippedQuestion((ChoiceQuestion)question);
-            }
-        }
     }
 
     private void setModifiedInterview(boolean _val) {
@@ -207,7 +210,9 @@ public class InterviewForm extends Screen implements ActionListener {
         commitAllAnswers();
         for ( int i = 0; i< vContainers.size(); i++)
         {
-            if (!((ContainerUI)vContainers.elementAt(i)).getQuestion().passConstraints() )
+            NDGQuestion question = ((ContainerUI)vContainers.elementAt(i)).getQuestion();
+            NDGAnswer answer = ((ContainerUI)vContainers.elementAt(i)).getAnswer();
+            if ( !question.passConstraints( answer ) )
             {
                 ((ContainerUI)vContainers.elementAt(i)).requestFocus();
                 return false;
@@ -216,41 +221,35 @@ public class InterviewForm extends Screen implements ActionListener {
         return true;
     }
 
-    private void updateSkippedQuestion(ChoiceQuestion question) {
+    private void updateSkippedQuestion( ChoiceQuestion aQuestion, ChoiceAnswer aAnswer ) {
         try
         {
-        int selectedChoiceItem = Integer.parseInt((String) question.getAnswer().getValue());
-        boolean sentence1 = ((selectedChoiceItem != ((ChoiceQuestion) question).getChoiceItem()) && (((ChoiceQuestion) question).isInverse()));
-        boolean sentence2 = ((selectedChoiceItem == ((ChoiceQuestion) question).getChoiceItem()) && (!((ChoiceQuestion) question).isInverse()));
+            int selectedChoiceItem = Integer.parseInt( (String)aAnswer.getSelectedIndexes().elementAt(0) );
+            boolean sentence1 = ((selectedChoiceItem != ((ChoiceQuestion) aQuestion).getChoiceItem()) && (((ChoiceQuestion) aQuestion).isInverse()));
+            boolean sentence2 = ((selectedChoiceItem == ((ChoiceQuestion) aQuestion).getChoiceItem()) && (!((ChoiceQuestion) aQuestion).isInverse()));
 
-        Vector questions = SurveysControl.getInstance().getQuestionsFlat();
-        int start = questions.indexOf(question);
-        int endCat = question.getCatTo();
-        int endQuestion = question.getSkipTo();
+            Vector questions = SurveysControl.getInstance().getQuestionsFlat();
+            int start = questions.indexOf( aQuestion );
+            int endCat = aQuestion.getCatTo();
+            int endQuestion = aQuestion.getSkipTo();
 
-        if( endCat > 0 && endCat <= SurveysControl.getInstance().getCategoriesFromOpenedSurvey().length )
-        {
-            Category category = SurveysControl.getInstance().getCategoriesFromOpenedSurvey()[endCat-1];
-            if( endQuestion > 0 && endQuestion <= category.getQuestions().length )
-            {
-                int endQuestionLinear = questions.indexOf(category.getQuestions()[endQuestion-1]);
-                for( int i = start+1; i<endQuestionLinear; i++)
-                {
-                    ((NDGQuestion)questions.elementAt(i)).setSkiped(sentence1 || sentence2);
+            if( endCat > 0 && endCat <= SurveysControl.getInstance().getSurvey().getCategories().size() ) {
+                Category category = (Category)SurveysControl.getInstance().getSurvey().getCategories().elementAt(endCat-1);
+                if( endQuestion > 0 && endQuestion <= category.getQuestions().size() ) {
+                    int endQuestionLinear = questions.indexOf(category.getQuestions().elementAt(endQuestion-1));
+                    for( int i = start+1; i<endQuestionLinear; i++) {
+                        ((NDGQuestion)questions.elementAt(i)).setSkiped(sentence1 || sentence2);
+                    }
+                }
+
+                for( int i = 0; i< vContainers.size(); i++ ) {
+                    ContainerUI container = (ContainerUI)vContainers.elementAt(i);
+                    boolean skip = container.getQuestion().getSkiped();
+                    container.setEnabled(!skip);
                 }
             }
-
-            for( int i = 0; i< vContainers.size(); i++ )
-            {
-                ContainerUI container = (ContainerUI)vContainers.elementAt(i);
-                boolean skip = container.getQuestion().getSkiped();
-                container.setEnabled(!skip);
-            }
         }
-        }
-        catch(Exception ex)
-        {
-        }
+        catch(Exception ex){/*do nothing*/}
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -273,8 +272,9 @@ public class InterviewForm extends Screen implements ActionListener {
 abstract class ContainerUI extends Container implements FocusListener {
     private final int NUMBER_OF_COLUMNS = 20;
 
-    protected TextArea qname;
-    protected NDGQuestion question;
+    protected TextArea mQuestionTextArea;
+    protected NDGQuestion mQuestion;
+    protected NDGAnswer mAnswer;
 
     public abstract void commitValue();
     public abstract void setEnabled(boolean enabled);
@@ -283,33 +283,31 @@ abstract class ContainerUI extends Container implements FocusListener {
     {
     }
 
-    public ContainerUI(NDGQuestion question)
+    public ContainerUI( NDGQuestion aQuestion, NDGAnswer aAnswer)
     {
         getStyle().setBorder(Border.createBevelLowered( NDGStyleToolbox.getInstance().focusLostColor,
                                                         NDGStyleToolbox.getInstance().focusLostColor,
                                                         NDGStyleToolbox.getInstance().focusLostColor,
                                                         NDGStyleToolbox.getInstance().focusLostColor ));
-        this.question  = question;
+        mQuestion  = aQuestion;
+        mAnswer = aAnswer;
     }
 
-    protected TextArea createQuestionName(String name) {
+    protected TextArea createQuestionName( String aQuestionText ) {
         TextArea questionName = new TextArea();
         questionName.setEditable(false);
         questionName.setFocusable(false);
         questionName.setColumns(NUMBER_OF_COLUMNS);
         questionName.setRows(1);
         questionName.setGrowByContent(false);
-        questionName.setText(name);
+        questionName.setText(aQuestionText);
 
         int pw = Display.getInstance().getDisplayWidth();
-        int w = questionName.getStyle().getFont().stringWidth(name);
-        if (w > pw)
-        {
+        int w = questionName.getStyle().getFont().stringWidth(aQuestionText);
+        if (w > pw) {
             questionName.setGrowByContent(true);
             questionName.setRows(2);
-        }
-        else
-        {
+        } else {
             questionName.setGrowByContent(false);
             questionName.setRows(1);
         }
@@ -317,9 +315,12 @@ abstract class ContainerUI extends Container implements FocusListener {
         return questionName;
     }
 
-    public NDGQuestion getQuestion()
-    {
-        return question;
+    public NDGQuestion getQuestion() {
+        return mQuestion;
+    }
+
+    public NDGAnswer getAnswer() {
+        return mAnswer;
     }
 
     public void focusGained(Component cmpnt){
@@ -332,8 +333,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     public void focusLost(Component cmpnt) {
         commitValue();	//TODO ensure it can be removed
-        if (!question.passConstraints())
-        {
+        if (!mQuestion.passConstraints(mAnswer)) {
             cmpnt.requestFocus();
             return;
         }
@@ -347,32 +347,32 @@ abstract class ContainerUI extends Container implements FocusListener {
 
 
      class DescriptiveFieldUI extends ContainerUI{
-        DescriptiveField tfDesc;
+        private DescriptiveField mDescriptionTextField;
 
-        public DescriptiveFieldUI(NDGQuestion obj) {
-            super(obj);
+        public DescriptiveFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            addComponent(qname);
+            mQuestionTextArea = createQuestionName( mQuestion.getName() );
+            addComponent(mQuestionTextArea);
 
-            tfDesc = new DescriptiveField(((DescriptiveQuestion)question).getLength());
-            tfDesc.setText((String) question.getAnswer().getValue());
-            tfDesc.setInputMode("Abc");
-            tfDesc.setEditable(true);
-            tfDesc.setFocusable(true);
-            addComponent(tfDesc);
-            tfDesc.addFocusListener(this);
-            tfDesc.addDataChangeListener(new DataChangedListener() {
+            mDescriptionTextField = new DescriptiveField(((DescriptiveQuestion) mQuestion).getLength());
+            mDescriptionTextField.setText((String)mAnswer.getValue()/*(String) question.getAnswer().getValue()*/);
+            mDescriptionTextField.setInputMode("Abc");
+            mDescriptionTextField.setEditable(true);
+            mDescriptionTextField.setFocusable(true);
+            addComponent(mDescriptionTextField);
+            mDescriptionTextField.addFocusListener(this);
+            mDescriptionTextField.addDataChangeListener(new DataChangedListener() {
                 public void dataChanged(int type, int index) {
                     revalidate();
                 }
             });
 
-            if (((DescriptiveQuestion)question).getChoices().size() >= 1) {
-                Vector vChoices = ((DescriptiveQuestion)question).getChoices();
+            if (((DescriptiveQuestion)mQuestion).getChoices().size() >= 1) {
+                Vector vChoices = ((DescriptiveQuestion)mQuestion).getChoices();
                 int totalChoices = vChoices.size();
                 String[] choices = new String[totalChoices];
 
@@ -389,22 +389,22 @@ abstract class ContainerUI extends Container implements FocusListener {
                 choice.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent ae) {
-                    tfDesc.setText(((List) ae.getSource()).getSelectedItem().toString());
+                    mDescriptionTextField.setText(((List) ae.getSource()).getSelectedItem().toString());
                     }
                 });
 
-                tfDesc.addDataChangeListener(new DataChangedListener() {
+                mDescriptionTextField.addDataChangeListener(new DataChangedListener() {
 
                 public void dataChanged(int arg0, int arg1) {
                   //  skipGameKey = true;
-                    proxyModel.filter(tfDesc.getText());
+                    proxyModel.filter(mDescriptionTextField.getText());
                     //setModifiedInterview(true);
                     }
                 });
 
                 addComponent(choice);
             } else {
-                tfDesc.addDataChangeListener(new HandleInterviewAnswersModified());
+                mDescriptionTextField.addDataChangeListener(new HandleInterviewAnswersModified());
             }
             Label spacer = new Label("");
             spacer.setFocusable(false);
@@ -412,74 +412,76 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void commitValue() {
-            question.getAnswer().setValue(tfDesc.getText());
-            question.setVisited(true);
+            mAnswer.setValue( mDescriptionTextField.getText() );
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled( boolean enabled ) {
-            qname.setEnabled(enabled);
-            tfDesc.setEnabled(enabled);
+            mQuestionTextArea.setEnabled(enabled);
+            mDescriptionTextField.setEnabled(enabled);
         }
      }
     ///////////////////////////// Numeric Question /////////////////////////////
     class NumericFieldUI extends ContainerUI{
-        NumericField nfNumber;
+        private NumericField mNumberTextField;
 
-        public NumericFieldUI(NDGQuestion obj){
-            super(obj);
+        public NumericFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ){
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion( ) {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            addComponent(qname);
+            mQuestionTextArea = createQuestionName(mQuestion.getName());
+            addComponent(mQuestionTextArea);
 
-            nfNumber = new NumericField(((NumericQuestion) question).getLength(),
-                    question instanceof DecimalQuestion );
-            nfNumber.setFocusable(true);
-            String value =((NumberAnswer)question.getAnswer()).getValueString();
-            nfNumber.setText(value);
-            nfNumber.addFocusListener(this);
-            nfNumber.addDataChangeListener(new HandleInterviewAnswersModified());
+            mNumberTextField = new NumericField( ((NumericQuestion) mQuestion).getLength(),
+                                                 mQuestion instanceof DecimalQuestion );
+            mNumberTextField.setFocusable(true);
+            String value =((NumericAnswer)mAnswer).getValueString();
+            mNumberTextField.setText(value);
+            mNumberTextField.addFocusListener(this);
+            mNumberTextField.addDataChangeListener(new HandleInterviewAnswersModified());
 
-            addComponent(nfNumber);
+            addComponent(mNumberTextField);
             Label spacer = new Label("");
             spacer.setFocusable(false);
             addComponent(spacer);
         }
 
         public void commitValue( ) {
-            question.getAnswer().setValue(nfNumber.getText());
-            question.setVisited(true);
+            mAnswer.setValue( mNumberTextField.getText() );
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
-            nfNumber.setEnabled(enabled);
+            mQuestionTextArea.setEnabled(enabled);
+            mNumberTextField.setEnabled(enabled);
         }
     }
 
     ////////////////////////////// Date Question ///////////////////////////////
     class DateFieldUI extends ContainerUI{
-        DateField dfDate;
+        private DateField mDateTextField;
 
-        public DateFieldUI( NDGQuestion obj ) {
-            super(obj);
+        public DateFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion() {
             setLayout( new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
+            mQuestionTextArea = createQuestionName( mQuestion.getName() );
             
-            addComponent(qname);
-            dfDate = new DateField(DateField.DDMMYYYY);
-            long datelong = Long.parseLong((String) question.getAnswer().getValue());
-            dfDate.setDate(new Date(datelong));
-            dfDate.setEditable(true);
-            dfDate.addFocusListener(this);
-            dfDate.addDataChangeListener(new HandleInterviewAnswersModified());
+            addComponent(mQuestionTextArea);
+            mDateTextField = new DateField(DateField.DDMMYYYY);
+            long datelong = ((DateAnswer)mAnswer).getDate();
+            mDateTextField.setDate(new Date(datelong));
+            mDateTextField.setEditable(true);
+            mDateTextField.addFocusListener(this);
+            mDateTextField.addDataChangeListener(new HandleInterviewAnswersModified());
 
-            addComponent(dfDate);
+            addComponent(mDateTextField);
 
             Label spacer = new Label("");
             spacer.setFocusable(false);
@@ -487,35 +489,36 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
         
         public void commitValue() {
-            Date date = dfDate.getDate();
+            Date date = mDateTextField.getDate();
             Long datelong = new Long(date.getTime());
-            question.getAnswer().setValue(datelong.toString());
-            question.setVisited(true);
+            ((DateAnswer)mAnswer).setDate(datelong.longValue());
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEditable(enabled);
-            dfDate.setEnabled(enabled);
+            mQuestionTextArea.setEditable(enabled);
+            mDateTextField.setEnabled(enabled);
         }
     }
 
     class ExclusiveChoiceFieldUI extends ContainerUI {
-        private ButtonGroup groupButton;
+        private ButtonGroup mGroupButton;
 
-        public ExclusiveChoiceFieldUI(NDGQuestion obj) {
-            super(obj);
+        public ExclusiveChoiceFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            
-            addComponent(qname);
+            mQuestionTextArea = createQuestionName(mQuestion.getName());
 
-            groupButton = new ButtonGroup();
-            Vector vChoices = ((ChoiceQuestion)question).getChoices();
-            Vector vOthers = ((ChoiceQuestion)question).getOthers();
-            
+            addComponent(mQuestionTextArea);
+
+            mGroupButton = new ButtonGroup();
+            Vector vChoices = ((ChoiceQuestion)mQuestion).getChoices();
+            Vector vOthers = ((ChoiceQuestion)mQuestion).getOthers();
+
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
             for (int i = 0; i < totalChoices; i++) {
@@ -525,24 +528,22 @@ abstract class ContainerUI extends Container implements FocusListener {
                 rb.setOtherText(""); // Initializes with empty string
                 rb.addActionListener(new HandleMoreDetails()); // More Details
                 rb.addFocusListener(this); // Controls when changing to a new question
-                groupButton.add(rb);
+                mGroupButton.add(rb);
                 addComponent(rb);
             }
-            
-            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
-            String answerValue = (String) question.getAnswer().getValue();
-            if (answerValue != null && !answerValue.equals("")) {
-                int index = Integer.parseInt((String) question.getAnswer().getValue());
-                groupButton.setSelected(index);
-                RadioButton rb = (RadioButton) groupButton.getRadioButton(index);
-                Vector v = ((ChoiceQuestion)question).getOthersText();
-                String str = (String) v.elementAt(0);
-                rb.setOtherText(str);
+
+            Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
+            for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
+                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
+                mGroupButton.setSelected(index);
+
+                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(index);
+                String other  = (String)((ChoiceAnswer)mAnswer).getOtherText( (String)vSelectedIndexes.elementAt(i ) );
+                if( other != null ) {
+                    rb.setOtherText( other );
+                }
             }
-            else if (vDefault.size() > 0){
-                groupButton.setSelected(Integer.parseInt((String) vDefault.elementAt(0)));
-            }
-            
+
             Label spacer = new Label("");
             spacer.setFocusable(false);
             addComponent(spacer);
@@ -550,35 +551,42 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void commitValue()
         {
-            String selectedIndex = "";
-            Vector vOthersText = new Vector();
-            for (int i = 0; i < groupButton.getButtonCount(); i++)
+            Vector selectedIndexes = new Vector();
+            Hashtable selectedOtherText = new Hashtable();
+
+            for (int i = 0; i < mGroupButton.getButtonCount(); i++)
             {
-                RadioButton rb = (RadioButton)groupButton.getRadioButton(i);
+                RadioButton rb = (RadioButton)mGroupButton.getRadioButton(i);
                 if (rb.isSelected())
                 {
-                    selectedIndex = (Integer.toString(i));
+                    selectedIndexes.addElement( Integer.toString(i) );
+                    if( rb.hasOther() ) {
+                        selectedOtherText.put( Integer.toString(i), rb.getOtherText() );
+                    }
+                    break;
                 }
-                vOthersText.addElement(rb.getOtherText());
             }
-            question.getAnswer().setValue(selectedIndex);
-            ((ChoiceQuestion)question).setOthersText(vOthersText);
-            question.setVisited(true);
+
+            ((ChoiceAnswer)mAnswer).setSelectedIndex( selectedIndexes );
+            ((ChoiceAnswer)mAnswer).setOtherText(selectedOtherText);
+
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
-            for( int i = 0; i<groupButton.getButtonCount(); i++)
+            mQuestionTextArea.setEnabled(enabled);
+            for( int i = 0; i<mGroupButton.getButtonCount(); i++)
             {
-                groupButton.getRadioButton(i).setEnabled(enabled);
+                mGroupButton.getRadioButton(i).setEnabled(enabled);
             }
         }
 
         public void handleMoreDetails( Object obj )
         {
-            for( int i = 0; i<groupButton.getButtonCount();i++)
+            for( int i = 0; i<mGroupButton.getButtonCount();i++)
             {
-                RadioButton rb = (RadioButton) groupButton.getRadioButton(i);
+                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(i);
                 if ((rb.hasOther()) && (rb.isSelected())) {
                     DetailsForm.show(rb.getText(), rb.getOtherText());
                     rb.setOtherText(SurveysControl.getInstance().getItemOtherText());
@@ -593,66 +601,60 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     class ExclusiveChoiceFieldAutoCompleteUI extends ContainerUI {
-        ButtonGroup groupButton;
-        DescriptiveField exclusiveChoiceTextField;
-        ListModel underlyingModel;
+        private ButtonGroup mGroupButton;
+        private DescriptiveField mExclusiveChoiceTextField;
+        private ListModel mDataModel;
 
-        public ExclusiveChoiceFieldAutoCompleteUI(NDGQuestion obj) {
-            super(obj);
+        public ExclusiveChoiceFieldAutoCompleteUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void focusGained(Component cmpnt) {
             super.focusGained(cmpnt);
-            exclusiveChoiceTextField.keyPressed(Display.GAME_FIRE);
+            mExclusiveChoiceTextField.keyPressed(Display.GAME_FIRE);
         }
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            addComponent(qname);
+            mQuestionTextArea = createQuestionName(mQuestion.getName());
+            addComponent(mQuestionTextArea);
 
-            groupButton = new ButtonGroup();
+            mGroupButton = new ButtonGroup();
 
-            Vector vChoices = ((ChoiceQuestion)question).getChoices();
-            Vector vOthers = ((ChoiceQuestion)question).getOthers();
+            Vector vChoices = ((ChoiceQuestion)mQuestion).getChoices();
+            Vector vOthers = ((ChoiceQuestion)mQuestion).getOthers();
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
 
-            underlyingModel = new DefaultListModel();
+            mDataModel = new DefaultListModel();
             final ManagerOptionSelectableRadio managerOptionSelectableRadio = new ManagerOptionSelectableRadio();
             int maxQuestionLength = 0;
             for (int i = 0; i < totalChoices; i++) {
                     choices[i] = (String) vChoices.elementAt(i);
                     RadioButton rb = new RadioButton(choices[i]);
-                    underlyingModel.addItem(new OptionSelectableRadio(choices[i], managerOptionSelectableRadio));
+                    mDataModel.addItem(new OptionSelectableRadio(choices[i], managerOptionSelectableRadio));
                     rb.setOther(((String) vOthers.elementAt(i)).equals("1"));
                     rb.setOtherText(""); // Initializes with empty string
                     rb.setFocusable(false);
-                    groupButton.add(rb);
+                    mGroupButton.add(rb);
                     maxQuestionLength = (choices[i].length() > maxQuestionLength) ? choices[i].length() : maxQuestionLength;
             }
 
-            exclusiveChoiceTextField = new DescriptiveField(maxQuestionLength);
+            mExclusiveChoiceTextField = new DescriptiveField(maxQuestionLength);
+            Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
+            for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
+                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
+                mGroupButton.setSelected(index);
+                ((OptionSelectableRadio) mDataModel.getItemAt(index)).setSelected(true);
 
-            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
-            String answerValue = (String) question.getAnswer().getValue();
-            if (answerValue != null && !answerValue.equals("")) {
-                int index = Integer.parseInt((String) question.getAnswer().getValue());
-                groupButton.setSelected(index);
-                ((OptionSelectableRadio) underlyingModel.getItemAt(index)).setSelected(true);
-                
-                RadioButton rb = (RadioButton) groupButton.getRadioButton(index);
-                Vector v = ((ChoiceQuestion)question).getOthersText();
-                String str = (String) v.elementAt(0);
-                rb.setOtherText(str);
-            }
-            else if (vDefault.size() > 0){
-                int idx = Integer.parseInt((String) vDefault.elementAt(0));
-                groupButton.setSelected(idx);
-                ((OptionSelectableRadio) underlyingModel.getItemAt(idx)).setSelected(true);
+                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(index);
+                String other  = (String)((ChoiceAnswer)mAnswer).getOtherText( (String)vSelectedIndexes.elementAt(i ) );
+                if( other != null ) {
+                    rb.setOtherText( other );
+                }
             }
 
-            final FilterProxyListModel proxyModel = new FilterProxyListModel(underlyingModel);
+            final FilterProxyListModel proxyModel = new FilterProxyListModel(mDataModel);
             proxyModel.setMaxDisplay(-1);//Unlimited.
 
             final List choice = new List(proxyModel);
@@ -661,24 +663,24 @@ abstract class ContainerUI extends Container implements FocusListener {
             choice.setHandlesInput(false);
             choice.setListCellRenderer(new RadioButtonRenderer(""));
             choice.addActionListener(new HandleMoreDetails());
-            if( groupButton.getSelectedIndex() >=1 )
+            if( mGroupButton.getSelectedIndex() >=1 )
             {
-                choice.setSelectedIndex(groupButton.getSelectedIndex()-1);
+                choice.setSelectedIndex(mGroupButton.getSelectedIndex()-1);
             }
 
-            exclusiveChoiceTextField.addDataChangeListener(new DataChangedListener() {
+            mExclusiveChoiceTextField.addDataChangeListener(new DataChangedListener() {
                 public void dataChanged(int arg0, int arg1) {
-                proxyModel.filter(exclusiveChoiceTextField.getText());
+                proxyModel.filter(mExclusiveChoiceTextField.getText());
                 }
             });
 
-            exclusiveChoiceTextField.addFocusListener(this);
+            mExclusiveChoiceTextField.addFocusListener(this);
             Container cList = new Container(new BoxLayout(BoxLayout.Y_AXIS));
             cList.setFocusable(false);
             cList.addComponent(choice);
             cList.setPreferredSize(new Dimension(30, 90));
 
-            addComponent(exclusiveChoiceTextField);
+            addComponent(mExclusiveChoiceTextField);
             addComponent(cList);
 
             Label spacer = new Label("");
@@ -688,28 +690,34 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void commitValue()
         {
-            String selectedIndex = "";
-            Vector vOthersText = new Vector();
-            for (int i = 0; i < groupButton.getButtonCount(); i++)
+            Vector selectedIndexes = new Vector();
+            Hashtable selectedOtherText = new Hashtable();
+
+            for (int i = 0; i < mGroupButton.getButtonCount(); i++)
             {
-                RadioButton rb = (RadioButton)groupButton.getRadioButton(i);
+                RadioButton rb = (RadioButton)mGroupButton.getRadioButton(i);
                 if (rb.isSelected())
                 {
-                    selectedIndex = (Integer.toString(i));
+                    selectedIndexes.addElement( Integer.toString(i) );
+                    if( rb.hasOther() ) {
+                        selectedOtherText.put( Integer.toString(i), rb.getOtherText() );
+                    }
+                    break;
                 }
-                vOthersText.addElement(rb.getOtherText());
             }
-            question.getAnswer().setValue(selectedIndex);
-            ((ChoiceQuestion)question).setOthersText(vOthersText);
-            question.setVisited(true);
+
+            ((ChoiceAnswer)mAnswer).setSelectedIndex( selectedIndexes );
+            ((ChoiceAnswer)mAnswer).setOtherText(selectedOtherText);
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
-            exclusiveChoiceTextField.setEnabled(enabled);
-            for( int i = 0; i<groupButton.getButtonCount(); i++)
+            mQuestionTextArea.setEnabled(enabled);
+            mExclusiveChoiceTextField.setEnabled(enabled);
+            for( int i = 0; i<mGroupButton.getButtonCount(); i++)
             {
-                groupButton.getRadioButton(i).setEnabled(enabled);
+                mGroupButton.getRadioButton(i).setEnabled(enabled);
             }
         }
 
@@ -719,10 +727,10 @@ abstract class ContainerUI extends Container implements FocusListener {
             int filterOffset = list.getSelectedIndex();
             int selItem = ((FilterProxyListModel)(list.getModel())).getFilterOffset(filterOffset);
 
-            groupButton.setSelected(selItem);
-            for( int i = 0; i<groupButton.getButtonCount();i++)
+            mGroupButton.setSelected(selItem);
+            for( int i = 0; i<mGroupButton.getButtonCount();i++)
             {
-                RadioButton rb = (RadioButton) groupButton.getRadioButton(i);
+                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(i);
                 if ((rb.hasOther()) && (rb.isSelected())) {
                     DetailsForm.show(rb.getText(), rb.getOtherText());
                     rb.setOtherText(SurveysControl.getInstance().getItemOtherText());
@@ -738,22 +746,22 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     ////////////////////////// Choice Multiple Question ////////////////////////
     class ChoiceFieldUI extends ContainerUI{
-        Vector groupButton;
+        private Vector mGroupButton;
 
-        public ChoiceFieldUI( NDGQuestion obj) {
-            super(obj);
+        public ChoiceFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            
-            addComponent(qname);
+            mQuestionTextArea = createQuestionName(mQuestion.getName());
 
-            groupButton = new Vector();
-            Vector vChoices = ((ChoiceQuestion)question).getChoices();
-            Vector vOthers = ((ChoiceQuestion)question).getOthers();
-            
+            addComponent(mQuestionTextArea);
+
+            mGroupButton = new Vector();
+            Vector vChoices = ((ChoiceQuestion)mQuestion).getChoices();
+            Vector vOthers = ((ChoiceQuestion)mQuestion).getOthers();
+
             int totalChoices = vChoices.size();
             String[] choices = new String[totalChoices];
             for (int i = 0; i < totalChoices; i++) {
@@ -763,22 +771,17 @@ abstract class ContainerUI extends Container implements FocusListener {
                 cb.setOtherText(""); // Initializes with empty string
                 cb.addActionListener(new HandleMoreDetails()); // More Details
                 cb.addFocusListener(this); // Controls when changing to a new question
-                groupButton.addElement(cb);
+                mGroupButton.addElement(cb);
                 addComponent(cb);
             }
-            int nIndex;
-            Vector vChoicesAnswer = (Vector) question.getAnswer().getValue();
-            Vector vDefault = ((ChoiceQuestion)question).getDefaultAnswers();
-            for (int i = 0; i < vChoicesAnswer.size(); i++) {
-                nIndex = Integer.parseInt((String) vChoicesAnswer.elementAt(i));
-                ((CheckBox) groupButton.elementAt(nIndex)).setSelected(true);
-                ((CheckBox) groupButton.elementAt(nIndex)).setOtherText((String) ((ChoiceQuestion)question).getOthersText().elementAt(i));
-            }
-            
-            if(vChoicesAnswer.isEmpty() || vDefault.size() > 0){
-                for(int idx = 0; idx < vDefault.size(); idx++ ){
-                    nIndex = Integer.parseInt((String) vDefault.elementAt(idx));
-                    ((CheckBox) groupButton.elementAt(nIndex)).setSelected(true);
+
+            Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
+            for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
+                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
+                ((CheckBox) mGroupButton.elementAt(i)).setSelected(true);
+
+                if ( ((ChoiceAnswer)mAnswer).getOtherText( String.valueOf(i) )!= null ) {
+                    ((CheckBox) mGroupButton.elementAt(i)).setOtherText((String)((ChoiceAnswer)mAnswer).getOtherText( String.valueOf( i ) ) );
                 }
             }
 
@@ -789,27 +792,32 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void commitValue()
         {
-            Vector vIndexes = new Vector();
-            Vector vOthersText = new Vector();
-            for (int i = 0; i < groupButton.size(); i++)
+            Vector selectedIndexes = new Vector();
+            Hashtable othersText = new Hashtable();
+
+            for (int i = 0; i < mGroupButton.size(); i++)
             {
-                CheckBox cb = (CheckBox) groupButton.elementAt(i);
+                CheckBox cb = (CheckBox) mGroupButton.elementAt(i);
                 if (cb.isSelected())
                 {
-                    vIndexes.addElement(Integer.toString(i));
+                    selectedIndexes.addElement( Integer.toString(i) );
+                    if( cb.hasOther() ) {
+                        othersText.put( Integer.toString(i), cb.getOtherText() );
+                    }
                 }
-                vOthersText.addElement(cb.getOtherText());
             }
-            question.getAnswer().setValue(vIndexes);
-            ((ChoiceQuestion)question).setOthersText(vOthersText);
-            question.setVisited(true);
+            ((ChoiceAnswer)mAnswer).setSelectedIndex( selectedIndexes );
+            ((ChoiceAnswer)mAnswer).setOtherText( othersText );
+
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
-            for( int i = 0; i< groupButton.size(); i++)
+            mQuestionTextArea.setEnabled(enabled);
+            for( int i = 0; i< mGroupButton.size(); i++)
             {
-                ((CheckBox)groupButton.elementAt(i)).setEnabled(enabled);
+                ((CheckBox)mGroupButton.elementAt(i)).setEnabled(enabled);
             }
         }
 
@@ -832,22 +840,22 @@ abstract class ContainerUI extends Container implements FocusListener {
         private static final int FOUR_ACTIONS_CONTEXT_MENU = 4;//TakePhotoCommand,OpenFileBrowserCommand,ShowPhotoCommand,RemovePhotoCommand
         private static final int TWO_ACTIONS_CONTEXT_MENU = 2;//TakePhotoCommand,OpenFileBrowserCommand
 
-        private Container imageContainer;
+        private Container mImageContainer;
 
-        public ImageFieldUI(NDGQuestion obj) {
-            super(obj);
+        public ImageFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void update(){
-           ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
-           if(imageContainer.getComponentCount() <= imgAnswer.getImages().size()) {
+           ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
+           if(mImageContainer.getComponentCount() <= imgAnswer.getImages().size()) {
                addCameraIconButton();
                setModifiedInterview(true);
            }
 
            form.showBack();
            //focus last button
-           Component comp = imageContainer.getComponentAt( imageContainer.getComponentCount() - 1 );
+           Component comp = mImageContainer.getComponentAt( mImageContainer.getComponentCount() - 1 );
            comp.requestFocus();
            rebuildOptionsMenu( comp );
         }
@@ -855,16 +863,16 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
-            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
+            ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
 
-            imageContainer = new Container (new FlowLayout());
+            mImageContainer = new Container (new FlowLayout());
 
             ImageData imgData = null;
 
-            Label spacer = new Label(question.getName());
+            Label spacer = new Label(mQuestion.getName());
             spacer.setFocusable(false);
             addComponent(spacer);
-            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)question).getMaxCount()) );
+            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
             maxPhotoCount.getStyle().setFont(NDGStyleToolbox.fontSmall);
             addComponent(maxPhotoCount);
 
@@ -875,34 +883,35 @@ abstract class ContainerUI extends Container implements FocusListener {
                 }
             }
             addCameraIconButton();
-            addComponent(imageContainer);
+            addComponent(mImageContainer);
             addFocusListener(this);
         }
 
         public void addCameraIconButton(){
-            ImageAnswer imgAnswer = (ImageAnswer)question.getAnswer();
-            if(imgAnswer.getImages().size() < ((ImageQuestion)question).getMaxCount()){
+            ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
+            if(imgAnswer.getImages().size() < ((ImageQuestion)mQuestion).getMaxCount()){
                 Image img = Screen.getRes().getImage("camera-icon");
                 addButton(img);
             }
         }
 
         private void addButton(Image img){
-                Button button = new Button();
-                button.setIcon(img);
-                button.addActionListener(this);
-                button.setAlignment(Component.LEFT);
-                button.setFocusable(true);
-                button.addFocusListener(this);
-                imageContainer.addComponent(button);
+            Button button = new Button();
+            button.setIcon(img);
+            button.addActionListener(this);
+            button.setAlignment(Component.LEFT);
+            button.setFocusable(true);
+            button.addFocusListener(this);
+            mImageContainer.addComponent(button);
         }
 
         public void focusGained(Component cmpnt) {
             super.focusGained(cmpnt);
             rebuildOptionsMenu(cmpnt);
 
-            NDGCameraManager.getInstance().sendPostProcessData(this, cmpnt,
-                    (ImageQuestion) question, imageContainer);
+            NDGCameraManager.getInstance().sendPostProcessData( this, cmpnt,
+                                                               (ImageAnswer)mAnswer,
+                                                                mImageContainer);
         }
 
         private void rebuildOptionsMenu( Component cmpnt ) {
@@ -910,7 +919,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             form.removeCommand(TakePhotoCommand.getInstance().getCommand());
             form.removeCommand(ShowPhotoCommand.getInstance().getCommand());
             form.removeCommand(RemovePhotoCommand.getInstance().getCommand());
-            if (imageContainer.getComponentIndex(cmpnt) < ((ImageAnswer) question.getAnswer()).getImages().size()) {
+            if (mImageContainer.getComponentIndex(cmpnt) < ((ImageAnswer)mAnswer).getImages().size()) {
                 form.addCommand(RemovePhotoCommand.getInstance().getCommand());
                 form.addCommand(ShowPhotoCommand.getInstance().getCommand());
             }
@@ -923,19 +932,20 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void commitValue() {
-            question.setVisited(true);
+            mQuestion.setVisited(true);
+            mAnswer.setVisited(true);
         }
 
         public void actionPerformed(ActionEvent cmd) {
             if ( cmd.getSource() instanceof Button ) {
                 NDGCameraManager.getInstance().sendPostProcessData( this,
                                                                     (Button)cmd.getSource(),
-                                                                    (ImageQuestion) question,
-                                                                    imageContainer);
+                                                                    (ImageAnswer)mAnswer,
+                                                                    mImageContainer);
 
-                int index = imageContainer.getComponentIndex((Button)cmd.getSource());
+                int index = mImageContainer.getComponentIndex((Button)cmd.getSource());
 
-                if( index  < ((ImageAnswer)question.getAnswer()).getImages().size() ){
+                if( index  < ((ImageAnswer)mAnswer).getImages().size() ){
                     new ImageQuestionContextMenu(0, FOUR_ACTIONS_CONTEXT_MENU).show();
                 } else {
                     new ImageQuestionContextMenu(0, TWO_ACTIONS_CONTEXT_MENU).show();
@@ -944,103 +954,104 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
+            mQuestionTextArea.setEnabled(enabled);
         }
     }
 
     class TimeFieldUI extends ContainerUI {
-        TimeField tfTime;
-        
-        public TimeFieldUI(NDGQuestion obj) {
-             super(obj);
+        private TimeField mTimeTextField;
+
+        public TimeFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+             super( aQuestion, aAnswer );
         }
 
         public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            
-            addComponent(qname);
-            tfTime = new TimeField(TimeField.HHMM1);
+            mQuestionTextArea = createQuestionName( mQuestion.getName() );
 
-            long datelong = Long.parseLong((String) question.getAnswer().getValue());
+            addComponent(mQuestionTextArea);
+            mTimeTextField = new TimeField(TimeField.HHMM1);
 
-            tfTime.setTime(new Date(datelong));
-            tfTime.setEditable(true);
-            tfTime.addFocusListener(this);
-            tfTime.addDataChangeListener(new HandleInterviewAnswersModified());
+            long datelong =  ((TimeAnswer)mAnswer).getTime();
 
-            addComponent(tfTime);
-        
+            mTimeTextField.setTime(new Date(datelong));
+            mTimeTextField.setEditable(true);
+            mTimeTextField.addFocusListener(this);
+            mTimeTextField.addDataChangeListener(new HandleInterviewAnswersModified());
+
+            addComponent(mTimeTextField);
+
             Label spacer = new Label("");
             spacer.setFocusable(false);
             addComponent(spacer);
         }
 
         public void commitValue() {
-            Date time = tfTime.getTime();
+            Date time = mTimeTextField.getTime();
             Long timelong = new Long(time.getTime());
-            question.getAnswer().setValue(timelong.toString());
-            question.setVisited(true);
+            ((TimeAnswer)mAnswer).setTime( timelong.longValue() );
+            mAnswer.setVisited(true);
+            mQuestion.setVisited(true);
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEnabled(enabled);
-            tfTime.setEnabled(enabled);
+            mQuestionTextArea.setEnabled(enabled);
+            mTimeTextField.setEnabled(enabled);
         }
     }
 
     class TimeField12UI extends ContainerUI {
-        TimeField tfTime;
-        ButtonGroup groupButton;
+        private TimeField mTimeTextField;
+        private ButtonGroup mAmPmGroupButton;
 
-        public TimeField12UI(NDGQuestion obj) {
-            super(obj);
+        public TimeField12UI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
+            super( aQuestion, aAnswer );
         }
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            qname = createQuestionName(question.getName());
-            
-            addComponent(qname);
-            tfTime = new TimeField(TimeField.HHMM);
-            tfTime.addFocusListener(this);
+            mQuestionTextArea = createQuestionName(mQuestion.getName());
 
-            groupButton = new ButtonGroup();
+            addComponent(mQuestionTextArea);
+            mTimeTextField = new TimeField(TimeField.HHMM);
+            mTimeTextField.addFocusListener(this);
+
+            mAmPmGroupButton = new ButtonGroup();
             final RadioButton am = new RadioButton("am");
             final RadioButton pm = new RadioButton("pm");
             am.addFocusListener(this);
             pm.addFocusListener(this);
 
-            groupButton.add(am);
-            groupButton.add(pm);
+            mAmPmGroupButton.add(am);
+            mAmPmGroupButton.add(pm);
             am.addActionListener(new HandleMoreDetails());
             pm.addActionListener(new HandleMoreDetails());
 
-            long datelong = Long.parseLong((String) question.getAnswer().getValue());
+            long datelong = ((TimeAnswer)mAnswer).getTime();
             Date date = new Date(datelong);
 
-            if (((TimeQuestion)question).getAm_pm() == 1) {
-                groupButton.setSelected(am);
-            } else if (((TimeQuestion)question).getAm_pm() == 2) {
-                groupButton.setSelected(pm);
+            if (((TimeQuestion)mQuestion).getAm_pm() == 1) {
+                mAmPmGroupButton.setSelected(am);
+            } else if (((TimeQuestion)mQuestion).getAm_pm() == 2) {
+                mAmPmGroupButton.setSelected(pm);
             } else {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(date);
                 if( cal.get(Calendar.AM_PM) == Calendar.AM ) {
-                    groupButton.setSelected(am);
-                     ((TimeQuestion)getQuestion()).setAm_pm(TimeQuestion.AM);
+                    mAmPmGroupButton.setSelected(am);
+                    ((TimeQuestion)getQuestion()).setAm_pm(TimeQuestion.AM);
                 } else {
-                    groupButton.setSelected(pm);
-                     ((TimeQuestion)getQuestion()).setAm_pm(TimeQuestion.PM);
+                    mAmPmGroupButton.setSelected(pm);
+                    ((TimeQuestion)getQuestion()).setAm_pm(TimeQuestion.PM);
                 }
             }
 
-            tfTime.setTime(date);
-            tfTime.setEditable(true);
-            tfTime.addFocusListener(this);
-            tfTime.addDataChangeListener(new HandleInterviewAnswersModified());
+            mTimeTextField.setTime(date);
+            mTimeTextField.setEditable(true);
+            mTimeTextField.addFocusListener(this);
+            mTimeTextField.addDataChangeListener(new HandleInterviewAnswersModified());
 
-        addComponent(tfTime);
+        addComponent(mTimeTextField);
         addComponent(am);
         addComponent(pm);
 
@@ -1050,34 +1061,36 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void commitValue() {
-            for (int i = 0; i < groupButton.getButtonCount(); i++)
+            for (int i = 0; i < mAmPmGroupButton.getButtonCount(); i++)
             {
-                RadioButton rb = (RadioButton)groupButton.getRadioButton(i);
+                RadioButton rb = (RadioButton)mAmPmGroupButton.getRadioButton(i);
                 if (rb.isSelected())
                 {
-                    ((TimeQuestion)question).setAm_pm(i == 0? TimeQuestion.AM : TimeQuestion.PM);
-                    Date time = tfTime.getTime();
+                    ((TimeQuestion)mQuestion).setAm_pm(i == 0? TimeQuestion.AM : TimeQuestion.PM);
+                    Date time = mTimeTextField.getTime();
                     Long timelong = new Long(time.getTime());
-                    question.getAnswer().setValue(timelong.toString());
-                    question.setVisited(true);
+                    ((TimeAnswer)mAnswer).setTime( timelong.longValue() );
+                    ((TimeAnswer)mAnswer).setAmPm24(i == 0? TimeQuestion.AM : TimeQuestion.PM);
+                    mAnswer.setVisited(true);
+                    mQuestion.setVisited(true);
                     return;
                 }
             }
         }
 
         public void setEnabled(boolean enabled) {
-            qname.setEditable(enabled);
-            tfTime.setEnabled(enabled);
-            for( int i = 0; i < groupButton.getButtonCount(); i++)
+            mQuestionTextArea.setEditable(enabled);
+            mTimeTextField.setEnabled(enabled);
+            for( int i = 0; i < mAmPmGroupButton.getButtonCount(); i++)
             {
-                groupButton.getRadioButton(i).setEnabled(enabled);
+                mAmPmGroupButton.getRadioButton(i).setEnabled(enabled);
             }
         }
 
         public void handleMoreDetails( Object obj )
         {
             if ( ((TimeQuestion)getQuestion()).getConvention() != 24) {
-            RadioButton rb = (RadioButton)groupButton.getRadioButton(groupButton.getSelectedIndex());
+            RadioButton rb = (RadioButton)mAmPmGroupButton.getRadioButton(mAmPmGroupButton.getSelectedIndex());
                 if ( rb.getText().equals("am")) {
                        ((TimeQuestion)getQuestion()).setAm_pm(TimeQuestion.AM);
                 } else {
@@ -1114,7 +1127,8 @@ abstract class ContainerUI extends Container implements FocusListener {
                 if ( parent instanceof ExclusiveChoiceFieldUI
                   && parent.getQuestion() instanceof ChoiceQuestion )
                 {
-                    updateSkippedQuestion((ChoiceQuestion)((ExclusiveChoiceFieldUI)parent).getQuestion());
+                    updateSkippedQuestion( (ChoiceQuestion)((ExclusiveChoiceFieldUI)parent).getQuestion(),
+                                           (ChoiceAnswer)((ExclusiveChoiceFieldUI)parent).getAnswer() );
                 }
             }
             else if((cmd instanceof List))
@@ -1131,7 +1145,8 @@ abstract class ContainerUI extends Container implements FocusListener {
                         ((OptionSelectableRadio) list.getSelectedItem()).setSelected(true);
                         ExclusiveChoiceFieldAutoCompleteUI parent = (ExclusiveChoiceFieldAutoCompleteUI)list.getParent().getParent();
                         parent.handleMoreDetails(list);
-                        updateSkippedQuestion((ChoiceQuestion)parent.getQuestion());
+                        updateSkippedQuestion( (ChoiceQuestion)parent.getQuestion(),
+                                               (ChoiceAnswer)parent.getAnswer() );
                     }
                 }
             }
@@ -1140,7 +1155,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
    class ManagerOptionSelectableRadio {
 
-        Vector options = new Vector();
+        private Vector options = new Vector();
 
         public void addOption(OptionSelectableRadio option) {
             if (!options.contains(option)) {
@@ -1159,7 +1174,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                         opt.setSelected(false);
                     }
                 }
-
             }
         }
     }
@@ -1193,7 +1207,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         private boolean selected = false;
         private String value;
-        ManagerOptionSelectableRadio group;
+        private ManagerOptionSelectableRadio group;
 
         public OptionSelectableRadio(String value, ManagerOptionSelectableRadio group) {
             this.value = value;

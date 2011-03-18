@@ -8,16 +8,25 @@ import br.org.indt.ndg.lwuit.control.SendResultCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.TimeField;
-import br.org.indt.ndg.lwuit.model.Answer;
 import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.model.CategoryAnswer;
+import br.org.indt.ndg.lwuit.model.CategoryConditional;
+import br.org.indt.ndg.lwuit.model.ChoiceAnswer;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
+import br.org.indt.ndg.lwuit.model.DateAnswer;
+import br.org.indt.ndg.lwuit.model.DateQuestion;
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
+import br.org.indt.ndg.lwuit.model.ImageQuestion;
+import br.org.indt.ndg.lwuit.model.NDGAnswer;
+import br.org.indt.ndg.lwuit.model.NumericAnswer;
+import br.org.indt.ndg.lwuit.model.NumericQuestion;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
-import br.org.indt.ndg.lwuit.model.NumberAnswer;
 import br.org.indt.ndg.lwuit.model.Survey;
+import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -31,6 +40,7 @@ import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.GridLayout;
 import com.sun.lwuit.plaf.UIManager;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -45,14 +55,16 @@ public class ResultView extends Screen implements ActionListener {
     private Font questionFont = NDGStyleToolbox.fontMediumItalic;
     private Font answerFont = NDGStyleToolbox.fontMedium;
     private Survey survey;
+    private ResultStructure results;
     int labelheight = 18;
     int labelheightspace = 8;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
 
     protected void loadData() {
-        title1 = surveysControl.getOpenedSurveyTitle();
-        survey = surveysControl.getCurrentSurveyNewModel();
+        title1 = surveysControl.getSurveyTitle();
+        survey = surveysControl.getSurvey();
+        results = SurveysControl.getInstance().getResult();
     }
 
     private void setPreferredHeight(Component component, int labelHeight) {
@@ -83,28 +95,51 @@ public class ResultView extends Screen implements ActionListener {
         setTitle(title1, title2);
         form.setSmoothScrolling(true);
 
-        Category[] categories = survey.getCategories();
-        int length = categories.length;
-        for (int i=0; i < length; i++) {
-            Category category = categories[i];
+        Vector categories = survey.getCategories();
+
+        for ( int categoryIndex=0; categoryIndex < categories.size(); categoryIndex++) {
+            Category category = (Category) categories.elementAt( categoryIndex );
             Label labelCategory = new Label(category.getName());
             labelCategory.getStyle().setFont(categoryFont);
             labelCategory.setSelectedStyle( labelCategory.getUnselectedStyle() );
             setPreferredHeight(labelCategory, labelheight);
 
             form.addComponent(labelCategory);
-            NDGQuestion[] questions = category.getQuestions();
-            int size = questions.length;
-            for (int j=0; j < size; j++) {
-                NDGQuestion question = questions[j];
-                TextArea componentQuestion = createWrappedTextArea(
-                        question.getName() + ":", questionFont);
-                componentQuestion.getStyle().setFont(questionFont);
-                Component componentAnswer = getFormattedAnswer(question, labelheight);
-                Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-                container.addComponent(componentQuestion);
-                container.addComponent(componentAnswer);
-                form.addComponent(container);
+
+            Vector questions = category.getQuestions();
+
+            String catIndex  = String.valueOf( categoryIndex+1 );
+            CategoryAnswer categoryAnswer =  SurveysControl.getInstance().getResult().getCategoryAnswers(catIndex);
+            int subCategoriesCount = categoryAnswer.getSubcategoriesCount();
+
+            if( subCategoriesCount == 0 ) {
+                TextArea labelSubCategory = createWrappedTextArea( "Category has been disabled", categoryFont );
+                form.addComponent( labelSubCategory );
+            }
+
+
+            for( int subCatIndex = 0; subCatIndex < subCategoriesCount; subCatIndex++ ) {
+                if( category instanceof CategoryConditional ) {
+                    Label labelSubCategory = new Label( "Sub-category: #" + (subCatIndex + 1) );//TODO localize
+                    labelSubCategory.getStyle().setFont(categoryFont);
+                    labelSubCategory.setSelectedStyle( labelSubCategory.getUnselectedStyle() );
+                    form.addComponent( labelSubCategory );
+                }
+
+                Hashtable table = categoryAnswer.getSubCategoryAnswers( subCatIndex );
+
+                for ( int questionIndex=0; questionIndex < questions.size(); questionIndex++) {
+                    NDGQuestion question = (NDGQuestion)questions.elementAt( questionIndex );
+                    NDGAnswer answer = (NDGAnswer)table.get( String.valueOf( question.getIdNumber()));
+
+                    TextArea componentQuestion = createWrappedTextArea( question.getName() + ":", questionFont );
+                    componentQuestion.getStyle().setFont(questionFont);
+                    Component componentAnswer = getFormattedAnswer(question, answer);
+                    Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
+                    container.addComponent(componentQuestion);
+                    container.addComponent(componentAnswer);
+                    form.addComponent(container);
+                }
             }
             Label space = new Label(" ");
             setPreferredHeight(space, labelheightspace);
@@ -112,14 +147,13 @@ public class ResultView extends Screen implements ActionListener {
         }
     }
 
-    private Component getFormattedAnswer(NDGQuestion question, int labelheight){
+    private Component getFormattedAnswer( NDGQuestion aQuestion, NDGAnswer aAnswer ){
         Component componentAnswer = null;
-        Answer answer = question.getAnswer();
-        if (question.getType().equals("_img")) {
+        if ( aQuestion instanceof ImageQuestion ) {
             // calculate columns count based on screen width in portrait orientation
             int width = Math.min(form.getWidth(), form.getHeight());
             int columns = (int)(width/ImageData.THUMBNAIL_SIZE);
-            Vector images = ((ImageAnswer)(answer)).getImages();
+            Vector images = ((ImageAnswer)(aAnswer)).getImages();
             // calculate rows count based on images and columns count
             int imgCount = images.size();
             int rows = (imgCount%columns == 0? 0 : 1) + imgCount/columns;
@@ -140,19 +174,18 @@ public class ResultView extends Screen implements ActionListener {
             }
             componentAnswer = imgContainer;
         } else {
-            if(question.getType().equals("_choice")){
-                ChoiceQuestion cquestion = (ChoiceQuestion) question;
+            if( aQuestion instanceof ChoiceQuestion ){
+                ChoiceQuestion cquestion = (ChoiceQuestion) aQuestion;
                 String choiceAnswer = " ";
                 int nIndex;
-                if(!cquestion.isExclusive()){
-                    Vector vChoicesAnswer = (Vector) cquestion.getAnswer().getValue();
-                    Vector vOthersAnswer = (Vector) cquestion.getOthersText();
+                if( !cquestion.isExclusive() ) {
+                    Vector vChoicesAnswer = (Vector) ((ChoiceAnswer)aAnswer).getSelectedIndexes();
                     int vsize = vChoicesAnswer.size();
                     for (int k = 0; k < vsize; k++) {
                         nIndex = Integer.parseInt( (String) vChoicesAnswer.elementAt(k) );
-                        String other = (String)vOthersAnswer.elementAt(k);
-                        choiceAnswer+= cquestion.getChoiceText(nIndex);
-                        if(other.length()>0) {
+                        String other = (String)((ChoiceAnswer)aAnswer).getOtherText( String.valueOf( k ) );
+                        choiceAnswer += cquestion.getChoiceText(nIndex);
+                        if ( other != null && other.length()>0 ) {
                             choiceAnswer+= "="+other;
                         }
                         choiceAnswer += "\n";
@@ -164,49 +197,47 @@ public class ResultView extends Screen implements ActionListener {
 
                 } else {
                     try {
-                        nIndex = Integer.parseInt( (String) question.getAnswer().getValue() );
+                        nIndex = Integer.parseInt( (String)((Vector)((ChoiceAnswer)aAnswer).getSelectedIndexes()).elementAt( 0 ) );
                         choiceAnswer += cquestion.getChoiceText(nIndex);
-                        Vector vOthersAnswer = (Vector) cquestion.getOthersText();
-                        String other = (String)vOthersAnswer.elementAt(0);
-                        if(other.length()>0) {
+                        String other =  (String)((ChoiceAnswer)aAnswer).getOtherText( String.valueOf( nIndex ) );
+                        if( other!= null && other.length()>0) {
                             choiceAnswer += "="+other;
                         }
                         componentAnswer = createWrappedTextArea(choiceAnswer, answerFont);
-                    } catch( NumberFormatException ex ) {
+                    } catch ( NumberFormatException ex ) {
+                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont); // empty question
+                    } catch ( ArrayIndexOutOfBoundsException ex ) {
                         componentAnswer = createWrappedTextArea(choiceAnswer, answerFont); // empty question
                     }
                 }
-            } else if(question.getType().equals("_date")) {
+            } else if ( aQuestion instanceof DateQuestion ) {
                 DateField dfDate = new DateField(DateField.DDMMYYYY);
-                long datelong = Long.parseLong((String)question.getAnswer().getValue());
-                dfDate.setDate(new Date(datelong));
+                dfDate.setDate( new Date( ((DateAnswer)aAnswer).getDate() ) );
                 componentAnswer = new Label(dfDate.getText());
             }
-            else if (question.getType().equals("_time")) {
-                TimeQuestion timeQuestion = (TimeQuestion) question;
+            else if ( aQuestion instanceof TimeQuestion ) {
+                TimeQuestion timeQuestion = (TimeQuestion) aQuestion;
+                TimeAnswer timeAnswer = (TimeAnswer)aAnswer;
                 TimeField tfDate = null;
                 if(timeQuestion.getConvention()==12){
                    tfDate = new TimeField(TimeField.HHMM);
                 }else{
                    tfDate = new TimeField(TimeField.HHMM1);
                 }
-                long timelong = Long.parseLong((String)question.getAnswer().getValue());
-                tfDate.setTime(new Date(timelong));
+                tfDate.setTime(new Date(timeAnswer.getTime()));
                 String convention = "";
 
-                if(timeQuestion.getAm_pm() == 1){
+                if(timeAnswer.getAmPm24() == 1){
                     convention = " am";
-                }else if(timeQuestion.getAm_pm() == 2){
+                }else if(timeAnswer.getAmPm24() == 2){
                     convention = " pm";
                 }
                 componentAnswer = new Label(tfDate.getText()+convention);
             }
-            else if ( question.getType().equals("_int") || question.getType().equals("_decimal"))
-            {
-                componentAnswer = createWrappedTextArea(((NumberAnswer)answer).getValueString(), answerFont) ;
-
+            else if ( aQuestion instanceof NumericQuestion ) {
+                componentAnswer = createWrappedTextArea(((NumericAnswer)aAnswer).getValueString(), answerFont) ;
             } else {
-                componentAnswer = createWrappedTextArea((String)answer.getValue(), answerFont);
+                componentAnswer = createWrappedTextArea((String)aAnswer.getValue(), answerFont);
             }
         }
         return componentAnswer;

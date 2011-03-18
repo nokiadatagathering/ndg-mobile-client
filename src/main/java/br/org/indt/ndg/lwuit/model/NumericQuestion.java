@@ -1,37 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
-import java.io.PrintStream;
-
-/**
- *
- * @author mluz
- */
-public abstract class NumericQuestion extends Question {
-    private int length;
+public abstract class NumericQuestion extends NDGQuestion {
+    private int mLength;
 
     public int getLength() {
-        return length;
+        return mLength;
     }
 
     public void setLength(int length) {
-        this.length = length;
+        mLength = length;
     }
 
-    abstract public void setHighConstraint(String _high);
-    abstract public void setLowConstraint(String _low);
-
-    abstract protected boolean passLowConstraint();
-    abstract protected boolean passHighConstraint();
-    abstract public String GetType();
-
-    public boolean passConstraints() {
-        if (passLowConstraint())
-            if (passHighConstraint())
+    public boolean passConstraints( NDGAnswer aAnswer ) {
+        NumericAnswer numericAnswer = (NumericAnswer)aAnswer;
+        if ( passLowConstraint( numericAnswer ) )
+            if ( passHighConstraint( numericAnswer ) )
                 return true;
             else
                 return false;
@@ -39,13 +22,10 @@ public abstract class NumericQuestion extends Question {
             return false;
     }
 
-    public void save(PrintStream _output){
-        String value = ((NumberAnswer)this.getAnswer()).getValueString();
+    abstract public void setHighConstraint( String _high );
+    abstract public void setLowConstraint( String _low );
+    abstract public String getType();
 
-        if (value!=null) {
-            _output.print("<" + GetType() + ">");
-            _output.print(value);
-            _output.println("</" + GetType() + ">");
-        }
-    }
+    abstract protected boolean passLowConstraint( NumericAnswer aAnswer );
+    abstract protected boolean passHighConstraint( NumericAnswer aAnswer );
 }

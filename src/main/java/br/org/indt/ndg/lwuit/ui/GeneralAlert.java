@@ -125,10 +125,10 @@ public class GeneralAlert extends Screen implements ActionListener {
         msg.getSelectedStyle().setBgTransparency(0x00);
         int textWidth = msg.getSelectedStyle().getFont().stringWidth(label) + 5;
         int lineHeight = msg.getSelectedStyle().getFont().getHeight() + msg.getRowsGap();
-        msg.setText(label);                
+        msg.setText(label);
         msg.setIsScrollVisible(false);
-                        
-        if (textWidth > displayW)
+
+        if (textWidth >= displayW)
         {
             msg.setPreferredW( textWidth / ( textWidth/displayW + 1) + 2 );//to fill equally to all lines
             msg.setRows(textWidth / msg.getPreferredW() + 2);
@@ -142,7 +142,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             dialog.setScrollable(true);
         }
         else
-        {            
+        {
             msg.setGrowByContent(false);
             msg.setRows(1);
             msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );

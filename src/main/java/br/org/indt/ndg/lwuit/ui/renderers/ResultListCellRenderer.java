@@ -1,7 +1,8 @@
-package br.org.indt.ndg.lwuit.ui;
+package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.lwuit.model.CheckableItem;
 import br.org.indt.ndg.lwuit.model.DisplayableItem;
+import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
@@ -15,7 +16,7 @@ import com.sun.lwuit.layouts.BorderLayout;
  * @author mluz, kgomes
  */
 
-class ResultListCellRenderer extends CheckableListCellRenderer {
+public class ResultListCellRenderer extends CheckableListCellRenderer {
 
     public ResultListCellRenderer(){
         super();
@@ -34,11 +35,9 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             label.setAlignment(CENTER);
             comp = label;
         }
-        comp.setVisible(true);
 
         if (isSelected) {
             setFocus(true);
-            comp.setFocus(true);
             comp.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
             comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             if( index > 0 ){
@@ -55,10 +54,8 @@ class ResultListCellRenderer extends CheckableListCellRenderer {
             getStyle().setBgPainter(m_focusBGPainter);
         } else {
             setFocus(false);
-            comp.setFocus(false);
             comp.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             comp.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
-            comp.getStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
             getStyle().setBgPainter(m_bgPainter);
         }
 

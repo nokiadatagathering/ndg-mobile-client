@@ -9,7 +9,6 @@ import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
-import br.org.indt.ndg.lwuit.ui.CheckableListCellRenderer;
 
 /**
  *

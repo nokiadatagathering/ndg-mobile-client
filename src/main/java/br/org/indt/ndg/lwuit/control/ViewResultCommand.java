@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.ResultView;
@@ -53,7 +48,7 @@ public class ViewResultCommand extends CommandControl {
                     GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
                     GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_RESULT, GeneralAlert.ERROR );
                 } else {
-                    AppMIDlet.getInstance().getFileStores().loadAnswers();
+                    SurveysControl.getInstance().setResult( AppMIDlet.getInstance().getFileStores().getResultStructure() );
                     AppMIDlet.getInstance().setDisplayable( ResultView.class );
                 }
             }

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.SurveysControl;
@@ -32,7 +27,7 @@ public class WaitingForm extends Screen {
 
     protected void loadData() {
         status = Resources.PROCESSING;
-        title1 = SurveysControl.getInstance().getOpenedSurveyTitle();
+        title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.NEWUI_NOKIA_DATA_GATHERING;
     }
 

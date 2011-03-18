@@ -6,7 +6,7 @@ import org.xml.sax.SAXException;
 
 public class NDGSurveysListHandler extends SurveysListHandler {
 
-    private static String SURVEY = "survey";
+    private static String SURVEY = "survey"; 
     private static String SURVEYS = "surveys";
     private static String TITLE = "title";
 

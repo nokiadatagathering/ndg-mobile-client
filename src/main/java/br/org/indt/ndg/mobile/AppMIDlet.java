@@ -120,7 +120,7 @@ public class AppMIDlet extends MIDlet {
     public SurveyList getSurveyList() {
         return surveyList;
     }
-    
+
     public void setSurveyList(SurveyList _list) {
         surveyList = _list;
     }
@@ -133,11 +133,11 @@ public class AppMIDlet extends MIDlet {
     {
         return submitServer;
     }
-   
+
     public ResultList getResultList() {
         return resultList;
     }
-    
+
     public void setResultList(ResultList _list) {
         resultList = _list;
     }
@@ -337,12 +337,7 @@ public class AppMIDlet extends MIDlet {
     public void showInterview() {
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         if(isNdgDir(dirName)){
-            if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
-            } else {
-                SurveysControl.getInstance().setSelectedCategory( 0 );
-                AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
-            }
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
         }else if(isXformDir(dirName)){
             AppMIDlet.getInstance().setDisplayable(XfoliteInterviewForm.class);
         }

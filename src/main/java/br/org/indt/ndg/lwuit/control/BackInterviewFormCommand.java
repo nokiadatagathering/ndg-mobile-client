@@ -1,11 +1,11 @@
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
-import com.sun.lwuit.events.ActionEvent;
 
 /**
  *
@@ -21,19 +21,19 @@ public class BackInterviewFormCommand extends BackCommand {
 
     protected void doAction(Object parameter) {
         InterviewForm view = (InterviewForm)parameter;
-        // ask whether chanes shall be discarded or saved (in memory, NOT in file)
+        // ask whether changes shall be discarded or saved (in memory, NOT in file)
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
         if ( view.isModifiedInterview() &&
-                GeneralAlert.getInstance().show( Resources.CMD_SAVE,
-                Resources.DISCARD_CHANGES, GeneralAlert.CONFIRMATION)
-                    == GeneralAlert.RESULT_NO ) {
+             GeneralAlert.RESULT_NO ==  GeneralAlert.getInstance().show( Resources.CMD_SAVE,
+                                                                         Resources.DISCARD_CHANGES,
+                                                                         GeneralAlert.CONFIRMATION) ) {
             // if accepted proceed as if 'Next' was clicked
-            view.actionPerformed(new ActionEvent(AcceptQuestionListFormCommand.getInstance().getCommand()));
+            AcceptQuestionListFormCommand.getInstance().execute( view );
         } else {
-            if ( SurveysControl.getInstance().hasMoreThenOneCategory() ) {
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
+            if ( SurveysControl.getInstance().getSelectedCategory() instanceof CategoryConditional ) {
+                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryConditionalList.class);
             } else {
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
             }
         }
     }

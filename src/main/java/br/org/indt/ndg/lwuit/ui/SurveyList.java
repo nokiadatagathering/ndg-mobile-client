@@ -9,10 +9,8 @@ import br.org.indt.ndg.lwuit.control.ExitCommand;
 import br.org.indt.ndg.lwuit.control.GPSCommand;
 import br.org.indt.ndg.lwuit.control.OpenSurveyCommand;
 import br.org.indt.ndg.lwuit.control.SelectStyleViewCommand;
-import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.TestConnectionCommand;
 import br.org.indt.ndg.lwuit.control.UpdateCommand;
-import br.org.indt.ndg.lwuit.model.Survey;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -20,21 +18,27 @@ import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
 import br.org.indt.ndg.lwuit.extended.AnimatedList;
+import br.org.indt.ndg.mobile.AppMIDlet;
+import java.util.Vector;
 
 
 public class SurveyList extends Screen implements ActionListener{
 
     private String title2 = Resources.SURVEY_LIST_TITLE;//NEWUI_TITLE_SURVEY_LIST;
     private String title1 = Resources.NEWUI_NOKIA_DATA_GATHERING;
-   
+    private String checkNewSurveyItem = "-> " + Resources.CHECK_NEW_SURVEYS + " <-";
     private AnimatedList list;
 
-    private Survey[] surveys;
+    private Vector surveys;
     private ListModel underlyingModel;
 
 
     protected void loadData() {
-        surveys =  SurveysControl.getInstance().getAllSurveys();
+        surveys = AppMIDlet.getInstance().getSurveyList().getList();
+
+        if( surveys.size()<=0 || !surveys.elementAt(0).equals( checkNewSurveyItem ) ) {
+            surveys.insertElementAt("-> " + Resources.CHECK_NEW_SURVEYS + " <-", 0);
+        }
     }
 
     protected void customize() {
@@ -67,10 +71,6 @@ public class SurveyList extends Screen implements ActionListener{
         form.setScrollable(false);
     }
 
-    private int getSelectedIndex() {
-        return list.getSelectedIndex() - 1;
-    }
-
     public void actionPerformed(ActionEvent evt) {
 
         try {
@@ -81,8 +81,8 @@ public class SurveyList extends Screen implements ActionListener{
                 GPSCommand.getInstance().execute(null);
             } else if (cmd == OpenSurveyCommand.getInstance().getCommand() || cmd == list) {
                 if (list.size() > 0) {
-                    if( getSelectedIndex() >= 0)
-                        OpenSurveyCommand.getInstance().execute(new Integer(getSelectedIndex()));
+                    if( list.getSelectedIndex() > 0)
+                        OpenSurveyCommand.getInstance().execute(new Integer( list.getSelectedIndex() - 1 ));
                     else
                         CheckNewSurveysCommand.getInstance().execute(null);
                 }
@@ -91,7 +91,7 @@ public class SurveyList extends Screen implements ActionListener{
             } else if (cmd == UpdateCommand.getInstance().getCommand()) {
                 UpdateCommand.getInstance().execute(null);
             } else if (cmd == DeleteSurveyCommand.getInstance().getCommand()) {
-                DeleteSurveyCommand.getInstance().execute(new Integer(getSelectedIndex()));
+                DeleteSurveyCommand.getInstance().execute(new Integer( list.getSelectedIndex() - 1 ));
             } else if (cmd == AppSettingsViewCommand.getInstance().getCommand()) {
                 AppSettingsViewCommand.getInstance().execute(null);
             } else if (cmd == TestConnectionCommand.getInstance().getCommand()) {
@@ -117,7 +117,7 @@ public class SurveyList extends Screen implements ActionListener{
         form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
         form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
         form.addCommand(GPSCommand.getInstance().getCommand());
-        if (surveys.length > 0)
+        if (surveys.size() > 0)
             form.addCommand(OpenSurveyCommand.getInstance().getCommand());
     }
 

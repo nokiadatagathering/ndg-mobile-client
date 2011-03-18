@@ -1,21 +1,23 @@
 package br.org.indt.ndg.mobile.xmlhandle;
 
 import br.org.indt.ndg.lwuit.control.ExitCommand;
+import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.model.ChoiceQuestion;
 import br.org.indt.ndg.lwuit.model.DateQuestion;
 import br.org.indt.ndg.lwuit.model.DecimalQuestion;
 import br.org.indt.ndg.lwuit.model.DescriptiveQuestion;
 import br.org.indt.ndg.lwuit.model.ImageQuestion;
 import br.org.indt.ndg.lwuit.model.IntegerQuestion;
-import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.NumericQuestion;
+import br.org.indt.ndg.lwuit.model.NDGQuestion;
+import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.structures.FileSystemSurveyStructure;
-import br.org.indt.ndg.mobile.structures.SurveyStructure;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,27 +32,24 @@ import java.util.Vector;
 public class kParser {
     private boolean error = false;
     private FileSystemSurveyStructure structure;
-    
-    
-    private SurveyStructure survey;
+
+    private Survey mSurvey;
+    private Category currentCategory;
     private NDGQuestion currentQuestion;
     private Vector questions=null;
     private String currentOther = "0";
-    
+
     public boolean getError() {
         return error;
     }
-    
+
     public void parserSurveyFileInfo(String filename) {
         try {
             FileConnection fc = (FileConnection) Connector.open(filename);
             InputStream is = fc.openInputStream();
              //Inicia o XMLParser
             KXmlParser parser = new KXmlParser();
-            //InputStreamSurveyReader issr = new InputStreamSurveyReader(is, "UTF-8");
             parser.setInput(new InputStreamReader(is, "UTF-8"));
-            //parser.setInput(issr);
-            
             parser.nextTag();
  
             String name = null;
@@ -79,10 +78,9 @@ public class kParser {
             if(name != null){
                 structure.addName(name);
             }
-            
+
             is.close();
             fc.close();
-            
         }
         catch(XmlPullParserException e) {
             Logger.getInstance().logException("XmlPullParserException[parserSurveyFileInfo]: " + e.getMessage());
@@ -98,24 +96,20 @@ public class kParser {
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
         }
     }
-    
+
     public void parserSurveyFile(String filename) {
         try {
             FileConnection fc = (FileConnection) Connector.open(filename);
             InputStream is = fc.openInputStream();
              //Inicia o XMLParser
             KXmlParser parser = new KXmlParser();
-            //InputStreamSurveyReader issr = new InputStreamSurveyReader(is, "UTF-8");
             parser.setInput(new InputStreamReader(is, "UTF-8"));
-            //parser.setInput(issr);
-            
             parser.nextTag();
- 
             //Posiciona na tag <survey>
             parser.require(IXmlPullParser.START_TAG, null, "survey");
-            
+
             getSurveyAttributes(parser);
-            
+
             //Enquanto é diferente de END_TAG
             while (parser.nextTag () != IXmlPullParser.END_TAG)
             {
@@ -125,19 +119,17 @@ public class kParser {
                 parserCategory(parser);
 
                 parser.require(IXmlPullParser.END_TAG, null, "category");
+                mSurvey.addCategory(currentCategory);
             }
- 
+
             parser.require(IXmlPullParser.END_TAG, null, "survey");
             parser.next();
 
             parser.require(IXmlPullParser.END_DOCUMENT, null, null);
-            //issr.show();
             is.close();
             fc.close();
-            
-            survey.initVisitedArray();
+
             //survey.confirmChecksum(checksum, surveyChecksumBuf);
-            
         }
         catch(XmlPullParserException e) {
             Logger.getInstance().logException("XmlPullParserException[parserSurveyFile]: " + e.getMessage());
@@ -146,26 +138,26 @@ public class kParser {
             Logger.getInstance().logException("Exception[parserSurveyFile]: " + e.getMessage());
         }
     }
-    
+
     private void parserCategory(KXmlParser parser) throws Exception {
         getCategoryAttributes(parser);
-        
+
         //Enquanto é diferente de </question>
+        questions = new Vector();
         while (parser.nextTag() != IXmlPullParser.END_TAG) {
             //Posiciona em uma tag "START". Ex: <question>
             parser.require(IXmlPullParser.START_TAG, null, "question");
-            
-            parserQuestion(parser);
 
+            parserQuestion(parser);
             //Posiciona no fim da tag </category>
             parser.require(IXmlPullParser.END_TAG, null, "question");
         }
-        survey.addCategory(questions);
+        currentCategory.setQuestions(questions);
     }
-    
+
     private void parserQuestion(KXmlParser parser) throws Exception {
         getQuestionAttributes(parser);
-        
+
         String elemName = "";
         Vector defaultAnswers = new Vector();
         int itemIndex = 0;
@@ -183,14 +175,11 @@ public class kParser {
             }
             else if (elemName.equals("length")) {
                 text = parser.nextText();
-                if (currentQuestion.getType().equals("_str"))
+                if (currentQuestion instanceof DescriptiveQuestion )
                     ((DescriptiveQuestion) currentQuestion).setLength(Integer.parseInt(text));
-                else if (currentQuestion.getType().equals("_int") )
+                else if (currentQuestion instanceof NumericQuestion )
                     ((NumericQuestion) currentQuestion).setLength(Integer.parseInt(text));
-                else if (currentQuestion.getType().equals("_decimal") )
-                    ((NumericQuestion) currentQuestion).setLength(Integer.parseInt(text));
-                
-                
+
             }
             else if (elemName.equals("SkipLogic")) {
                 String namespace = parser.getNamespace();
@@ -210,7 +199,6 @@ public class kParser {
             else if (elemName.equals("select")) {
                 text = parser.nextText();
                 ((ChoiceQuestion) currentQuestion).setExclusive( "exclusive".equals(text) );
-                
             }
             else if (elemName.equals("item")) {
                 if (currentQuestion instanceof ChoiceQuestion) {
@@ -220,7 +208,7 @@ public class kParser {
                     ((ChoiceQuestion) currentQuestion).addChoice(text);
                     ((ChoiceQuestion) currentQuestion).addOther( currentOther );
                     ((ChoiceQuestion) currentQuestion).addOthersText( text );
-                    
+
                     if(strIsDefault != null && strIsDefault.compareTo("1") == 0) {
                         defaultAnswers.addElement(new Integer(itemIndex).toString());
                     }
@@ -236,45 +224,43 @@ public class kParser {
             //Posiciona no fim da tag <description> <length> <item> <select> <SkipLogic>
             parser.require(IXmlPullParser.END_TAG, null, elemName);
         }
-        
+
         if (currentQuestion instanceof ChoiceQuestion && defaultAnswers.size() > 0 ){
             ChoiceQuestion chQuestion = (ChoiceQuestion) currentQuestion;
             chQuestion.setDefaultAnswers(defaultAnswers);
         }
-        
+
+        currentQuestion.setCategoryId(currentCategory.getId());
+        currentQuestion.setCategoryName(currentCategory.getName());
         questions.addElement(currentQuestion);
     }
-    
+
     private void getSurveyAttributes(KXmlParser parser) throws Exception {
         String namespace = parser.getNamespace();
         String id = parser.getAttributeValue(namespace, "id");
         String display = parser.getAttributeValue(namespace, "display");
-        String deployed = parser.getAttributeValue(namespace, "deployed");
         String title = parser.getAttributeValue(namespace, "title");
-        
-        survey.setIdNumber(Integer.parseInt(id));
-        survey.setDisplayId(display);
-        survey.setTitle(title);
+
+        mSurvey.setIdNumber(Integer.parseInt(id));
+        mSurvey.setDisplayId(display);
+        mSurvey.setTitle(title);
     }
-    
+
     private void getCategoryAttributes(KXmlParser parser) throws Exception {
         String namespace = parser.getNamespace();
-        questions = new Vector();
-            
         String name = parser.getAttributeValue(namespace, "name");
         String id = parser.getAttributeValue(namespace, "id");
+        String condition = parser.getAttributeValue(namespace, "condition");
 
-        survey.addCatName(name);
-        survey.addCatId(id);            
-
+        if( condition!= null && condition.trim().length() > 0 ) {
+            currentCategory = new CategoryConditional( name, id, condition );
+        } else {
+            currentCategory = new Category( name, id );
+        }
     }
-    
+
     private void getQuestionAttributes(KXmlParser parser) throws Exception {
         String namespace = parser.getNamespace();
-//        not used:
-//        String field = parser.getAttributeValue(namespace, "field");
-//        String direction = parser.getAttributeValue(namespace, "direction");
-//        String editable = parser.getAttributeValue(namespace, "editable");
 
         String _type = parser.getAttributeValue(namespace, "type");
         String _id = parser.getAttributeValue(namespace, "id");
@@ -328,13 +314,13 @@ public class kParser {
             ((ImageQuestion)currentQuestion).setMaxCount( count < 1 ? 1 : count );
         }
     }
-    
+
     public void setFileSystemSurveyStructure(FileSystemSurveyStructure _structure) {
         structure = _structure;
     }
-    
-    public void setSurveyStructure(SurveyStructure survey) {
-        this.survey = survey;
+
+    public void setSurveyStructure(Survey aSurvey) {
+        mSurvey = aSurvey;
     }
 }
 

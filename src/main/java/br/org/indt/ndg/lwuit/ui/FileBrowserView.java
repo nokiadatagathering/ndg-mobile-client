@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelPickPhotoFormCommand;
 import br.org.indt.ndg.lwuit.extended.List;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.lwuit.ui.camera.LoadedPhotoForm;
+import br.org.indt.ndg.lwuit.ui.renderers.FileBrowserCellRenderer;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -47,7 +44,6 @@ public class FileBrowserView extends Screen implements ActionListener {
         myList.removeActionListener(this);
         myList.addActionListener(this);
         myList.setListCellRenderer(new FileBrowserCellRenderer());
-        myList.setSmoothScrolling(false);
         form.addCommand(localBackCommand);
         try {
             form.removeCommandListener(this);

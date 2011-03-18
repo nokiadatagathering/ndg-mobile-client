@@ -16,6 +16,8 @@ import br.org.indt.ndg.lwuit.control.ViewResultCommand;
 import br.org.indt.ndg.lwuit.control.ViewSentResultsCommand;
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
+import br.org.indt.ndg.lwuit.ui.renderers.ResultListCellRenderer;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.List;
@@ -23,6 +25,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.list.ListModel;
+import java.util.Vector;
 
 /**
  *
@@ -32,24 +35,31 @@ public class ResultList extends Screen implements ActionListener {
 
     private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;
+    private Result newResultItem = new Result( "-> " + Resources.NEWUI_NEW_RESULT + " <-" );
 
     private ClickableList list = null;
     private CheckableListModel underlyingModel;
-    private Result[] results;
+    private Vector results;
     private boolean checked;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
 
 
     protected void loadData() {
-        title1 = surveysControl.getOpenedSurveyTitle();
-        results = SurveysControl.getInstance().getResultsFromOpenedSurvey();
+        title1 = surveysControl.getSurveyTitle();
+
+        results = AppMIDlet.getInstance().getResultList().getList();
+
+        if ( results.size()<=0 || !results.elementAt(0).equals( newResultItem ) ) {
+            results.insertElementAt( newResultItem, 0 );
+        }
+
         registerEvent(new ResultListOnShow(), ON_SHOW);
     }
 
     protected void customize() {
         setTitle(title1, title2);
-        
+
         checked = false;
 
         form.removeAllCommands();
@@ -120,7 +130,6 @@ public class ResultList extends Screen implements ActionListener {
                     underlyingModel.setChecked(list.getSelectedIndex());
                 }
                 DeleteResultNowCommand.getInstance().execute(underlyingModel.getSelectedFlags());
-                
         } else if (cmd == ViewSentResultsCommand.getInstance().getCommand()) {
                 ViewSentResultsCommand.getInstance().execute(null);
         } else if (cmd == MarkAllResultsCommand.getInstance().getCommand()) {

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
@@ -30,11 +25,10 @@ public class DeleteSurveyCommand extends CommandControl {
         if ( GeneralAlert.RESULT_YES == GeneralAlert.getInstance().show(Resources.DELETE_CONFIRMATION,Resources.DELETE_SURVEY_CONFIRMATION, GeneralAlert.CONFIRMATION ) )
         {
             AppMIDlet.getInstance().getSurveyList().setSurveyCurrentIndex(selectedIndex);
-            AppMIDlet.getInstance().getSurveyList().getList().removeElementAt(selectedIndex);
+            AppMIDlet.getInstance().getSurveyList().getList().removeElementAt(selectedIndex+1);
             AppMIDlet.getInstance().getSurveyList().deleteSurvey();
             AppMIDlet.getInstance().setDisplayable(SurveyList.class);
         }
-
     }
 
     public static DeleteSurveyCommand getInstance() {

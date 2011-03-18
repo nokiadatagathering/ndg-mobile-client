@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
-public class DecimalAnswer extends NumberAnswer {
-    
+public class DecimalAnswer extends NumericAnswer {
+
     public String getValueString() {
         if( getValue() != null )
         {
@@ -16,5 +11,9 @@ public class DecimalAnswer extends NumberAnswer {
         {
             return "";
         }
+    }
+
+    public String getElementName() {
+        return "decimal";
     }
 }

@@ -1,7 +1,8 @@
-package br.org.indt.ndg.lwuit.ui;
+package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.lwuit.model.CheckableItem;
 import br.org.indt.ndg.lwuit.model.Result;
+import br.org.indt.ndg.lwuit.ui.Screen;
 
 /**
  *

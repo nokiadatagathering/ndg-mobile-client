@@ -1,4 +1,4 @@
-package br.org.indt.ndg.lwuit.ui;
+package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.model.Category;
@@ -15,11 +15,11 @@ import com.sun.lwuit.layouts.BoxLayout;
  *
  * @author mluz
  */
-class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
+public class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
 
     private Label categoryLabel;
-	private Label questionsLabel;
-	private Label iconLabel;
+    private Label questionsLabel;
+    private Label iconLabel;
 
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
@@ -30,7 +30,7 @@ class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
         categoryLabel = new Label(category.getName());
         categoryLabel.setIcon(null);
 
-        questionsLabel = new Label(category.getTotalQuestions() + (category.getTotalQuestions() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION));
+        questionsLabel = new Label(category.getQuestions().size() + (category.getQuestions().size() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION));
         questionsLabel.setIcon(null);
 
         iconLabel = new Label("");

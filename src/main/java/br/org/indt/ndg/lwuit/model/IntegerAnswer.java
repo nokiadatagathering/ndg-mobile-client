@@ -1,7 +1,7 @@
 package br.org.indt.ndg.lwuit.model;
 
-public class IntegerAnswer extends NumberAnswer {
-    
+public class IntegerAnswer extends NumericAnswer {
+
     public String getValueString() {
         if( getValue() != null )
         {
@@ -11,5 +11,9 @@ public class IntegerAnswer extends NumberAnswer {
         {
             return "";
         }
+    }
+
+    public String getElementName() {
+        return "int";
     }
 }

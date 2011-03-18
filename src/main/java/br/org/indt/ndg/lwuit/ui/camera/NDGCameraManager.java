@@ -2,7 +2,6 @@ package br.org.indt.ndg.lwuit.ui.camera;
 
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
-import br.org.indt.ndg.lwuit.model.ImageQuestion;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Component;
@@ -16,7 +15,6 @@ import com.sun.lwuit.Container;
 public class NDGCameraManager {
     private static NDGCameraManager instance = new NDGCameraManager();
 
-    private ImageQuestion imageQuestion;
     private ImageAnswer currentImageAnswer;
     private Container imageContainer;
     private Component thumbnailButton;
@@ -32,21 +30,13 @@ public class NDGCameraManager {
 
     public void sendPostProcessData( NDGCameraManagerListener ndgListener,
                                      Component button,
-                                     ImageQuestion question,
+                                     ImageAnswer aAnswer,
                                      Container container ) {
-        if ( question == null) {
-            throw new IllegalArgumentException("Neither parameter can be null");
-        }
-        imageQuestion = question;
-        currentImageAnswer = (ImageAnswer) question.getAnswer();
+        currentImageAnswer = aAnswer;
         thumbnailButton = button;
         imageContainer = container;
         imageIndex = imageContainer.getComponentIndex(thumbnailButton);
         listener = ndgListener;
-    }
-
-    public ImageQuestion getCurrentImageQuestion(){
-        return imageQuestion;
     }
 
     public ImageData getCurrentImageData(){
@@ -78,17 +68,17 @@ public class NDGCameraManager {
         if ( AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
             imageData.setGeoTag( AppMIDlet.getInstance().getCoordinates() );
         }
-        if(imageIndex >= ((ImageAnswer)imageQuestion.getAnswer()).getImages().size()){
-            ((ImageAnswer)imageQuestion.getAnswer()).getImages().addElement(imageData);
+        if ( imageIndex >= currentImageAnswer.getImages().size() ) {
+            currentImageAnswer.getImages().addElement(imageData);
         } else {
-            ((ImageData)((ImageAnswer)imageQuestion.getAnswer()).getImages().elementAt(imageIndex)).delete();
-            ((ImageAnswer)imageQuestion.getAnswer()).getImages().setElementAt(imageData, imageIndex);
+            ((ImageData)currentImageAnswer.getImages().elementAt(imageIndex)).delete();
+            currentImageAnswer.getImages().setElementAt(imageData, imageIndex);
         }
     }
 
     public void deletePhoto( ) {
-        ((ImageData)((ImageAnswer)imageQuestion.getAnswer()).getImages().elementAt(imageIndex)).delete();
-        ((ImageAnswer)imageQuestion.getAnswer()).getImages().removeElementAt(imageIndex);
+        ((ImageData)currentImageAnswer.getImages().elementAt(imageIndex)).delete();
+        currentImageAnswer.getImages().removeElementAt(imageIndex);
         imageContainer.removeComponent(thumbnailButton);
     }
 }

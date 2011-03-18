@@ -54,9 +54,9 @@ public class Parser {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
-        }        
+        }
     }
-    
+
     public void parseFile(String filename) {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();

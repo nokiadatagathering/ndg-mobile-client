@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
 /**
@@ -14,6 +9,10 @@ public class Result implements DisplayableItem, CheckableItem {
     private String name;
     private String fileName;
     private boolean isChecked = false;
+
+    public Result( String aName ) {
+        name = aName;
+    }
 
     public String getName() {
         return name;
@@ -41,5 +40,4 @@ public class Result implements DisplayableItem, CheckableItem {
     public boolean isChecked() {
         return isChecked;
     }
-
 }

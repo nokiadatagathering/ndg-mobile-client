@@ -1,19 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
-import br.org.indt.ndg.mobile.AppMIDlet;
-import java.io.PrintStream;
 import java.util.Vector;
 
 /**
  *
  * @author mluz
  */
-public class DescriptiveQuestion extends Question {
+public class DescriptiveQuestion extends NDGQuestion {
 
     private int length;
     private Vector choices = new Vector();
@@ -63,21 +56,11 @@ public class DescriptiveQuestion extends Question {
         return othersText;
     }
 
-    public void save(PrintStream _output){
-        if (this.getAnswer().getValue()!=null){
-            String value = (String)this.getAnswer().getValue();
-            String temp;
-            if(value.length() == 0){
-                temp = " ";
-            }
-            else
-                temp = AppMIDlet.getInstance().u2x(value);
-            _output.print("<str>");
-            _output.print(temp);
-            _output.println("</str>");
-            
-        }
+    public NDGAnswer getAnswerModel() {
+        return new DescriptiveAnswer();
     }
-    
 
+    public boolean passConstraints( NDGAnswer aAnswer ) {
+        return true;
+    }
 }

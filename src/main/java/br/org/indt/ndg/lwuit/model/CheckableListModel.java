@@ -20,6 +20,11 @@ public class CheckableListModel extends DefaultListModel {
         m_firstItemUncheckable = firstItemUncheckable;
     }
 
+    public CheckableListModel(Vector items, boolean firstItemUncheckable) {
+        super(items);
+        m_firstItemUncheckable = firstItemUncheckable;
+    }
+
     /**
      *
      * @return an array with the status of each list entry

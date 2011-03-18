@@ -39,10 +39,9 @@ public class NewResultCommand extends CommandControl {
                 AppMIDlet.getInstance().getFileStores().resetQuestions();
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(false);
                 AppMIDlet.getInstance().getFileStores().resetResultStructure();
-                
-                SurveysControl.getInstance().reset();
-                SurveysControl.getInstance().resetQuestion();//this is from refactoring IV
 
+                SurveysControl.getInstance().reset();
+                SurveysControl.getInstance().prepareEmptyResults();
                 AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time used to create new survey
                 AppMIDlet.getInstance().showInterview();
             } catch (Exception e) {

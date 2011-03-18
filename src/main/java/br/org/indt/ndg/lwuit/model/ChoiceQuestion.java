@@ -1,18 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
-import java.io.PrintStream;
 import java.util.Vector;
 
 /**
  *
  * @author mluz
  */
-public class ChoiceQuestion extends Question {
+public class ChoiceQuestion extends NDGQuestion {
 
     private Vector choices = new Vector();
     private Vector others = new Vector();
@@ -99,30 +93,14 @@ public class ChoiceQuestion extends Question {
         return othersText;
     }
 
-    public void save(PrintStream _output){
-        Vector vSelecteds = null;
-
-        if(exclusive){
-            vSelecteds = new Vector();
-            if (!((String)this.getAnswer().getValue()).equals("")) {
-                vSelecteds.addElement((String) this.getAnswer().getValue());
-            }
-        }else {
-            vSelecteds = (Vector) this.getAnswer().getValue();
-        }
-
-        for (int index=0; index < vSelecteds.size(); index++) {
-            String selectedIndex = (String) vSelecteds.elementAt(index);
-            if (((String)getOthers().elementAt(Integer.parseInt(selectedIndex))).equals("1")) {
-                _output.print("<other " + "index=\"" + selectedIndex + "\">");
-                _output.print(othersText.elementAt(Integer.parseInt(selectedIndex)));
-                _output.println("</other>");
-            } else {
-                _output.print("<item>");
-                _output.print(selectedIndex);
-                _output.println("</item>");
-            }
-        }
+    public NDGAnswer getAnswerModel() {
+        ChoiceAnswer anwser = new ChoiceAnswer( );
+        Vector vDefault = getDefaultAnswers();
+        anwser.setSelectedIndex( vDefault );
+        return anwser;
     }
 
+    public boolean passConstraints( NDGAnswer aAnswer ) {
+        return true;
+    }
 }

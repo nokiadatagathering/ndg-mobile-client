@@ -1,6 +1,13 @@
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.model.*;
+import br.org.indt.ndg.lwuit.model.CategoryAnswer;
+import br.org.indt.ndg.lwuit.model.ChoiceAnswer;
+import br.org.indt.ndg.lwuit.model.DateAnswer;
+import br.org.indt.ndg.lwuit.model.DescriptiveAnswer;
+import br.org.indt.ndg.lwuit.model.ImageAnswer;
+import br.org.indt.ndg.lwuit.model.NDGAnswer;
+import br.org.indt.ndg.lwuit.model.NumericAnswer;
+import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.ResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
@@ -8,15 +15,15 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.logging.Logger;
+import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
 import com.nokia.xfolite.xforms.submission.XFormsXMLSerializer;
-import com.nokia.xfolite.xml.dom.Element;
-import com.nokia.xfolite.xml.dom.NamedNode;
-import com.nokia.xfolite.xml.dom.Node;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 import javax.microedition.io.ConnectionNotFoundException;
@@ -29,12 +36,14 @@ import javax.microedition.location.Location;
  * @author kgomes
  */
 public class PersistenceManager {
+    private static final int VERSION = 2;//1-without conditional categories;2-with conditional categories
 
     private static PersistenceManager instance = null;
     private SaveResultsObserver m_saveObserver = null;
     private boolean error = false;
     private String resultId;
     private Vector vQuestions;
+    private ResultStructure mAnswers = null;
 
     private PersistenceManager(){
     }
@@ -60,6 +69,8 @@ public class PersistenceManager {
         m_saveObserver = saveObserver;
         vQuestions = _vQuestions;
 
+        mAnswers = SurveysControl.getInstance().getResult();
+
         WaitingScreen.show(Resources.SAVING_RESULT);
         SaveResultRunnable srr = new SaveResultRunnable();
         Thread t = new Thread(srr);
@@ -71,7 +82,7 @@ public class PersistenceManager {
 
 
         XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
-
+        
         //Create path
         String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String UID = generateUniqueID();
@@ -85,7 +96,7 @@ public class PersistenceManager {
             fname = "r_" + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
 //        }
         filename = Resources.ROOT_DIR + surveyDir + fname;
-
+        
         try {
             FileConnection fCon = (FileConnection)Connector.open(filename);
             if(!fCon.exists()){
@@ -138,14 +149,14 @@ public class PersistenceManager {
                 connection.create();
             }
 
-            String displayName = getResultDisplayName(vQuestions);
+            String displayName = getResultDisplayName();
 
             FileSystem fs = AppMIDlet.getInstance().getFileSystem();
             fs.storeFilename(displayName, fname);
             AppMIDlet.getInstance().setFileSystem(fs);
 
             OutputStream out = connection.openOutputStream();
-            writeToStream(out, false);
+            writeAnswerToStream(out, false);
 
             out.close();
             connection.close();
@@ -190,13 +201,13 @@ public class PersistenceManager {
         connection.create();
 
         OutputStream out = connection.openOutputStream();
-        writeToStream(out, true);
+        writeAnswerToStream(out, true);
 
         out.close();
         connection.close();
     }
 
-    private void writeToStream( OutputStream out, boolean appendBinaryData ) {
+    private void writeAnswerToStream( OutputStream out, boolean appendBinaryData ) {
         PrintStream output = new PrintStream(out);
         output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
         output.print("<result ");
@@ -211,8 +222,9 @@ public class PersistenceManager {
         output.print("s_id=\"" + String.valueOf(SurveysControl.getInstance().getSurveyIdNumber()) + "\" ");
         output.print("u_id=\"" + AppMIDlet.getInstance().getIMEI() + "\" ");
 
-        long timeTaken = (new Date()).getTime();
-        output.print("time=\"" + String.valueOf(timeTaken)+ "\">");  //convert to seconds
+        long timeTaken = new Date().getTime();
+        output.print("time=\"" + String.valueOf(timeTaken) + "\" " );//convert to seconds
+        output.print( "version=\"" + VERSION + "\">" );
         output.println();
         if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
             // we do not set new location if it was already in survey and survey is modified
@@ -236,49 +248,40 @@ public class PersistenceManager {
                 }
             }
         }
-        output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName(vQuestions)) + "</title>");
-        int catId = 0;
-        int qIndex = 0;
-        NDGQuestion question = (NDGQuestion) vQuestions.elementAt(qIndex);
-        while (qIndex < vQuestions.size()) {
-            catId = Integer.parseInt(question.getCategoryId());
-            /** Category **/
-            output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(question.getCategoryName()) + "\" ");
-            output.println("id=\"" + question.getCategoryId() + "\">");
-            while (catId == Integer.parseInt(question.getCategoryId())) {
-                /** Question **/
-                String type = getQuestionType(question);
-                output.print("<answer " + "type=\"" + type + "\" ");
-                output.print("id=\"" + question.getQuestionId() + "\" ");
-                output.print("visited=\"" + question.getVisited() + "\"");
-                if (question.getType().equals("_time")) {
-                    if (((TimeQuestion) question).getConvention() == 24 || ((TimeQuestion) question).getConvention() == 0) {
-                        output.print(" convention=\"" + "24" + "\"");
+        output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName()) + "</title>");
+
+        Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();
+        for( int i = 0; i< anwsers.size(); i++ ){
+            CategoryAnswer category = (CategoryAnswer)anwsers.elementAt(i);
+            output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(category.getName() ) + "\" ");
+            output.println("id=\"" + category.getId() + "\">");
+            for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
+                /** Subcategory **/
+                output.print("<subcategory id=\"" + (subCat + 1) + "\">" );
+                Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
+                while( questionIndex.hasMoreElements() ) {
+                    NDGAnswer answer = (NDGAnswer) category.getSubCategoryAnswers( subCat ).get( questionIndex.nextElement() );
+                    String type = answer.getType();
+                    output.print("<answer " + "type=\"" + type + "\" ");
+                    output.print("id=\"" + answer.getId() + "\" ");
+                    output.print("visited=\"" + answer.getVisited() + "\"");
+                    if (answer instanceof TimeAnswer ) {
+                        output.print(" convention=\"" + ((TimeAnswer)answer).getConvetionString() + "\"");
+                        output.print(">");
+                        output.println();
+                        answer.save(output);
+                    } else if ( answer instanceof ImageAnswer ) {
+                        output.print(">");
+                        output.println();
+                        ((ImageAnswer)answer).save( output, appendBinaryData );
                     } else {
-                        if (((TimeQuestion) question).getAm_pm() == TimeQuestion.AM) {
-                            output.print(" convention=\"" + "am" + "\"");
-                        } else {
-                            output.print(" convention=\"" + "pm" + "\"");
-                        }
+                        output.print(">");
+                        output.println();
+                        answer.save(output);
                     }
-                    output.print(">");
-                    output.println();
-                    question.save(output);
-                } else if ( question.getType().equals("_img") ) {
-                    output.print(">");
-                    output.println();
-                    ((ImageQuestion)question).save( output, appendBinaryData );
-                } else {
-                    output.print(">");
-                    output.println();
-                    question.save(output);
+                    output.println("</answer>");
                 }
-                output.println("</answer>");
-                qIndex++;
-                if (qIndex >= vQuestions.size()) {
-                    break;
-                }
-                question = (NDGQuestion) vQuestions.elementAt(qIndex);
+                output.print("</subcategory>");
             }
             output.println("</category>");
         }
@@ -295,61 +298,39 @@ public class PersistenceManager {
         return result;
     }
 
-    private String getQuestionType(NDGQuestion question) {
+    private String getResultDisplayName() {
         String result = "";
-        if (question instanceof DescriptiveQuestion) {
-            result = "_str";
-        }
-        else if (question instanceof DecimalQuestion) {
-            result = "_decimal";
-        }
-        else if (question instanceof IntegerQuestion) {
-            result = "_int";
-        }
-        else if (question instanceof DateQuestion) {
-            result = "_date";
-        }
-        else if (question instanceof TimeQuestion) {
-            result = "_time";
-        }
-        else if (question instanceof ChoiceQuestion) {
-            result = "_choice";
-        }
-        else if(question instanceof ImageQuestion){
-            result = "_img";
-        }
-        return result;
-    }
-
-    private String getResultDisplayName(Vector vQuestions) {
-        String result = "";
-        String [] displayIds;
-        displayIds = SurveysControl.getInstance().getSurveyDisplayIds();
-        NDGQuestion q;
-        for (int i = 0; i < vQuestions.size(); i++) {
-            q = (NDGQuestion) vQuestions.elementAt(i);
-            if ( (q.getCategoryId().equals(displayIds[0])) && (q.getQuestionId().equals(displayIds[1])) ) {
-                if ((q instanceof ChoiceQuestion) || (q instanceof ImageQuestion)) {
-                    result = resultId;
-                }
-                else if ( (q instanceof DescriptiveQuestion) || (q instanceof NumericQuestion) ) {
-                    result = ((String) q.getAnswer().getValue());
-                    if ( result.equals("") ) {
-                        result = resultId;
-                    }
-                }
-                else if (q instanceof DateQuestion) {
-                    long datelong = Long.parseLong((String)q.getAnswer().getValue());
-                    Date date = new Date(datelong);
-                    result = date.toString();
-                } else if (q instanceof TimeQuestion) {
-                    long timelong = Long.parseLong((String)q.getAnswer().getValue());
-                    Date time = new Date(timelong);
-                    result = time.toString();
-                }
+        //take first answer and use it to prepare displayable survey title
+        boolean found = false;
+        NDGAnswer answer = null;
+        for( int i = 0; i< mAnswers.getAllAnwsers().size(); i++ ) {
+            try {
+                CategoryAnswer categoryanswer =  mAnswers.getCategoryAnswers( String.valueOf(i+1) );
+                Hashtable table = categoryanswer.getSubCategoryAnswers(0);
+                answer = (NDGAnswer)table.get( String.valueOf( "1" ) );
+                found = true;
+            } catch (Exception ex ) {
+                //do nothing
             }
         }
+        if( !found ) {
+            return resultId;
+        }
 
+        if (( answer instanceof ChoiceAnswer) || (answer instanceof ImageAnswer)) {
+            result = resultId;
+        } else if ( (answer  instanceof DescriptiveAnswer) || (answer instanceof NumericAnswer ) ) {
+            result = (String) answer.getValue();
+            if ( result.trim().equals("") ) {
+                result = resultId;
+            }
+        } else if ( answer instanceof DateAnswer ) {
+            Date date = new Date( ( (DateAnswer)answer).getDate() );
+            result = date.toString();
+        } else if ( answer instanceof TimeAnswer ) {
+            Date time = new Date( ((TimeAnswer)answer).getTime() );
+            result = time.toString();
+        }
         return result;
     }
 

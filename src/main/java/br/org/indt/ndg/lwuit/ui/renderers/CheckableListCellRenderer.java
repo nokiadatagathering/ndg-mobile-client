@@ -1,11 +1,10 @@
-package br.org.indt.ndg.lwuit.ui;
+package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.lwuit.model.CheckableItem;
 import br.org.indt.ndg.lwuit.model.DisplayableItem;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.CheckBox;
 import com.sun.lwuit.Component;
-import com.sun.lwuit.Label;
 import com.sun.lwuit.List;
 import com.sun.lwuit.layouts.BorderLayout;
 import java.util.Vector;
@@ -31,13 +30,11 @@ public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
         prepareCheckBox((CheckableItem) value);
 
         if (isSelected) {
-            setFocus(true);
             m_rendererCheckbox.setFocus(true);
             m_rendererCheckbox.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
             m_rendererCheckbox.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             getStyle().setBgPainter(m_focusBGPainter);
         } else {
-            setFocus(false);
             m_rendererCheckbox.setFocus(false);
             m_rendererCheckbox.getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
             m_rendererCheckbox.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );

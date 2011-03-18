@@ -1,16 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
-public class TimeAnswer extends Answer {
-    private long time = 0;
-    private long convention;
+import java.io.PrintStream;
+import java.util.Calendar;
+import java.util.Date;
 
-    public void setTime(long _time) { time = _time; }    
-    public long getTime() {  return time; }
+public class TimeAnswer extends NDGAnswer {
+    private long convention = 0;
+
+    public TimeAnswer() {
+        super();
+        Date time = new Date();
+        Long timelong = new Long(time.getTime());
+        setValue( String.valueOf( timelong.longValue() ) );
+    }
+
+    public void setTime(long _time) {
+        setValue( String.valueOf( _time ) );
+    }
+
+    public long getTime() {
+        return Long.parseLong( (String)getValue());
+    }
 
     /**
      * @return the convention
@@ -23,7 +33,65 @@ public class TimeAnswer extends Answer {
      * @param convention the convention to set
      */
     public void setAmPm24(long convention) {
-       
         this.convention = convention;
+    }
+
+    public String getConvetionString() {
+        if ( convention == TimeQuestion.AM ) {
+            return "am";
+        } else if ( convention == TimeQuestion.PM ) {
+            return "pm";
+        } else {
+            return "24";
+        }
+    }
+
+    public void save( PrintStream _output ){
+        String value = (String)getValue();
+        String value1 = convertLongToTimeString( getTime() );
+        if (value!=null) {
+            _output.print("<time>");
+            _output.print(value1);
+            _output.println("</time>");
+        }
+    }
+
+     private String convertLongToTimeString(long _time) {
+        String result = "";
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(_time));
+        String strHour = "" + cal.get(Calendar.HOUR);
+        String strHourofDay = "" + cal.get(Calendar.HOUR_OF_DAY);
+        String strMin = "" + cal.get(Calendar.MINUTE);
+
+        if (this.convention == 1 || this.convention == 2) { // Se AM ou PM.
+            if (cal.get(Calendar.HOUR) == 0) {
+                result = "" + "12";
+                if (strMin.length() == 1)
+                    result += ":" + "0" + (cal.get(Calendar.MINUTE));
+                else
+                    result += ":" + (cal.get(Calendar.MINUTE));
+            } else {
+                if (strHour.length() == 1)
+                    result = "0" + cal.get(Calendar.HOUR);
+                else
+                    result = "" + cal.get(Calendar.HOUR);
+                    if (strMin.length() == 1)
+                        result += ":" + "0" + cal.get(Calendar.MINUTE);
+                    else
+                        result += ":" + cal.get(Calendar.MINUTE);
+            }
+        } else { // Se 24 hours
+                if (strHourofDay.length() == 1)
+                    result = "0" + cal.get(Calendar.HOUR_OF_DAY);
+                else
+                    result = "" + cal.get(Calendar.HOUR_OF_DAY);
+                    if (strMin.length() == 1)
+                        result += ":" + "0" + cal.get(Calendar.MINUTE);
+                    else
+                        result += ":" + cal.get(Calendar.MINUTE);
+        }
+
+        return result;
     }
 }

@@ -9,7 +9,6 @@ import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Graphics;
-import com.sun.lwuit.Label;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
@@ -19,13 +18,9 @@ import com.sun.lwuit.impl.midp.VirtualKeyboard;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.UIManager;
 
-/**
- *
- * @author mturiel
- */
-public class DetailsForm extends Screen implements ActionListener {
+public class QuantityForm extends Screen implements ActionListener {
 
-    private static DetailsForm df;
+    private static QuantityForm df;
     private Dialog dialog;
     private TitlePainter tp = new TitlePainter();
 
@@ -37,7 +32,7 @@ public class DetailsForm extends Screen implements ActionListener {
     private DescriptiveField tfDesc;
 
     protected void loadData() {
-        title = Resources.MORE_DETAILS;
+        title = "Condition";//TODO localize
         cmdOk = new Command(br.org.indt.ndg.mobile.Resources.OK);
     }
 
@@ -54,8 +49,11 @@ public class DetailsForm extends Screen implements ActionListener {
         c.addComponent( createWrappedText( label ) );
         tfDesc = new DescriptiveField(50);
         tfDesc.setText(otrText);
-        tfDesc.setInputMode("Abc");
+        tfDesc.setInputMode("123");
+        tfDesc.setInputModeOrder(new String[]{"123"});
         tfDesc.setEditable(true);
+        tfDesc.setFocus(true);
+        tfDesc.requestFocus();
         c.addComponent(tfDesc);
         dialog.addComponent(c);
         dialog.addCommand(cmdOk);
@@ -73,7 +71,7 @@ public class DetailsForm extends Screen implements ActionListener {
                 }
             };
 
-           //TODO add 'Clear' button to virtual keyboard if possible
+			//TODO add 'Clear' button to virtual keyboard if possible
             VirtualKeyboard.bindVirtualKeyboard(tfDesc, vkExtendedOk);
         }
     }
@@ -89,7 +87,7 @@ public class DetailsForm extends Screen implements ActionListener {
     public static void show(String _label, String _otrText) {
         label = _label;
         otrText = _otrText;
-        df = new DetailsForm();
+        df = new QuantityForm();
         df.loadData();
         df.customize();
         df.showDialog();

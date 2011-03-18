@@ -1,26 +1,19 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.Resources;
-import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 
-public class TimeQuestion extends Question {
+public class TimeQuestion extends NDGQuestion {
 
     private static final int MIDNIGHT = 24;
-    private long low = Resources.NOENTRY; // definição dos limites MIN e MAX.
-    private long high = Resources.NOENTRY;
-
-    private long convention = Resources.NOENTRY;
-    
     public static final int AM = 1;
     public static final int PM = 2;
+
+    private long low = Resources.NOENTRY; // definição dos limites MIN e MAX.
+    private long high = Resources.NOENTRY;
+    private long convention = Resources.NOENTRY;
     private long am_pm = -1;
 
     private long parseDateLow(String _date) {  //timer format is hours:min ex: 01:30
@@ -51,12 +44,12 @@ public class TimeQuestion extends Question {
         calendar.set(Calendar.DAY_OF_MONTH, 31);      //day before at midnight so date given is inclusive
         calendar.set(Calendar.MONTH, 12);
         calendar.set(Calendar.YEAR, 2010);
-        
+
         return calendar.getTime().getTime();
     }
 
     public void setHighConstraint(String _date) {
-        try{
+        try {
             high = parseTimeHigh(_date);
         }
         catch(RuntimeException re){
@@ -65,7 +58,7 @@ public class TimeQuestion extends Question {
     }
 
     public void setLowConstraint(String _date) {
-        try{
+        try {
             low = parseDateLow(_date);
         }
         catch(RuntimeException re){
@@ -74,7 +67,7 @@ public class TimeQuestion extends Question {
     }
 
     public void setConvention(String _time) {
-        try{
+        try {
             convention = Integer.parseInt(_time);
         }
         catch(Exception re){
@@ -83,17 +76,17 @@ public class TimeQuestion extends Question {
     }
 
     public void setConvention(long _convention) {
-        this.convention = _convention;
+        convention = _convention;
     }
 
     public long getConvention() {
-        return this.convention;
+        return convention;
     }
 
-    private boolean passLowConstraint() {
+    private boolean passLowConstraint( TimeAnswer aAnswer ) {
        if (low == Resources.NOENTRY) return true;
        else {
-           long value = Long.parseLong((String) this.getAnswer().getValue());
+           long value = aAnswer.getTime();
            if (value >= low) return true;
            else {
                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -103,10 +96,10 @@ public class TimeQuestion extends Question {
        }
     }
 
-    private boolean passHighConstraint() {
+    private boolean passHighConstraint( TimeAnswer aAnswer ) {
         if (high == Resources.NOENTRY) return true;
         else {
-            long value = Long.parseLong((String) this.getAnswer().getValue());
+            long value = aAnswer.getTime();
             if (value <= high) return true;
             else {
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -116,21 +109,12 @@ public class TimeQuestion extends Question {
         }
     }
 
-    public boolean passConstraints() {
-        if (passLowConstraint())
-            if (passHighConstraint()) return true;
+    public boolean passConstraints( NDGAnswer aAnswer ) {
+        TimeAnswer aTimeAnswer = (TimeAnswer)aAnswer;
+        if ( passLowConstraint( aTimeAnswer ) )
+            if ( passHighConstraint( aTimeAnswer ) ) return true;
             else return false;
         else return false;
-    }
-
-    public void save(PrintStream _output){
-        String value = (String)this.getAnswer().getValue();
-        String value1 = convertLongToTimeString(Long.parseLong((String) this.getAnswer().getValue()));
-        if (value!=null) {
-            _output.print("<time>");
-            _output.print(value1);
-            _output.println("</time>");
-        }
     }
 
     private String convertLongToTimeString(long _time) {
@@ -185,5 +169,9 @@ public class TimeQuestion extends Question {
      */
     public void setAm_pm(long am_pm) {
         this.am_pm = am_pm;
+    }
+
+    public NDGAnswer getAnswerModel() {
+        return new TimeAnswer();
     }
 }

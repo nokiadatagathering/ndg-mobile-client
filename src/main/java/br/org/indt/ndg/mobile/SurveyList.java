@@ -14,7 +14,7 @@ public class SurveyList {
         Vector surveyNames = fs.SurveyNames();
 
         Enumeration e = surveyNames.elements();
-        
+
         while (e.hasMoreElements()) {
             surveyList.addElement((String) e.nextElement());
         }

@@ -1,13 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.Resources;
-import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -15,7 +9,7 @@ import java.util.Date;
  *
  * @author mluz
  */
-public class DateQuestion extends Question {
+public class DateQuestion extends NDGQuestion {
 
     private static final int MIDNIGHT = 24;
     private long low = Resources.NOENTRY;
@@ -73,10 +67,10 @@ public class DateQuestion extends Question {
         }
     }
 
-    private boolean passLowConstraint() {
+    private boolean passLowConstraint( DateAnswer aAnswer ) {
        if (low == Resources.NOENTRY) return true;
        else {
-           long value = Long.parseLong((String) this.getAnswer().getValue());
+           long value = aAnswer.getDate();
            if (value >= low) return true;
            else {
                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -86,10 +80,10 @@ public class DateQuestion extends Question {
        }
     }
 
-    private boolean passHighConstraint() {
+    private boolean passHighConstraint( DateAnswer aAnswer ) {
         if (high == Resources.NOENTRY) return true;
         else {
-            long value = Long.parseLong((String) this.getAnswer().getValue());
+            long value = aAnswer.getDate();
             if (value <= high) return true;
             else {
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -99,20 +93,12 @@ public class DateQuestion extends Question {
         }
     }
 
-    public boolean passConstraints() {
-        if (passLowConstraint())
-            if (passHighConstraint()) return true;
+    public boolean passConstraints( NDGAnswer aAnswer ) {
+        DateAnswer dateAnswer = (DateAnswer)aAnswer;
+        if (passLowConstraint( dateAnswer ))
+            if (passHighConstraint( dateAnswer )) return true;
             else return false;
         else return false;
-    }
-
-    public void save(PrintStream _output){
-        String value = (String)this.getAnswer().getValue();
-        if (value!=null) {
-             _output.print("<date>");
-            _output.print(value);
-            _output.println("</date>");
-        }
     }
 
     private String convertLongToDateString(long _date) {
@@ -125,4 +111,7 @@ public class DateQuestion extends Question {
         return result;
     }
 
+    public NDGAnswer getAnswerModel() {
+        return new DateAnswer();
+    }
 }

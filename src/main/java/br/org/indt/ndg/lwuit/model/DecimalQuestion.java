@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
@@ -30,9 +25,9 @@ public class DecimalQuestion extends NumericQuestion {
         }
     }
 
-     protected boolean passLowConstraint() {
+     protected boolean passLowConstraint( NumericAnswer aAnswer ) {
         boolean result = true;
-        String strValue = (String) this.getAnswer().getValue();
+        String strValue = (String)aAnswer.getValue();
         if ( strValue.equals("") ) result = true;
         else {
             try
@@ -55,9 +50,9 @@ public class DecimalQuestion extends NumericQuestion {
         return result;
     }
 
-    protected boolean passHighConstraint() {
+    protected boolean passHighConstraint( NumericAnswer aAnswer ) {
         boolean result = true;
-        String strValue = (String) this.getAnswer().getValue();
+        String strValue = (String)aAnswer.getValue();
         if ( strValue.equals("") ) result = true;
         else {
             try
@@ -80,8 +75,12 @@ public class DecimalQuestion extends NumericQuestion {
         return result;
     }
 
-    public String GetType()
+    public String getType()
     {
-        return "decimal";
+        return "_decimal";
+    }
+
+    public NDGAnswer getAnswerModel() {
+        return new DecimalAnswer();
     }
 }

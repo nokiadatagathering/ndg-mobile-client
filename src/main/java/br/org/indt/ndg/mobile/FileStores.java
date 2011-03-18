@@ -1,19 +1,22 @@
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.model.CategoryAnswer;
+import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
-import java.util.Enumeration;
+import br.org.indt.ndg.lwuit.model.Survey;
 import java.util.Hashtable;
 import java.util.Vector;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
-import br.org.indt.ndg.mobile.structures.SurveyStructure;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import br.org.indt.ndg.mobile.xmlhandle.ResultHandler;
 import br.org.indt.ndg.mobile.xmlhandle.kParser;
 
 public class FileStores {
 
-    private SurveyStructure surveyStructure = null;
+    private Survey surveyStructure = null;
     private ResultStructure resultStructure = null;
 
     private Parser parser=null;
@@ -32,7 +35,7 @@ public class FileStores {
         else return false;
     }
 
-    public SurveyStructure getSurveyStructure() {
+    public Survey getSurveyStructure() {
         return surveyStructure;
     }
 
@@ -47,34 +50,36 @@ public class FileStores {
 
     //reset widgets so they will be created newly again
     public void resetQuestions() {
-        int numCats = getSurveyStructure().getNumCategories();
-        Enumeration e;
+        Survey currentSurvey = SurveysControl.getInstance().getSurvey();
+        int numCats = currentSurvey.getCategories().size();
         NDGQuestion question;
-        
-        for (int j=0; j < numCats; j++ ) {
-            e = getSurveyStructure().getQuestions(j).elements();
-            while (e.hasMoreElements()) {
-                question = (NDGQuestion) e.nextElement();
+
+        for (int i=0; i < numCats; i++ ) {
+            if( currentSurvey.getCategories().elementAt(i) instanceof CategoryConditional ) {
+                ((CategoryConditional)currentSurvey.getCategories().elementAt(i)).setQuantity(0);
+            }
+            for( int j=0; j < ((Category)currentSurvey.getCategories().elementAt(i)).getQuestions().size(); j++ ) {
+                question = (NDGQuestion)((Category)currentSurvey.getCategories().elementAt(i)).getQuestions().elementAt(j);
                 question.setIsNew(true);
                 question.setFirstTime();
-                question.setVisited(false, j);
-            }       
+                question.setVisited(false);
+            }
         }
-        getSurveyStructure().initVisitedArray();
     }
 
     public void parseSurveyFile() {
-        surveyStructure =  new SurveyStructure();
+        surveyStructure =  new Survey();
 
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
 
-        if(AppMIDlet.getInstance().isXformDir(dirName)){
+        if (AppMIDlet.getInstance().isXformDir(dirName)) {
             surveyStructure.setTitle(AppMIDlet.getInstance().getFileSystem().getCurrentSurveyName());
-            return;
+        } else {
+            kparser = new kParser();
+            kparser.setSurveyStructure(surveyStructure);
+            kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);
         }
-        kparser = new kParser();
-        kparser.setSurveyStructure(surveyStructure);
-        kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);
+        SurveysControl.getInstance().setSurvey((Survey) surveyStructure);
     }
 
     public void parseResultFile() {
@@ -92,46 +97,33 @@ public class FileStores {
         }
     }
 
-    /**
-     * TESTAR EXAUSTIVAMENTE
-     * @param categoryIndex
-     * @param id
-     * @return the Answer or null
-     */
-    public NDGAnswer loadAnswerById(int categoryIndex, int id){
-        if(resultStructure != null){
-            Hashtable answers = resultStructure.getAnswers(categoryIndex);
-            return (NDGAnswer) answers.get(String.valueOf(id));
-        }
-        else
-            return null;
-    }
-    
     //Loads answers read from result.xml file from result structure to survey structure
     public void loadAnswers() {
         Vector questions;
-        Hashtable answers;
         NDGQuestion question;
-        String questionType;
         int questionID;
         NDGAnswer currentAnswer;
 
-        for (int i=0; i < surveyStructure.getNumCategories(); i++) {
+        for (int i=0; i < surveyStructure.getCategories().size(); i++) {
+            Category category = (Category) surveyStructure.getCategories().elementAt(i);
+            if( category instanceof CategoryConditional ) {
+                CategoryAnswer categoryAnswer = SurveysControl.getInstance().getResult().getCategoryAnswers( String.valueOf( i + 1 ) );
+                ((CategoryConditional)category).setQuantity( categoryAnswer.getSubcategoriesCount() );
+            } else if ( category instanceof Category ){
+                questions = category.getQuestions();
+                CategoryAnswer answers = resultStructure.getCategoryAnswers( String.valueOf( i + 1 ) );
 
-            questions = surveyStructure.getQuestions(i);
-            answers = resultStructure.getAnswers(i);
+                int questionsSize = questions.size();
+                for (int j=0; j < questionsSize; j++) {
+                    question = (NDGQuestion) questions.elementAt(j);
 
-            int questionsSize = questions.size();
-            for (int j=0; j < questionsSize; j++) {
-                question = (NDGQuestion) questions.elementAt(j);
+                    questionID = question.getIdNumber();
 
-                questionID = question.getIdNumber();
-                questionType = question.getType();
-
-                //set visited questions loaded from result.xml
-                Object tempanswer = answers.get(String.valueOf(questionID));
-                currentAnswer = (NDGAnswer) tempanswer;
-                question.setVisited(currentAnswer.getVisited(), i);
+                    //set visited questions loaded from result.xml
+                    Object tempanswer = answers.getSubCategoryAnswers(0).get(String.valueOf(questionID));
+                    currentAnswer = (NDGAnswer) tempanswer;
+                    question.setVisited(currentAnswer.getVisited());
+                }
             }
         }
     }

@@ -7,13 +7,14 @@ import br.org.indt.ndg.lwuit.control.DeleteSentResultCommand;
 import br.org.indt.ndg.lwuit.control.MarkAllResultsCommand;
 import br.org.indt.ndg.lwuit.control.MoveToUnsentCommand;
 import br.org.indt.ndg.lwuit.control.ResultControl;
+import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.UnmarkAllResultsCommand;
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
+import br.org.indt.ndg.lwuit.ui.renderers.SentResultListCellRenderer;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.list.DefaultListModel;
 
 
 /**
@@ -30,7 +31,7 @@ public class SentResultList extends Screen implements ActionListener{
     private CheckableListModel underlyingModel;
 
     protected void loadData() {
-        title = AppMIDlet.getInstance().getFileStores().getSurveyStructure().getTitle();
+        title = SurveysControl.getInstance().getSurvey().getDisplayableName();
         results = ResultControl.getInstance().getSentResults();
         //sentList = new SentList();
     }

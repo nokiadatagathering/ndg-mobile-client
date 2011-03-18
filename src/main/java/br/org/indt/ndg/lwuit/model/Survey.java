@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
+
+import java.util.Vector;
 
 /**
  *
@@ -11,44 +8,36 @@ package br.org.indt.ndg.lwuit.model;
  */
 public class Survey implements DisplayableItem{
 
-    private String name;
-    private int totalQuestions;
-    private int totalResults;
-    private Category[] categories;
+    private String mDisplay;
+    private String mTitle;
+    private int mId;
+    private Vector mCategories = new Vector();
 
-    public Category[] getCategories() {
-        return categories;
+    public Vector getCategories() {
+        return mCategories;
     }
 
-    public void setCategories(Category[] categories) {
-        this.categories = categories;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getTotalQuestions() {
-        return totalQuestions;
-    }
-
-    public int getTotalResults() {
-        return totalResults;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setTotalQuestions(int totalQuestions) {
-        this.totalQuestions = totalQuestions;
-    }
-
-    public void setTotalResults(int totalResults) {
-        this.totalResults = totalResults;
+    public void addCategory( Category category ) {
+        mCategories.addElement(category);
     }
 
     public String getDisplayableName() {
-        return getName();
+        return mTitle;
+    }
+
+    public void setIdNumber(int aId) {
+        mId = aId;
+    }
+
+    public void setDisplayId(String aDisplay) {
+        mDisplay = aDisplay;
+    }
+
+    public void setTitle(String aTitle) {
+        mTitle = aTitle;
+    }
+
+    public int getId() {
+        return mId;
     }
 }

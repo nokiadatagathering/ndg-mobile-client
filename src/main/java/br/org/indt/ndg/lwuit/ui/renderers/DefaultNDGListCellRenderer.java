@@ -1,7 +1,8 @@
-package br.org.indt.ndg.lwuit.ui;
+package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.lwuit.extended.ListBGPainter;
 import br.org.indt.ndg.lwuit.extended.ListFocusBGPainter;
+import br.org.indt.ndg.lwuit.ui.Screen;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Image;
@@ -17,7 +18,7 @@ import com.sun.lwuit.painter.BackgroundPainter;
  *
  * @author mluz
  */
-abstract class DefaultNDGListCellRenderer extends Container implements ListCellRenderer {
+public abstract class DefaultNDGListCellRenderer extends Container implements ListCellRenderer {
 
     protected final BackgroundPainter m_bgPainter;
     protected final Painter m_focusBGPainter;
@@ -33,6 +34,7 @@ abstract class DefaultNDGListCellRenderer extends Container implements ListCellR
         m_focusBGPainter = new ListFocusBGPainter(this);
         m_bottomLine = Screen.getRes().getImage("bottom");
         m_transitionLabel.setCellRenderer(true);
+        setCellRenderer(true);
     }
 
     public abstract Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected);

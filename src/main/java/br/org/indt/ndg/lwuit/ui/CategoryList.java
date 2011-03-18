@@ -3,16 +3,21 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
 import br.org.indt.ndg.lwuit.control.EnterCategoryCommand;
+import br.org.indt.ndg.lwuit.control.EnterDirectCategoryConditionalCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.Category;
+import br.org.indt.ndg.lwuit.model.CategoryConditional;
+import br.org.indt.ndg.lwuit.ui.renderers.CategoryListCellRenderer;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
+import java.util.Vector;
 
 /**
  *
@@ -27,11 +32,11 @@ public class CategoryList extends Screen implements ActionListener, SaveResultsO
     private ListModel underlyingModel;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
-    private Category[] categories;
+    private Vector categories;
 
     protected void loadData() {
-        categories = SurveysControl.getInstance().getCategoriesFromOpenedSurvey();
-        title1 = surveysControl.getOpenedSurveyTitle();
+        categories = SurveysControl.getInstance().getSurvey().getCategories();
+        title1 = surveysControl.getSurveyTitle();
     }
 
     protected void customize() {
@@ -66,6 +71,8 @@ public class CategoryList extends Screen implements ActionListener, SaveResultsO
         list.setFixedSelection(List.FIXED_NONE_CYCLIC);
         form.addComponent(list);
         form.setScrollable(false);
+
+        list.addSelectionListener(new HandleSelectedItem());
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -85,5 +92,28 @@ public class CategoryList extends Screen implements ActionListener, SaveResultsO
     public void onResultsSaved() {
         // Refresh ResultList since a new result was probbaly created
         AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
+    }
+
+    private void resetAllCommands() {
+        form.removeAllCommands();
+        form.addCommand(BackCategoriesListCommand.getInstance().getCommand());
+        form.addCommand(SaveResultCommand.getInstance().getCommand());
+        form.addCommand(EnterCategoryCommand.getInstance().getCommand());
+        form.addCommand(EnterDirectCategoryConditionalCommand.getInstance().getCommand());
+    }
+
+
+    private class HandleSelectedItem implements SelectionListener{
+
+        public HandleSelectedItem() {
+        }
+
+        public void selectionChanged(int oldSelected, int newSelected) {
+            if( SurveysControl.getInstance().getSurvey().getCategories().elementAt(newSelected) instanceof CategoryConditional ) {
+                resetAllCommands();
+            } else {
+                form.removeCommand( EnterDirectCategoryConditionalCommand.getInstance().getCommand() );
+            }
+        }
     }
 }

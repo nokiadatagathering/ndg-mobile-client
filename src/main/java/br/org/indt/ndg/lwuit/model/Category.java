@@ -1,54 +1,42 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.model;
+
+import java.util.Vector;
 
 /**
  *
  * @author mluz, amartini, mturiel
  */
 public class Category {
+    private String mName;
+    private String mId;
+    private Vector mQuestions;
 
-    private int totalQuestions;
-    private String name;
-    private boolean fullFilled = false;
-    private NDGQuestion[] questions;
-
-    public NDGQuestion[] getQuestions() {
-        return questions;
+    public Category( String aName, String aId ) {
+        mName = aName;
+        mId = aId;
     }
 
-    public void setQuestions(NDGQuestion[] questions) {
-        this.questions = questions;
+    public Vector getQuestions() {
+        return mQuestions;
+    }
+
+    public void setQuestions(Vector questions) {
+        mQuestions = questions;
     }
 
     public boolean isFullFilled() {
-        for ( int i = 0;i< questions.length; i++) {
-            if( questions[i].getVisited() == true )
+        for ( int i = 0; i< mQuestions.size(); i++ ) {
+            if( ((NDGQuestion)mQuestions.elementAt(i)).getVisited() == true )
                 return true;
         }
         return false;
     }
 
-    public void setFullFilled(boolean fullFilled) {
-        this.fullFilled = fullFilled;
-    }
-
-    public int getTotalQuestions() {
-        return questions.length;
-    }
-
-    public void setTotalQuestions(int totalQuestions) {
-        this.totalQuestions = totalQuestions;
-    }
-
     public String getName() {
-        return name;
+        return mName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getId() {
+        return mId;
     }
 }

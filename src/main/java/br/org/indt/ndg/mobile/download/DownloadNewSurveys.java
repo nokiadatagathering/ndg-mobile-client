@@ -192,7 +192,7 @@ public class DownloadNewSurveys implements Runnable{
                  // Parse the surveys list
                 dis = fconn.openDataInputStream();
                 String[] surveysTitles = null;
-
+                
                 if (isNdgProtocol()) { // NDG Protocol
                     Logger.getInstance().emul("Download survey list: ", "NDG");
                     NDGSurveysListHandler ndgSurveyListHandler = new NDGSurveysListHandler();
@@ -559,7 +559,7 @@ public class DownloadNewSurveys implements Runnable{
         protected abstract void parseAndSaveSurveys() throws IOException, SecurityException;
         protected abstract String getCurrentSurveyId();
         protected abstract String getCurrentSurveyTitle();
-
+        
         protected final SurveyHandler m_surveyHandler;
         protected final String m_surveyEndTag;
         protected final String m_surveyDirPrefix;
@@ -736,7 +736,7 @@ public class DownloadNewSurveys implements Runnable{
             m_surveysDirFiles.clear();
             m_notDownloadedSurveys = "";
         }
-
+        
         private void receiveDataAndSaveSurveys( InputStream in ) {
             if ((int) httpConnection.getLength() <= 0) {
                 cancelOperation();
@@ -908,7 +908,7 @@ public class DownloadNewSurveys implements Runnable{
             return m_surveys[m_currentIndex].getFormId();
         }
         protected String getCurrentSurveyTitle() {
-            return m_surveys[m_currentIndex].getName();
+            return m_surveys[m_currentIndex].getDisplayableName();
         }
 
         protected void parseAndSaveSurveys() throws IOException, SecurityException {
