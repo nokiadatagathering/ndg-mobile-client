@@ -29,4 +29,3 @@ public class EnterCategoryConditionalCommand extends CommandControl {
         return instance;
     }
 }
-

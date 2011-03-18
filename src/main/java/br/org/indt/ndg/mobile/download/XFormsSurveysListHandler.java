@@ -42,7 +42,7 @@ public class XFormsSurveysListHandler extends SurveysListHandler {
         String value = new String(ch, start, length).trim();
         if ( m_currentSurvey == null )
             return;
-       
+
         if ( FORM_ID_TAG.equals(m_currentTag) ) {
             m_currentSurvey.setFormId(value);
         } else if (NAME_TAG.equals(m_currentTag)) {

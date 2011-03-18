@@ -8,7 +8,7 @@ public class AnimatedList extends List implements SelectionListener {
 
     final private int ANIMATION_DELAY = 300;
     final private int ANIMATION_START_DELAY = 1000;
-    
+
     private long tickTime = System.currentTimeMillis();
     private int lastSelection = -1;
     private SurveyListCellRenderer slcr;

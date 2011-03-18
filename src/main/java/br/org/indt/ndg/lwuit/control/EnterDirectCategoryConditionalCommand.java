@@ -32,4 +32,3 @@ public class EnterDirectCategoryConditionalCommand extends CommandControl {
         return instance;
     }
 }
-

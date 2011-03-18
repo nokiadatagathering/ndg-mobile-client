@@ -82,7 +82,7 @@ public class PersistenceManager {
 
 
         XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
-        
+
         //Create path
         String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String UID = generateUniqueID();
@@ -96,7 +96,7 @@ public class PersistenceManager {
             fname = "r_" + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
 //        }
         filename = Resources.ROOT_DIR + surveyDir + fname;
-        
+
         try {
             FileConnection fCon = (FileConnection)Connector.open(filename);
             if(!fCon.exists()){

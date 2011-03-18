@@ -7,7 +7,7 @@ public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRender
 
     private final int PADDING = 5;
     private int position = 0;
-    
+
     protected String getTextToAnimate() {
         return m_label.getText();
     }

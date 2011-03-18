@@ -21,16 +21,16 @@ public class NumericField extends TextField implements DataChangedListener {
         m_decimal = decimal;
         addDataChangeListener(this);
         setOverwriteMode(false);
-        
+
         setInputMode("123");
         setInputModeOrder(new String[]{"123"});
-        
+
         if( Display.getInstance().isTouchScreenDevice() ) {
             VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
             if (m_decimal) {
-                onScreenKeyboard.setInputModeOrder(new String[] {VirtualKeyboard.NUMBERS_SYMBOLS_MODE} );    
+                onScreenKeyboard.setInputModeOrder(new String[] {VirtualKeyboard.NUMBERS_SYMBOLS_MODE} );
             } else {
-                onScreenKeyboard.setInputModeOrder(new String[] {VirtualKeyboard.NUMBERS_MODE} );                
+                onScreenKeyboard.setInputModeOrder(new String[] {VirtualKeyboard.NUMBERS_MODE} );
             }
             VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);
         }

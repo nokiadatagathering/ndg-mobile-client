@@ -25,12 +25,12 @@ public class NDGSurveyHandler extends SurveyHandler {
         final String elementName, final Attributes attributes) throws SAXException
     {
          if (elementName.equals(SURVEY)) {
-    
+
             surveyID = attributes.getValue(ID);
             surveyTitle = attributes.getValue(TITLE);
-    
+
             if (surveyID == null || "".equals(surveyID)) {
-      
+
                 throw new SAXException(Resources.EINVALID_SURVEYS);
             }
             throw new DoneParsingException();

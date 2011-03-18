@@ -78,8 +78,8 @@ public class XfoliteInterviewForm extends Screen implements UserInterface, Actio
         String file = Resources.ROOT_DIR + dirName + fileName;
         setTitle(title1, title2);
         load(file);
-        
-        
+
+
     }
 
     public void log(int lvl, String msg, Element el) {
@@ -140,7 +140,7 @@ public class XfoliteInterviewForm extends Screen implements UserInterface, Actio
             m_doc.addSerializer(new MultipartFormDataSerializer());
 
             m_doc.parse(parser);
-            
+
         }catch(IOException ex ){
             ex.printStackTrace();
         }catch (XmlPullParserException ex) {

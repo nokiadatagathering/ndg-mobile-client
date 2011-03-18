@@ -47,7 +47,7 @@ public class CategoryAnswer {
     public void put(int aIndex, String aId, NDGAnswer aAnswer) {
         if( mSubCategory.size() <= aIndex ) {
             mSubCategory.addElement(new Hashtable());
-        } 
+        }
         ((Hashtable)mSubCategory.elementAt(aIndex)).put( aId, aAnswer );
     }
 

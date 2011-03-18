@@ -26,7 +26,7 @@ public class CheckableListCellRenderer extends DefaultNDGListCellRenderer{
         if ( list.size() == 0 )
             return this;
         removeAll();
-        
+
         prepareCheckBox((CheckableItem) value);
 
         if (isSelected) {
