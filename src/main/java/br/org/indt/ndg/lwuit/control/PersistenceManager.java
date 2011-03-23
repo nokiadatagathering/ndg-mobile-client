@@ -14,6 +14,7 @@ import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.SortsKeys;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
@@ -259,6 +260,13 @@ public class PersistenceManager {
                 /** Subcategory **/
                 output.print("<subcategory id=\"" + (subCat + 1) + "\">" );
                 Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
+                Vector keys = new Vector(category.getSubCategoryAnswers( subCat ).size());
+                while( questionIndex.hasMoreElements() ) {
+                    keys.addElement(questionIndex.nextElement());
+                }
+                SortsKeys sorts = new SortsKeys();
+                sorts.qsort(keys);
+                questionIndex = keys.elements();
                 while( questionIndex.hasMoreElements() ) {
                     NDGAnswer answer = (NDGAnswer) category.getSubCategoryAnswers( subCat ).get( questionIndex.nextElement() );
                     String type = answer.getType();
@@ -309,6 +317,7 @@ public class PersistenceManager {
                 Hashtable table = categoryanswer.getSubCategoryAnswers(0);
                 answer = (NDGAnswer)table.get( String.valueOf( "1" ) );
                 found = true;
+                break;
             } catch (Exception ex ) {
                 //do nothing
             }
