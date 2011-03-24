@@ -60,6 +60,10 @@ public class SurveyList extends Screen implements ActionListener{
         // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
         underlyingModel = new DefaultListModel(surveys);
 
+        if( list != null ) {
+            list.stopAnimation();
+            list = null;
+        }
         list = new AnimatedList(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
@@ -72,7 +76,6 @@ public class SurveyList extends Screen implements ActionListener{
     }
 
     public void actionPerformed(ActionEvent evt) {
-
         try {
             Object cmd = evt.getSource();
             if (cmd == ExitCommand.getInstance().getCommand()) {
