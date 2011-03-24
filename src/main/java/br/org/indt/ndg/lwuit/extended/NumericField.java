@@ -1,7 +1,9 @@
 package br.org.indt.ndg.lwuit.extended;
 
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
+import com.sun.lwuit.Form;
 import com.sun.lwuit.events.DataChangedListener;
 import com.sun.lwuit.impl.midp.VirtualKeyboard;
 
@@ -97,4 +99,17 @@ public class NumericField extends TextField implements DataChangedListener {
         checkLength();
     }
 
+    protected Command installCommands(Command clear, Command t9) {
+        Form f = getComponentForm();
+        Command[] originalCommands = new Command[f.getCommandCount()];
+        for(int iter = 0 ; iter < originalCommands.length ; iter++) {
+            originalCommands[iter] = f.getCommand(iter);
+        }
+        f.removeAllCommands();
+        Command retVal = super.installCommands(clear, t9);
+        for(int iter = originalCommands.length - 1 ; iter >= 0 ; iter--) {
+            f.addCommand(originalCommands[iter]);
+        }
+        return retVal;
+    }
 }
