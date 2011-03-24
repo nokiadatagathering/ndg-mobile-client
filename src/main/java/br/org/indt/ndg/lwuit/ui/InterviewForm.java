@@ -928,6 +928,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void focusLost(Component cmpnt) {
+            form.removeCommand(OpenFileBrowserCommand.getInstance().getCommand());
+            form.removeCommand(TakePhotoCommand.getInstance().getCommand());
+            form.removeCommand(ShowPhotoCommand.getInstance().getCommand());
+            form.removeCommand(RemovePhotoCommand.getInstance().getCommand());
             super.focusLost(cmpnt);
         }
 
