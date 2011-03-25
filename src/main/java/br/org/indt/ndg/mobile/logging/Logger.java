@@ -112,5 +112,8 @@ public class Logger {
     public void emul(String message, double n){
         System.out.println(message + n);
     }
+    public void emul(String message){
+        System.out.println(message);
+    }
 
 }

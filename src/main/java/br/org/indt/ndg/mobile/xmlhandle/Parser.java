@@ -68,13 +68,16 @@ public class Parser {
             try {
                 saxParser.parse(is, handler);
             } catch (DoneParsingException e) {
-
+                // do nothing
             } catch (SAXParseException e) {
                 Logger.getInstance().logException("SAXParseException on parsing: " + e.getMessage());
                 e.printStackTrace();
                 error = true;
                 AppMIDlet.getInstance().getFileSystem().setError(true);
-            } finally {
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            finally {
                 if( is != null ) is.close();
                 if( fc != null ) fc.close();
             }

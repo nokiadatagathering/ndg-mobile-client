@@ -46,15 +46,21 @@ public class OpenResultCommand extends CommandControl {
 
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(true);
-                AppMIDlet.getInstance().getFileStores().parseResultFile();
-                if (AppMIDlet.getInstance().getFileStores().getError()) {
-                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
-                } else {
-                    SurveysControl.getInstance().setResult( AppMIDlet.getInstance().getFileStores().getResultStructure() );
-                    AppMIDlet.getInstance().getFileStores().loadAnswers();
-                    AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time increment used to create new survey
+
+                if(AppMIDlet.getInstance().isCurrentDirXForm()){
+                    AppMIDlet.getInstance().getFileStores().loadXFormResult();
                     AppMIDlet.getInstance().showInterview();
+                }else{
+                    AppMIDlet.getInstance().getFileStores().parseResultFile();
+                    if (AppMIDlet.getInstance().getFileStores().getError()) {
+                        GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                        GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
+                    } else {
+                        SurveysControl.getInstance().setResult( AppMIDlet.getInstance().getFileStores().getResultStructure() );
+                        AppMIDlet.getInstance().getFileStores().loadAnswers();
+                        AppMIDlet.getInstance().setTimeTracker((new Date()).getTime());  //to keep track of time increment used to create new survey
+                        AppMIDlet.getInstance().showInterview();
+                    }
                 }
             }
         }

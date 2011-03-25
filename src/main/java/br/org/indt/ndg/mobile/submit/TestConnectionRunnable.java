@@ -2,6 +2,7 @@ package br.org.indt.ndg.mobile.submit;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.Utils;
 import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
@@ -22,7 +23,7 @@ public class TestConnectionRunnable implements Runnable {
 
 
     private void testGPRS() {
-        String urlServlet = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl();
+        String urlServlet = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl(Utils.NDG_FORMAT);
         HttpConnection httpConn = null;
         try {
             httpConn = (HttpConnection) Connector.open(urlServlet);

@@ -39,7 +39,7 @@ public class CategoryConditionalList extends Screen implements ActionListener, S
         selectedCategory = (CategoryConditional)SurveysControl.getInstance().getSelectedCategory();
         boolean xx = selectedCategory instanceof CategoryConditional;
         if ( !xx ) {
-            throw new UnsupportedOperationException("This cannot happen!!!");
+            //throw new UnsupportedOperationException("This cannot happen!!!");
         }
         entries = new Vector();
         for( int i=0; i < selectedCategory.getQuantity(); i++ ) {

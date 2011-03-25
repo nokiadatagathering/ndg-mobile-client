@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.ui.ResultView;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
+import br.org.indt.ndg.lwuit.ui.OpenRosaResultView;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
@@ -43,13 +44,19 @@ public class ViewResultCommand extends CommandControl {
         public void run() {
             try { Thread.sleep(200); } catch(Exception e){}
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
-                AppMIDlet.getInstance().getFileStores().parseResultFile();
-                if (AppMIDlet.getInstance().getFileStores().getError()) {
-                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_RESULT, GeneralAlert.ERROR );
-                } else {
-                    SurveysControl.getInstance().setResult( AppMIDlet.getInstance().getFileStores().getResultStructure() );
-                    AppMIDlet.getInstance().setDisplayable( ResultView.class );
+
+                if(AppMIDlet.getInstance().isCurrentDirXForm()){
+                    AppMIDlet.getInstance().getFileStores().loadXFormResult();
+                    AppMIDlet.getInstance().setDisplayable(OpenRosaResultView.class);
+                }else{
+                    AppMIDlet.getInstance().getFileStores().parseResultFile();
+                    if (AppMIDlet.getInstance().getFileStores().getError()) {
+                        GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                        GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_RESULT, GeneralAlert.ERROR );
+                    } else {
+                        SurveysControl.getInstance().setResult( AppMIDlet.getInstance().getFileStores().getResultStructure() );
+                        AppMIDlet.getInstance().setDisplayable( ResultView.class );
+                    }
                 }
             }
         }

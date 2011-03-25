@@ -284,8 +284,6 @@ public class Resources {
     public static final String EINVALID_SURVEYS = Local.getText(Local.QTJ_EINVALID_SURVEYS);
     public static final String EINVALID_XML_FILE = Local.getText(Local.QTJ_EINVALID_XML_FILE);
 
-    public static int splashCountdown = 8000;
-
     private boolean error = false;
 
     public static Image splashPortrait;

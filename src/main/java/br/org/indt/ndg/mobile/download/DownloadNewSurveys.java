@@ -9,6 +9,7 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SurveyList;
+import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import java.io.ByteArrayInputStream;
@@ -73,7 +74,7 @@ public class DownloadNewSurveys implements Runnable{
      */
     private boolean isNdgProtocol() {
         int protocolId = AppMIDlet.getInstance().getSettings().getStructure().getProtocolId();
-        return (protocolId == 0);
+        return (protocolId == Utils.NDG_FORMAT);
     }
 
     private void updateRequestUrls() {

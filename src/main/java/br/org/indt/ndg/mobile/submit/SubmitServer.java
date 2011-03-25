@@ -3,44 +3,42 @@ package br.org.indt.ndg.mobile.submit;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connector;
-import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.ResultList;
 import br.org.indt.ndg.mobile.SurveyList;
-import br.org.indt.ndg.mobile.error.ServerCantWriteResultsException;
+import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.logging.Logger;
-import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZOutputStream;
+import java.util.Hashtable;
 
 public class SubmitServer {
     //These values are set in Settings.xml
-    private final int SERVER_CANNOT_WRITE_RESULT = -1;
+    private static final int SERVER_CANNOT_WRITE_RESULT = -1;
     private static final int NO_SURVEY_IN_SERVER = 2;
-    private final int SUCCESS = 1;
+    private static final int SUCCESS = 1;
 
-    private static final String ENCODING = "UTF-8";
+    private static final String INPUT_NAME_TAG = "filename";
 
-    private HttpConnection httpConn = null;
-    //private FileConnection fileConn = null;
-    private InputStreamReader fileInput = null;
-    private DataOutputStream httpOutput = null;
-    private DataInputStream httpInput = null;
-    private boolean stop = false;
-    private String urlServlet = "";
+    private boolean m_canceled = false;
+    private String m_servletUrl = "";
+    private HttpPostRequest m_currentRequest = null;
+    private final Vector m_filesNotSent = new Vector();
 
     public SubmitServer() {
     }
 
     public void cancel() {
-        stop = true;
+        m_canceled = true;
+        if (m_currentRequest != null) {
+            m_currentRequest.cancel();
+            m_currentRequest = null;
+            m_filesNotSent.removeAllElements();
+        }
     }
 
     public void submitResult(String resultFilename){
@@ -54,143 +52,134 @@ public class SubmitServer {
     }
 
     private void send(Vector resultFilenames){
-            boolean compression_on = AppMIDlet.getInstance().getSettings().getStructure().getServerCompression();
-            urlServlet = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl();
+        String surveyRoot = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+        int surveyFormat = Utils.resolveSurveyFormatFromDirName(surveyRoot);
+        m_servletUrl = AppMIDlet.getInstance().getSettings().getStructure().getServerUrl(surveyFormat);
+        Enumeration e = resultFilenames.elements();
+        m_filesNotSent.removeAllElements();
+        while ( e.hasMoreElements() && !m_canceled ) {
+            String filename = null;
+            String fileContents = "";
+            filename = (String) e.nextElement();
+            try {
+                fileContents = loadFile(filename);
+            } catch (IOException ioe) {
+                m_filesNotSent.addElement(filename);
+                continue;
+            }
+            if ( fileContents == null || fileContents.equals("") ) {
+                m_filesNotSent.addElement(filename);
+                continue;
+            }
 
-            Enumeration e = resultFilenames.elements();
-            while (e.hasMoreElements() && !stop) {
-                try {
-                    httpConn = (HttpConnection) Connector.open(urlServlet);
-                    httpConn.setRequestMethod(HttpConnection.POST);
-                    httpOutput = httpConn.openDataOutputStream();
+            byte[] response;
+            try {
+                HttpPostRequest request = null;
+                switch (surveyFormat) {
+                    case Utils.NDG_FORMAT:
+                        boolean useCompression = AppMIDlet.getInstance().getSettings().getStructure().getServerCompression();
+                        request = new HttpNormalPostRequest( m_servletUrl, fileContents.getBytes(), useCompression );
+                        break;
+                    case Utils.OPEN_ROSA_FORMAT:
+                        request = new HttpMultipartPostRequest( m_servletUrl, new Hashtable(),
+                                INPUT_NAME_TAG, filename, "text/xml", fileContents.getBytes());
+                        break;
+                    default:
+                        throw new RuntimeException("Unspported Survey Format");
                 }
-                catch(Exception ex){
-                    finalizeGPRSTransmission();
+                response = request.send();
+
+                int responseCode = response[0];
+                processResult(filename, responseCode);
+            } catch (IOException ioe) {
+                if (!m_canceled){
+                    GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+                    GeneralAlert.getInstance().showCodedAlert( Resources.NETWORK_FAILURE,
+                                                               ioe.getMessage() != null ? ioe.getMessage().trim() : "",
+                                                               GeneralAlert.ALARM );
                     break;
                 }
-
-                String file = null;
-                String buffer = "";
-                file = (String) e.nextElement();
-                buffer = loadFile(file);
-                try{
-                    if (!stop){
-                        if (compression_on) submitCompressFile(buffer);
-                        else submitFile(buffer);
-                    }
-                    if (!stop){
-                        httpInput = new DataInputStream(httpConn.openDataInputStream());
-                        int in = httpInput.readInt();
-                        if(in == SERVER_CANNOT_WRITE_RESULT){
-                            throw new ServerCantWriteResultsException();
-                        }
-                        else if (in == NO_SURVEY_IN_SERVER) {
-                           GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
-                           GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.SURVEY_NOT_IN_SERVER, GeneralAlert.ERROR);
-                           AppMIDlet.getInstance().setSurveyList(new SurveyList());
-                           AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-                        } else {
-                            //System.out.println("Server received data");
-                                        /*
-                                         * Just move as sent if user do not previously canceled the process.
-                                         * In some cases, some files will reach the server, but for reliability they will be
-                                         * kept in the mobile as not sent.
-                                         */
-                            AppMIDlet.getInstance().getFileSystem().moveSentResult(file);
-                        }
-                    }
-                }
-                catch (IOException ioe) {
-                    if (!stop){
-                        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-                        GeneralAlert.getInstance().showCodedAlert( Resources.NETWORK_FAILURE,
-                                                                   ioe.getMessage() != null ? ioe.getMessage().trim() : "",
-                                                                   GeneralAlert.ALARM );
-                    }
-                } catch (ServerCantWriteResultsException snwre) {
-                    if (!stop) {
-                        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-                        GeneralAlert.getInstance().show( Resources.NETWORK_FAILURE, Resources.TRY_AGAIN_LATER , GeneralAlert.ALARM );
-                    }
-                }
-                finalizeGPRSTransmission();
-            }
-            AppMIDlet.getInstance().setResultList(new ResultList());
-            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
-    }
-
-    private void finalizeGPRSTransmission(){
-        try {
-            if (httpOutput != null) httpOutput.close();
-            if (httpInput != null) httpInput.close();
-            if (fileInput != null) fileInput.close();
-            if (httpConn != null) httpConn.close();
-        } catch (Exception exc) {
-            if (!stop) {
-                Logger.getInstance().log(exc.getMessage());
             }
         }
-    }
-
-    private void submitFile(String buffer) {
-        try {
-            httpOutput.writeInt(buffer.length());
-            httpOutput.write(buffer.getBytes(), 0, buffer.length());
-            httpOutput.flush();
-        } catch (IOException ioe) {
-            Logger.getInstance().log(ioe.getMessage());
+        if ( !m_filesNotSent.isEmpty() ) {
+            StringBuffer filesNotSentFormatted = new StringBuffer();
+            for ( int i = 0; i < m_filesNotSent.size(); i++ ) {
+                filesNotSentFormatted.append((String) m_filesNotSent.elementAt(i)).append("\n");
+            }
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().showCodedAlert( Resources.NETWORK_FAILURE, ioe.getMessage().trim() , GeneralAlert.ALARM );
+            GeneralAlert.getInstance().show("Send Errors",
+                    "Some results were not sent:\n" + filesNotSentFormatted,
+                    GeneralAlert.ALARM); // TODO localization
         }
+        AppMIDlet.getInstance().setResultList(new ResultList());
+        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 
-    private void submitCompressFile(String buffer) {
+    private String loadFile(String _filename) throws IOException {
+        String fileContents = "";
+        FileConnection fc = null;
+        DataInputStream inputStream = null;
+        ByteArrayOutputStream outputStream = null;
         try {
-            ByteArrayOutputStream out=new ByteArrayOutputStream();
-            out.reset();
-
-            ZOutputStream zOut=new ZOutputStream(out, JZlib.Z_BEST_COMPRESSION);
-            DataOutputStream objOut=new DataOutputStream(zOut);
-
-            byte [] bytes = buffer.getBytes(ENCODING);
-            objOut.write(bytes);
-            zOut.close();
-
-            httpOutput.writeInt(bytes.length);
-            httpOutput.writeInt(out.size());
-            httpOutput.write(out.toByteArray(), 0, out.size());
-            httpOutput.flush();
-        } catch (IOException ioe) {
-            Logger.getInstance().log(ioe.getMessage());
-        }
-    }
-
-    private String loadFile(String _filename) {
-        ByteArrayOutputStream baos=null;
-
-        String SURVEY_ROOT = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        String strTemp = "";
-        try {
-            FileConnection fc = (FileConnection) Connector.open(Resources.ROOT_DIR + SURVEY_ROOT + "b_"+ _filename + "/" + "b_"+ _filename );//here is file with image data
-
-            DataInputStream dos = fc.openDataInputStream();
-
-            baos = new ByteArrayOutputStream();
-
-            int data = dos.read();
-
-            while (data != -1) {
-                baos.write((byte) data);
-                data = dos.read();
+            String surveyRoot = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+            // result without binary data (if there is no binary data in the survey then it is the complete result file)
+            String pathToSurveyWithoutBinary = Resources.ROOT_DIR + surveyRoot + _filename;
+            // result with binary data (possibly big very file), is available only if binary data actually exists in the survey
+            String pathToSurveyWithData = Resources.ROOT_DIR + surveyRoot + "b_" + _filename + "/" + "b_" + _filename;
+            // try to open file with binary data, if it does not exist open result without binary data
+            fc = (FileConnection) Connector.open( pathToSurveyWithData );
+            if ( fc.exists() ) {
+                Logger.getInstance().emul("Sending file with binary data", "");
+            } else {
+                fc = (FileConnection) Connector.open( pathToSurveyWithoutBinary );
+                Logger.getInstance().emul("Sending file without binary data", "");
             }
 
-            strTemp = baos.toString();
-            baos.close();
-            fc.close();
-            dos.close();
-        } catch (IOException ioe) {
-            Logger.getInstance().log(ioe.getMessage());
+            inputStream = fc.openDataInputStream();
+            outputStream = new ByteArrayOutputStream();
+
+            int data = inputStream.read();
+            while (data != -1) {
+                outputStream.write((byte) data);
+                data = inputStream.read();
+            }
+            fileContents = outputStream.toString();
+        } finally {
+            try {
+                if (inputStream != null)
+                    inputStream.close();
+                if (outputStream != null)
+                    outputStream.close();
+                if (fc != null)
+                    fc.close();
+            } catch (IOException ex) {
+                Logger.getInstance().logException(ex.getMessage());
+            }
         }
-        return strTemp;
+        return fileContents;
+    }
+
+    private void processResult(String filename, int in) {
+        if ( in == SUCCESS ) {
+            // do nothing
+        } else if(in == SERVER_CANNOT_WRITE_RESULT) {
+            if (!m_canceled) {
+                m_filesNotSent.addElement(filename);
+                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+                GeneralAlert.getInstance().show( Resources.NETWORK_FAILURE, Resources.TRY_AGAIN_LATER , GeneralAlert.ALARM );
+            }
+        } else if (in == NO_SURVEY_IN_SERVER) {
+           GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
+           GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.SURVEY_NOT_IN_SERVER, GeneralAlert.ERROR);
+           AppMIDlet.getInstance().setSurveyList(new SurveyList());
+           AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
+        } else {
+            /*
+             * Just move as sent if user do not previously canceled the process.
+             * In some cases, some files will reach the server, but for reliability they will be
+             * kept in the mobile as not sent.
+             */
+            AppMIDlet.getInstance().getFileSystem().moveSentResult(filename);
+        }
     }
 }

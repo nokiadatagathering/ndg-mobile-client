@@ -139,6 +139,7 @@ public class FileSystem {
         kParser kparser = new kParser();
         kparser.setFileSystemSurveyStructure(fsSurveyStructure);
         kparser.parserSurveyFileInfo(root + _dirName + Resources.SURVEY_NAME);
+        setError(kparser.getError());
     }
 
     public void deleteFile(String filename) {

@@ -7,17 +7,24 @@ import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.Survey;
-import java.util.Hashtable;
 import java.util.Vector;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import br.org.indt.ndg.mobile.xmlhandle.ResultHandler;
 import br.org.indt.ndg.mobile.xmlhandle.kParser;
+import com.nokia.xfolite.xml.dom.Document;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 public class FileStores {
 
     private Survey surveyStructure = null;
     private ResultStructure resultStructure = null;
+    private Document xformResult;
 
     private Parser parser=null;
     private kParser kparser = null;
@@ -46,6 +53,7 @@ public class FileStores {
     public void resetResultStructure()
     {
         resultStructure = null;
+        xformResult = null;
     }
 
     //reset widgets so they will be created newly again
@@ -80,6 +88,33 @@ public class FileStores {
             kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);
         }
         SurveysControl.getInstance().setSurvey((Survey) surveyStructure);
+    }
+
+    public void loadXFormResult(){
+        xformResult = null;
+
+        String resultFileName = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+        String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+        String resultPath = Resources.ROOT_DIR + dirName + resultFileName;
+        FileConnection fc;
+        try {
+            fc = (FileConnection) Connector.open(resultPath, Connector.READ);
+            InputStream is = fc.openInputStream();
+            KXmlParser parser = new KXmlParser();
+            parser.setInput(is, "UTF-8");
+
+            xformResult = new Document();
+            xformResult.parse(parser);
+
+        } catch (XmlPullParserException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public Document getXFormResult(){
+        return xformResult;
     }
 
     public void parseResultFile() {

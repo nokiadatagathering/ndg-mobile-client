@@ -13,6 +13,7 @@ app-msisdn: +559200000009
 server-servlet_CheckForUpdate: ClientUpdate
 server-servlet_Context: /ndg-servlets/
 server-servlet_PostResults: PostResults
+server-servlet_PostResultsOpenRosa: PostResultsOpenRosa
 server-servlet_ReceiveSurveys: ReceiveSurveys
 server-servlet_RegisterIMEI: RegisterIMEI
 server-url: http://localhost:8080

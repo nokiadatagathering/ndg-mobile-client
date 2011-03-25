@@ -5,6 +5,7 @@ import br.org.indt.ndg.lwuit.extended.ChoiceGroupListener;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.Utils;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.TextArea;
@@ -41,15 +42,20 @@ public class ApplicationSettings extends Screen implements ActionListener, Choic
         protocolTypeQuestion.setFocusable(false);
 
         String[] choices = {"NDG Protocol", "XForms Protocol"};
-
-        int selectedProtocolId = AppMIDlet.getInstance().getSettings().getStructure().getProtocolId();
-        m_protocolChoice = new ChoiceGroup(choices, selectedProtocolId );
+        int selectedProtocol = 0;
+        int currentProtocolId = AppMIDlet.getInstance().getSettings().getStructure().getProtocolId();
+        if ( currentProtocolId == Utils.NDG_FORMAT ) {
+            selectedProtocol = 0;
+        } else if ( currentProtocolId == Utils.OPEN_ROSA_FORMAT ) {
+            selectedProtocol = 1;
+        }
+        m_protocolChoice = new ChoiceGroup(choices, selectedProtocol );
         m_protocolChoice.setCgListener(this);
 
         form.addComponent(protocolTypeQuestion);
         form.addComponent(m_protocolChoice);
 
-        m_protocolChoice.setItemFocused(selectedProtocolId);
+        m_protocolChoice.setItemFocused(selectedProtocol);
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -61,7 +67,12 @@ public class ApplicationSettings extends Screen implements ActionListener, Choic
 
     public void itemChoosed(int i) {
         m_protocolChoice.setSelectedIndex(i);
-        AppMIDlet.getInstance().getSettings().getStructure().setProtocolId(i);
+        int newProtocolId = 1;
+        if ( i == 0 )
+            newProtocolId = Utils.NDG_FORMAT;
+        else if ( i == 1 )
+            newProtocolId = Utils.OPEN_ROSA_FORMAT;
+        AppMIDlet.getInstance().getSettings().getStructure().setProtocolId(newProtocolId);
         AppMIDlet.getInstance().getSettings().writeSettings();
     }
 

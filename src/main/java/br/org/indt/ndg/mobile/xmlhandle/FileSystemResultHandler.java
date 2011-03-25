@@ -28,15 +28,21 @@ public class FileSystemResultHandler extends DefaultHandler {
     public void startDocument() throws SAXException {}
     
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+
         tagStack.push(qName);
     }
-    
+
     public void characters(char[] ch, int start, int length) throws SAXException {
         String chars = new String(ch, start, length).trim();
-        
+
+
+        //TODO parse metatags here
         if (chars.length() > 0) {
             String qName = (String)tagStack.peek();
             if (qName.equals("title")) {
+                structure.addXmlResultFileObj(chars, filename);
+                throw new DoneParsingException();
+            }else if(qName.equals("orx:instanceID")){
                 structure.addXmlResultFileObj(chars, filename);
                 throw new DoneParsingException();
             }

@@ -18,7 +18,11 @@ import br.org.indt.ndg.mobile.SortsKeys;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
+import com.nokia.xfolite.xforms.model.Instance;
 import com.nokia.xfolite.xforms.submission.XFormsXMLSerializer;
+import com.nokia.xfolite.xml.dom.Attr;
+import com.nokia.xfolite.xml.dom.Document;
+import com.nokia.xfolite.xml.dom.Element;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -31,6 +35,7 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Location;
+import org.kxml2.io.KXmlSerializer;
 
 /**
  *
@@ -45,6 +50,14 @@ public class PersistenceManager {
     private String resultId;
     private Vector vQuestions;
     private ResultStructure mAnswers = null;
+    private XFormsDocument xFormDoc = null;
+
+    private static String ORX_NAMESPACE = "http://openrosa.org/xforms/metadata";
+    private static String INSTANCE_NAME = "orx:instanceID";
+    private static String META_NAME = "orx:meta";
+    private static String TIME_START_NAME = "orx:timeStart";
+    private static String TIME_END_NAME = "orx:timeEnd";
+    private static String DEVICE_ID_NAME = "orx:deviceID";
 
     private PersistenceManager(){
     }
@@ -79,33 +92,47 @@ public class PersistenceManager {
         t.start();
     }
 
-    public void saveXForm(XFormsDocument document){
+    public void saveXForm(XFormsDocument document, SaveResultsObserver saveObserver){
+        m_saveObserver = saveObserver;
+        xFormDoc = document;
 
+        WaitingScreen.show(Resources.SAVING_RESULT);
+        SaveXFormResultRunnable srr = new SaveXFormResultRunnable();
+        Thread t = new Thread(srr);
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
+    }
 
-        XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
-
+    public void saveXFormRun(){
         //Create path
+        if(xFormDoc == null){
+            return;
+        }
+
         String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String UID = generateUniqueID();
 
         String filename;  //check whether to create new file or use existing filename
         String fname;  //filename without root/survey directory part
-
-//        if (isLocalFile) {
-//            fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
-//        } else {
+        Document instanceDocument = xFormDoc.getModel().getDefaultInstance().getDocument();
+        boolean isLocalFile = AppMIDlet.getInstance().getFileSystem().isLocalFile();
+        if (isLocalFile) {
+            fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+        } else {
             fname = "r_" + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
-//        }
+            AddMeta(instanceDocument);
+        }
+
         filename = Resources.ROOT_DIR + surveyDir + fname;
 
+        XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
         try {
             FileConnection fCon = (FileConnection)Connector.open(filename);
             if(!fCon.exists()){
                 fCon.create();
             }
-
             OutputStream stream = fCon.openOutputStream();
-            serilizer.serialize(stream, document.getDocumentElement(), null);
+            serilizer.serialize(stream, instanceDocument.getDocumentElement(), null);
             stream.close();
             fCon.close();
 
@@ -113,6 +140,33 @@ public class PersistenceManager {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    /***
+     * Adds required javaRosa meta tags.
+     * https://bitbucket.org/javarosa/javarosa/wiki/OpenRosaMetaDataSchema
+     * @param instanceDocument
+     */
+    private void AddMeta(Document instanceDocument){
+
+        Element docElem = instanceDocument.getDocumentElement();
+        docElem.setAttribute("xmlns:orx", ORX_NAMESPACE);
+
+        Element metaElem = instanceDocument.createElement(META_NAME);
+        Element instanceElem = instanceDocument.createElement(INSTANCE_NAME);
+        Element timeStartElem = instanceDocument.createElement(TIME_START_NAME);
+        Element timeEndElem = instanceDocument.createElement(TIME_END_NAME);
+        Element deviceIdElem = instanceDocument.createElement(DEVICE_ID_NAME);
+
+        instanceElem.setText(generateUniqueID());
+        deviceIdElem.setText(AppMIDlet.getInstance().getIMEI());
+
+        metaElem.appendChild(instanceElem);
+        metaElem.appendChild(deviceIdElem);
+        metaElem.appendChild(timeStartElem);
+        metaElem.appendChild(timeEndElem);
+
+        docElem.insertBefore(metaElem, docElem.getChild(0));
     }
 
 
@@ -358,6 +412,15 @@ public class PersistenceManager {
         public void run() {
             PersistenceManager.getInstance().save2();
             AppMIDlet.getInstance().getFileStores().resetQuestions();
+            AppMIDlet.getInstance().getFileSystem().loadResultFiles();
+            AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
+            PersistenceManager.getInstance().resultsSaved();
+        }
+    }
+
+    class SaveXFormResultRunnable implements Runnable {
+        public void run() {
+            PersistenceManager.getInstance().saveXFormRun();
             AppMIDlet.getInstance().getFileSystem().loadResultFiles();
             AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
             PersistenceManager.getInstance().resultsSaved();

@@ -18,6 +18,7 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.structures.FileSystemSurveyStructure;
+import java.io.IOException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,57 +44,65 @@ public class kParser {
         return error;
     }
 
-    public void parserSurveyFileInfo(String filename) {
+    public void parserSurveyFileInfo(String filepath) {
+        FileConnection fc = null;
+        InputStream is = null;
         try {
-            FileConnection fc = (FileConnection) Connector.open(filename);
-            InputStream is = fc.openInputStream();
+            fc = (FileConnection) Connector.open(filepath);
+            is = fc.openInputStream();
              //Inicia o XMLParser
             KXmlParser parser = new KXmlParser();
+            parser.setFeature(KXmlParser.FEATURE_PROCESS_NAMESPACES, true);
             parser.setInput(new InputStreamReader(is, "UTF-8"));
             parser.nextTag();
  
             String name = null;
-            int res = -1;
-            if(parser.getName().equals("survey")){
+            if ( parser.getName().equals("survey") ) {
                 name = parser.getAttributeValue(parser.getNamespace(), "title");
-            }else if(parser.getName().equals("xforms") || parser.getName().equals("html")) {
-                name = "xform";
-                boolean bVal = true;
-                try{
-                    while(bVal){
-                        if(parser.getAttributeValue("", "name") != null){
-                            name = parser.getAttributeValue("", "name");
-                            bVal = false;
-                        }
-                        if(parser.next() == KXmlParser.END_DOCUMENT){
-                            name = filename;
-                            bVal = false;
+            } else if ( parser.getName().equals("xforms") || parser.getName().equals("html") ) {
+                name = filepath; // filepath sa default survey name
+                while ( parser.next() != KXmlParser.END_DOCUMENT ) {
+                    // First occurance of unempty <title> tag or <data> with 'id' attrubute tag will act as survey name
+                    if ( parser.getEventType() == KXmlParser.START_TAG &&
+                            parser.getName().equals("title") )
+                    {
+                        String tempName = parser.nextText();
+                        if ( tempName != null && !tempName.equals("") ) {
+                            name = tempName;
+                            break;
                         }
                     }
-                }catch(Exception ex){
-                    name = filename;
+                    if ( parser.getEventType() == KXmlParser.START_TAG &&
+                            parser.getName().equals("data") &&
+                            parser.getAttributeValue("", "id") != null)
+                    {
+                        name = parser.getAttributeValue("", "id");
+                        break;
+                    }
                 }
+            } else {
+                Logger.getInstance().log("Unrecognized survey: " + filepath);
             }
-
             if(name != null){
                 structure.addName(name);
             }
-
-            is.close();
-            fc.close();
-        }
-        catch(XmlPullParserException e) {
+        } catch(XmlPullParserException e) {
             Logger.getInstance().logException("XmlPullParserException[parserSurveyFileInfo]: " + e.getMessage());
-            e.printStackTrace();
             error = true;
-            AppMIDlet.getInstance().getFileSystem().setError(true);
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Logger.getInstance().logException("Exception[parserSurveyFileInfo]: " + e.getMessage());
-            e.printStackTrace();
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EPARSE_GENERAL, GeneralAlert.ERROR );
+        } finally {
+            try {
+                if ( is != null )
+                    is.close();
+                if ( fc != null )
+                    fc.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

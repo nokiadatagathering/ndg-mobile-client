@@ -1,12 +1,13 @@
-package br.org.indt.ndg.lwuit.ui.xfolite;
+package br.org.indt.ndg.lwuit.ui.openrosa;
 
 import br.org.indt.ndg.lwuit.extended.CheckBox;
 import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
-import br.org.indt.ndg.lwuit.extended.TimeField;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.dom.XFormsElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
@@ -24,20 +25,47 @@ import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.Border;
+import java.util.Hashtable;
+import java.util.Vector;
 
+
+
+
+// ********************      helper classes     ******************************8
 /**
  *
  * @author damian.janicki
  */
-public class XfoliteWidgetFactory implements WidgetFactory, XPathNSResolver {
+public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
 
     private Container rootContainer = null;
-//    public String stringType = "xsd:string";
-//    public String numericType = "xsd:integer";
+    private static OpenRosaResourceManager resourceManager = new OpenRosaResourceManager();
+    private Vector createdContainers = new Vector();
 
-    public XfoliteWidgetFactory(Container cont) {
+    public OpenRosaWidgetFactory(Container cont) {
         rootContainer = cont;
         rootContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        resourceManager.clear();
+    }
+
+    public static OpenRosaResourceManager getResoruceManager(){
+        return resourceManager;
+    }
+    public boolean commitValues() {
+        boolean result = true;
+        for (int i = 0; i < createdContainers.size(); i++) {
+            if (!((ContainerUI) createdContainers.elementAt(i)).validate()) {
+                result = false;
+                ((ContainerUI) createdContainers.elementAt(i)).showBadInputError();
+                break;
+            }
+        }
+        if(result == true) {
+            for (int i = 0; i < createdContainers.size(); i++) {
+                ((ContainerUI) createdContainers.elementAt(i)).commitValue();
+            }
+        }
+        return result;
     }
 
     public void elementParsed(Element el) {
@@ -49,68 +77,81 @@ public class XfoliteWidgetFactory implements WidgetFactory, XPathNSResolver {
         if (el instanceof BoundElement) {
             binding = (BoundElement) el;
         }
-        Container cont = createQuestionContainer();
+        Component comp = null;
 
         if ("input" == tagName || "secret" == tagName) {
-            addInput(binding, cont);
+            comp = addInput(binding);
         } else if (tagName == "select") {
-            addSelect(binding, cont);
+            comp = addSelect(binding);
         } else if ("range" == tagName) {
+            addInput(binding);
         } else if ("output" == tagName) {
         } else if ("trigger" == tagName) {
         } else if ("switch" == tagName) {
         } else if ("upload" == tagName) {
+            String mediatype = el.getAttribute("mediatype");
+            if(mediatype!=null && mediatype.indexOf("image") > -1) {
+                //addPhotoUI(binding, cont);
+            }
         } else if ("submit" == tagName) {
         } else if ("select1" == tagName) {
-            addSelect1(binding, cont);
+            comp = addSelect1(binding);
         } else if ("img" == tagName) {
         } else if ("hr" == tagName) {
         } else if ("p" == tagName) {
         } else if ("table" == tagName) {
         } else if ("td" == tagName || "th" == tagName) {
+        } else if (tagName == "value") {
+            addTextValue(el);
         } else {
         }
+        if(comp != null) {
+            rootContainer.addComponent(comp);
+            createdContainers.addElement(comp);
+        }
+    }
 
-        rootContainer.addComponent(cont);
+    public void addTextValue(Element el){
+        Element parent = (Element)el.getParentNode();
+        if(parent.getNodeName() != "text"){
+            return;
+        }
+
+        String id = parent.getAttribute("id");
+        String value = el.getText();
+
+        resourceManager.put(id, value);
     }
 
     public void removingElement(Element el) {
-        System.out.println("______MYTEST _______ removingElement:  " + el.getLocalName());
     }
 
     public void elementInitialized(Element el) {
-        System.out.println("______MYTEST _______ elementInitialized:  " + el.getLocalName());
     }
 
     public void childrenInitialized(Element el) {
-        System.out.println("______MYTEST _______ childrenInitialized: " + el.getLocalName());
     }
 
     public String lookupNamespaceURI(String prefix) {
         return "";
     }
 
-    private void addInput(BoundElement bindElem, Container parentContainer) {
-        if (bindElem == null || parentContainer == null) {
-            System.out.println("bindElem or parentContainrer is null");
-            return;
-        }
-
+    private Component addInput(BoundElement bindElem) {
         DataTypeBase a = bindElem.getDataType();
-
         Component question = null;
+
         if (a != null) {
             switch (a.getBaseTypeID()) {
                 case DataTypeBase.XML_SCHEMAS_DATE:
                     question = new XfoilDateFieldUI(bindElem);
                     break;
-                case DataTypeBase.XML_SCHEMAS_DATETIME:
-                    break;
+//                case DataTypeBase.XML_SCHEMAS_DATETIME:
+//                    break;
                 case DataTypeBase.XML_SCHEMAS_TIME:
-                    question = new XfoilTimeFieldUI(bindElem);
+                    //question = new XfoilTimeFieldUI(bindElem);
                     break;
                 case DataTypeBase.XML_SCHEMAS_STRING:
-                case DataTypeBase.XML_SCHEMAS_ANYURI:
+//                case DataTypeBase.XML_SCHEMAS_ANYURI:
                     question = new XfoilDescriptiveFieldUI(bindElem);
                     break;
                 case DataTypeBase.XML_SCHEMAS_DECIMAL:
@@ -118,57 +159,35 @@ public class XfoliteWidgetFactory implements WidgetFactory, XPathNSResolver {
                     question = new XfoilNumericFieldUI(bindElem);
                     break;
                 default:
-                    return;
+                case DataTypeBase.XML_SCHEMAS_UNKNOWN:
+                    question = new XfoilMockComponent(bindElem);
             }
-        } else {
-            // other method to distinct questions, works on openxdata form
-//            String bindAttr = bindElem.getAttribute(bindElem.useRepeatPrefix() ? "repeat-bind" : "bind");
-//            String typeA = bindElem.getModel().getBind(bindAttr).getTypeString();
-//            if (typeA.compareTo(stringType) == 0) {
-//                question = addDescriptionQuestion(bindElem);
-//            } else if (typeA.compareTo(numericType) == 0) {
-//                question = addNumericQuestion(bindElem);
-//            } else {
-//                return;
-//            }
         }
-        parentContainer.addComponent(question);
+       return question;
     }
 
-    private void addSelect(BoundElement bindElem, Container parentContainer) {
-        if (bindElem == null || parentContainer == null) {
-            System.out.println("bindElem or parentContainrer is null");
-            return;
-        }
+    private Component addSelect(BoundElement bindElem) {
         Component question = new XfoilMultipleChoiceFieldUI(bindElem);
-        parentContainer.addComponent(question);
+        return question;
 
     }
 
-    private void addSelect1(BoundElement bindElem, Container parentContainer) {
-        if (bindElem == null || parentContainer == null) {
-            System.out.println("bindElem or parentContainrer is null");
-            return;
-        }
+    private Component addSelect1(BoundElement bindElem) {
         Component question = new XfoilExclusiveChoiceFieldUI(bindElem);
-        parentContainer.addComponent(question);
+        return question;
     }
 
-    private Container createQuestionContainer() {
-        Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-
-        container.getStyle().setBorder(Border.createBevelLowered(NDGStyleToolbox.getInstance().focusLostColor,
-                NDGStyleToolbox.getInstance().focusLostColor,
-                NDGStyleToolbox.getInstance().focusLostColor,
-                NDGStyleToolbox.getInstance().focusLostColor));
-        return container;
-    }
 }
+
 
 abstract class ContainerUI extends Container implements FocusListener {
 
     protected TextArea qname;
     protected BoundElement element;
+
+    protected void commitValue(String input) {
+            element.setStringValue(input);
+    }
 
     public abstract void commitValue();
 
@@ -184,6 +203,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                 NDGStyleToolbox.getInstance().focusLostColor));
         this.element = element;
         setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        addFocusListener(this);
     }
 
     protected void addQuestionName() {
@@ -195,7 +215,9 @@ abstract class ContainerUI extends Container implements FocusListener {
         questionName.setFocusable(false);
         questionName.setRows(1);
         questionName.setGrowByContent(true);
-        questionName.setText(labelEl.getText());
+//        questionName.setText(labelEl.getText());
+
+        questionName.setText(OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(element));
 
         int pw = Display.getInstance().getDisplayWidth();
         int w = questionName.getStyle().getFont().stringWidth(labelEl.getText());
@@ -209,8 +231,27 @@ abstract class ContainerUI extends Container implements FocusListener {
         this.addComponent(questionName);
     }
 
+    protected abstract boolean validate();
+
     public BoundElement getElement() {
         return element;
+    }
+
+    public void showBadInputError() {
+        String constraint = element.getConstraintString();
+        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+        if (constraint != null) {
+            GeneralAlert.getInstance().show(
+                    Resources.CMD_SAVE,
+                    "Valid input " + "from: " + OpenRosaConstraintHelper.getInstance().getLowConstraint(constraint) +
+                    " to: " + OpenRosaConstraintHelper.getInstance().getHighConstraint(constraint),
+                    GeneralAlert.WARNING); // TODO localization
+        } else {
+            GeneralAlert.getInstance().show(
+                    Resources.CMD_SAVE,
+                    "Invalid input ",
+                    GeneralAlert.WARNING); // TODO localization
+        }
     }
 
     public void focusGained(Component cmpnt) {
@@ -222,10 +263,10 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     public void focusLost(Component cmpnt) {
-        commitValue();
-        if (false) // not pass constraints
-        {
+        if (!validate()) {
+            showBadInputError();
             cmpnt.requestFocus();
+
             return;
         }
         getStyle().setBorder(Border.createBevelLowered(NDGStyleToolbox.getInstance().focusLostColor,
@@ -233,15 +274,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                 NDGStyleToolbox.getInstance().focusLostColor,
                 NDGStyleToolbox.getInstance().focusLostColor), false);
         refreshTheme();
-    }
-
-    protected String getLabel(XFormsElement el) {
-        XFormsElement labelEl = (XFormsElement) el.getUserData(XFormsElement.LABEL_KEY);
-        if (labelEl != null) {
-            return labelEl.getText();
-        } else {
-            return "";
-        }
     }
 
     protected String getValue(XFormsElement el) {
@@ -256,6 +288,8 @@ abstract class ContainerUI extends Container implements FocusListener {
 
 class XfoilDescriptiveFieldUI extends ContainerUI {
 
+    DescriptiveField tfDesc = null;
+
     public XfoilDescriptiveFieldUI(BoundElement element) {
         super(element);
         addQuestionName();
@@ -263,16 +297,23 @@ class XfoilDescriptiveFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        commitValue(tfDesc.getText());
+    }
+
+    protected boolean validate() {
+        return OpenRosaConstraintHelper.getInstance().
+                validateConstraint(tfDesc.getText(), element);
     }
 
     public void setEnabled(boolean enabled) {
-   //     throw new UnsupportedOperationException("Not supported yet.");
+        //     throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void addDescriptionQuestion(BoundElement bindElem) {
-        String strValue = bindElem.getStringValue();
-        DescriptiveField tfDesc = new DescriptiveField(100);
+        String strValue = bindElem.getStringValue().trim();
+
+        tfDesc = new DescriptiveField(OpenRosaConstraintHelper.getInstance().
+                getMaxStringLength(element));
         tfDesc.setInputMode("Abc");
         tfDesc.setEditable(true);
         tfDesc.setFocusable(true);
@@ -285,6 +326,8 @@ class XfoilDescriptiveFieldUI extends ContainerUI {
 
 class XfoilNumericFieldUI extends ContainerUI {
 
+    NumericField nfNumber = null;
+
     public XfoilNumericFieldUI(BoundElement element) {
         super(element);
         addQuestionName();
@@ -292,7 +335,12 @@ class XfoilNumericFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        commitValue(nfNumber.getText());
+    }
+
+    protected boolean validate() {
+        return OpenRosaConstraintHelper.getInstance().
+                validateConstraint(nfNumber.getText(), element);
     }
 
     public void setEnabled(boolean enabled) {
@@ -300,17 +348,19 @@ class XfoilNumericFieldUI extends ContainerUI {
     }
 
     private void addNumericQuestion(BoundElement bindElem) {
-        String value = bindElem.getStringValue();
-        NumericField nfNumber = new NumericField(20, false);  // to be done decimal or not
+        String value = bindElem.getStringValue().trim();
+        nfNumber = new NumericField(50, true);  // decimals allowed?
         nfNumber.setFocusable(true);
         if (value != null) {
             nfNumber.setText(value);
         }
+        nfNumber.addFocusListener(this);
         this.addComponent(nfNumber);
     }
 }
 
 class XfoilDateFieldUI extends ContainerUI {
+    DateField dfDate;
 
     public XfoilDateFieldUI(BoundElement element) {
         super(element);
@@ -319,7 +369,12 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        commitValue(dfDate.getText());
+    }
+
+    protected boolean validate() {
+        return OpenRosaConstraintHelper.getInstance().
+                validateConstraint(dfDate.getText(), element);
     }
 
     public void setEnabled(boolean enabled) {
@@ -327,54 +382,55 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     private void addDateQuestion(BoundElement bindElem) {
-        String value = bindElem.getStringValue();
-        DateField dfDate;
+        String value = bindElem.getStringValue().trim();
         if (value != null && value != "") {
-            dfDate = new DateField(value, DateField.YYYYMMDD, '-');
+            dfDate = new DateField(value, DateField.MMDDYYYY, '/');
         } else {
-            dfDate = new DateField(DateField.YYYYMMDD);
+            dfDate = new DateField(DateField.MMDDYYYY);
         }
         dfDate.setEditable(true);
-        //dfDate.addFocusListener(this);
-        //dfDate.addDataChangeListener(new HandleInterviewAnswersModified());
+        dfDate.addFocusListener(this);
         addComponent(dfDate);
     }
 }
 
-class XfoilTimeFieldUI extends ContainerUI {
-
-    public XfoilTimeFieldUI(BoundElement element) {
-        super(element);
-        addQuestionName();
-        addTimeQuestion(element);
-    }
-
-    public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setEnabled(boolean enabled) {
-     //   throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private void addTimeQuestion(BoundElement bindElem) {
-        String value = bindElem.getStringValue();
-        TimeField dfTime;
-        if (value != null && (value == null ? "" != null : !value.equals(""))) {
-            dfTime = new TimeField(value, TimeField.HHMM, ':');
-        } else {
-            dfTime = new TimeField(TimeField.HHMM);
-        }
-        //long datelong = Long.parseLong((String) bindElem.getText();
-        //dfDate.setDate(new Date(datelong));
-        dfTime.setEditable(true);
-        //dfDate.addFocusListener(this);
-        //dfDate.addDataChangeListener(new HandleInterviewAnswersModified());
-        addComponent(dfTime);
-    }
-}
+//class XfoilTimeFieldUI extends ContainerUI {
+//    TimeField dfTime;
+//
+//    public XfoilTimeFieldUI(BoundElement element) {
+//        super(element);
+//        addQuestionName();
+//        addTimeQuestion(element);
+//    }
+//
+//    public void commitValue() {
+//         element.setStringValue(dfTime.getText());
+//    }
+//
+//    protected boolean validate() {
+//        return true;
+//    }
+//
+//    public void setEnabled(boolean enabled) {
+//     //   throw new UnsupportedOperationException("Not supported yet.");
+//    }
+//
+//    private void addTimeQuestion(BoundElement bindElem) {
+//        String value = bindElem.getStringValue().trim();
+//        if (value != null && (value == null ? "" != null : !value.equals(""))) {
+//            //dfTime = new TimeField(value, TimeField.HHMM, ':');
+//
+//        } else {
+//            dfTime = new TimeField(TimeField.HHMM);
+//        }
+//        dfTime.setEditable(true);
+//        addComponent(dfTime);
+//    }
+//}
 
 class XfoilMultipleChoiceFieldUI extends ContainerUI {
+
+    private Vector cbs = new Vector();
 
     public XfoilMultipleChoiceFieldUI(BoundElement element) {
         super(element);
@@ -383,11 +439,23 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        String values = "";
+        for (int i = 0; i < cbs.size(); i++) {
+            CheckBox cb = (CheckBox)cbs.elementAt(i);
+            if( cb.isSelected() ) {
+                values = values.concat(cb.getText() + " ");
+            }
+        }
+        element.setStringValue(values);
+    }
+
+    protected boolean validate() {
+        // maybe required atttr
+        return true;
     }
 
     public void setEnabled(boolean enabled) {
-     //   throw new UnsupportedOperationException("Not supported yet.");
+        //   throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void addSelectQuestion(BoundElement bindElem) {
@@ -411,8 +479,8 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
         String chosenVal = " " + bindElem.getStringValue() + " ";
         for (int i = 0; i < length; i++) {
             XFormsElement n = (XFormsElement) choices.item(i);
-            String label = getLabel(n);
-            String value = getValue(n);
+            String label = OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(n);
+            String value = OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(n);
 
             if (!value.equals("") && chosenVal.indexOf(" " + value + " ") >= 0) {
                 selected[i] = true;
@@ -423,14 +491,18 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
             values[i] = value;
         }
 
-        for (int chIdx = 0; chIdx < length; chIdx++) {
-            CheckBox cb = new CheckBox(names[chIdx]);
+        for (int i = 0; i < length; i++) {
+            CheckBox cb = new CheckBox(names[i]);
+            cb.setSelected(selected[i]);
+            cbs.addElement(cb);
             addComponent(cb);
         }
     }
 }
 
 class XfoilExclusiveChoiceFieldUI extends ContainerUI {
+
+    private ButtonGroup groupButton;
 
     public XfoilExclusiveChoiceFieldUI(BoundElement element) {
         super(element);
@@ -439,7 +511,18 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        for (int i = 0; i < groupButton.getButtonCount(); i++) {
+            RadioButton rb = (RadioButton) groupButton.getRadioButton(i);
+            if (rb.isSelected()) {
+                element.setStringValue(rb.getText());
+                break;
+            }
+        }
+    }
+
+    protected boolean validate() {
+        // maybe required atttr
+        return true;
     }
 
     public void setEnabled(boolean enabled) {
@@ -466,7 +549,7 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
         String chosenVal = " " + bindElem.getStringValue() + " ";
         for (int i = 0; i < length; i++) {
             XFormsElement n = (XFormsElement) choices.item(i);
-            String label = getLabel(n);
+            String label = OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(n);
             String value = getValue(n);
 
             if (!value.equals("") && chosenVal.indexOf(" " + value + " ") >= 0) {
@@ -477,7 +560,7 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
             names[i] = label;
             values[i] = value;
         }
-        ButtonGroup groupButton = new ButtonGroup();
+        groupButton = new ButtonGroup();
 
         int totalChoices = names.length;
         String[] choicesStrings = new String[totalChoices];
@@ -486,10 +569,36 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
             RadioButton rb = new RadioButton(choicesStrings[i]);
             rb.setOther(values[i].equals("1"));
             rb.setOtherText(""); // Initializes with empty string
+            rb.setSelected(selected[i]);
             //rb.addActionListener(new HandleMoreDetails()); // More Details
             //rb.addFocusListener(this); // Controls when changing to a new question
             groupButton.add(rb);
             addComponent(rb);
         }
+    }
+}
+
+class XfoilMockComponent extends ContainerUI {
+
+    public XfoilMockComponent(BoundElement element) {
+        super(element);
+        addQuestionName();
+        addMockLabel();
+    }
+
+    public void commitValue() {
+        // mock
+    }
+
+    protected boolean validate() {
+        return true;
+    }
+
+    public void setEnabled(boolean enabled) {
+     //   throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private void addMockLabel() {
+        addComponent(new Label("Unsupported type"));
     }
 }

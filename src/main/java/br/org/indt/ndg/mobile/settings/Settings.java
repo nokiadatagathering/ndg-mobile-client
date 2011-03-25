@@ -23,46 +23,37 @@ public class Settings {
     
     public void writeSettings() {
         String filename = Resources.ROOT_DIR + Resources.SETTINGS_FILE;
-        
+        FileConnection fileConnection = null;
+        OutputStream outputStream = null;
+        PrintStream printStream = null;
         try {
-            FileConnection connection = (FileConnection) Connector.open(filename);
-            if(!connection.exists()) connection.create();
-            else {
-                connection.delete();
-                connection.create();
+            fileConnection = (FileConnection) Connector.open(filename);
+            if( !fileConnection.exists() ) {
+                fileConnection.create();
+            }  else {
+                fileConnection.delete();
+                fileConnection.create();
             }
-            
-            OutputStream out = connection.openOutputStream();
-            PrintStream output = new PrintStream(out);
-            
-            output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            
-            output.print("<settings");
-            output.print(" registered=\"" + settingsStructure.getRegisteredFlag() + "\"");
-            output.print(" splash=\"" + settingsStructure.getSplashTime() + "\"");
-            output.println(" language=\"" + settingsStructure.getLanguage() + "\">");
-            
-            settingsStructure.writeGpsSettings(output);
-            settingsStructure.writeGeoTaggingSettings(output);
-            settingsStructure.writeProtocolSettings(output);
-            settingsStructure.writePhotoResolutionSettings(output);
-            settingsStructure.writeStyleSettings(output);
-            settingsStructure.writeLogSettings(output);
-            settingsStructure.writeServerSettings(output);
-            settingsStructure.writeVersionSettings(output);
-            
-            output.println("</settings>");
-            
-            output.close();
-            out.close();
-            connection.close();
-            
+            outputStream = fileConnection.openOutputStream();
+            printStream = new PrintStream(outputStream);
+            settingsStructure.saveSettings(printStream);
         } catch (ConnectionNotFoundException e) {
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
             GeneralAlert.getInstance().show(e);
         } catch(IOException e) {
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true);
             GeneralAlert.getInstance().show(e);
+        } finally {
+            try {
+                if (printStream != null)
+                    printStream.close();
+                if (outputStream != null)
+                    outputStream.close();
+                if (fileConnection != null)
+                    fileConnection.close();
+            } catch (IOException ex) {
+                //ignore
+            }
         }
     }
     
@@ -107,33 +98,12 @@ public class Settings {
         try {
             FileConnection conn = (FileConnection) Connector.open(Resources.ROOT_DIR + Resources.SETTINGS_FILE);
             if(!conn.exists()){
-                String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
-                String defaultAppLanguage = AppMIDlet.getInstance().getDefaultAppLanguage();
-                String[] defaultServelts = AppMIDlet.getInstance().getDefaultServlets();
-                
-                String settings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<settings registered=\"0\" splash=\"8\" language=\"" + defaultAppLanguage + "\">\n" +
-                        "<gps configured=\"yes\"/>\n" +
-                        "<geotagging configured=\"yes\"/>\n" +
-                        "<protocolSettings protocolId=\"0\"/>\n" +
-                        "<photoResolution configId=\"0\"/>\n" +
-                        "<style id=\"0\"/>\n" +
-                        "<log active=\"no\"/>\n" +
-                        "<server compression=\"on\">\n" +
-                        "<url_compress>" + defaultServerUrl + defaultServelts[0] + defaultServelts[1] + "</url_compress>\n" +
-                        "<url_normal>" + defaultServerUrl + defaultServelts[0] + defaultServelts[1] + "</url_normal>\n" +
-                        "<url_receive_survey>" + defaultServerUrl + defaultServelts[0] + defaultServelts[2] + "</url_receive_survey>\n" +
-                        "<url_update_check>" + defaultServerUrl + defaultServelts[0] + defaultServelts[3] + "</url_update_check>\n" +
-                        "<url_register_imei>" + defaultServerUrl + defaultServelts[0] + defaultServelts[4] + "</url_register_imei>\n" +
-                        "</server>\n" +
-                        "<version application=\"" + AppMIDlet.getInstance().getAppVersion() + "\"/>\n" +
-                        "</settings>";
                 conn.create();
-                OutputStream out = conn.openDataOutputStream();
-                
-                out.write(settings.getBytes("UTF-8"));
-                out.flush();
-                out.close();
+                OutputStream outputStream = conn.openDataOutputStream();
+                PrintStream printStream = new PrintStream(outputStream);
+                settingsStructure.createDefaultSettings(printStream);
+                printStream.close();
+                outputStream.close();
                 conn.close();
             }
              } catch (IOException ex) {

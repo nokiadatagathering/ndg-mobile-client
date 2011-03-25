@@ -4,6 +4,7 @@ import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
+import br.org.indt.ndg.lwuit.ui.OpenRosaInterviewForm;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import java.io.IOException;
@@ -30,7 +31,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
-import br.org.indt.ndg.lwuit.ui.XfoliteInterviewForm;
 
 public class AppMIDlet extends MIDlet {
 
@@ -76,7 +76,7 @@ public class AppMIDlet extends MIDlet {
 
     public void setIMEI() {
         imei = System.getProperty("com.nokia.mid.imei");
-        //imei = "999966663333";
+        //imei = "9999";
     } 
 
     public String getIMEI() {
@@ -105,7 +105,8 @@ public class AppMIDlet extends MIDlet {
             getAppProperty("server-servlet_PostResults"),
             getAppProperty("server-servlet_ReceiveSurveys"),
             getAppProperty("server-servlet_CheckForUpdate"),
-            getAppProperty("server-servlet_RegisterIMEI")
+            getAppProperty("server-servlet_RegisterIMEI"),
+            getAppProperty("server-servlet_PostResultsOpenRosa")
         };
     }
     
@@ -339,7 +340,7 @@ public class AppMIDlet extends MIDlet {
         if(isNdgDir(dirName)){
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
         }else if(isXformDir(dirName)){
-            AppMIDlet.getInstance().setDisplayable(XfoliteInterviewForm.class);
+            AppMIDlet.getInstance().setDisplayable(OpenRosaInterviewForm.class);
         }
     }
 
@@ -356,5 +357,9 @@ public class AppMIDlet extends MIDlet {
         } else{
             return false;
         }
+    }
+
+    public boolean isCurrentDirXForm(){
+        return isXformDir(AppMIDlet.getInstance().getFileSystem().getSurveyDirName());
     }
 }

@@ -62,8 +62,8 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         super();
         separator = aSeparator;
         setInputMode("123");
-        //addDataChangeListener(this);
-        //addFocusListener(this);
+        addDataChangeListener(this);
+        addFocusListener(this);
         this.dateFormat = dateFormat;
         setDateAsString(date);
         setUseSoftkeys(false);

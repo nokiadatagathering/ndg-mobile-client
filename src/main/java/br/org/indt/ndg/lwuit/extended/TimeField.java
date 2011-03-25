@@ -39,34 +39,14 @@ public class TimeField extends TextField implements DataChangedListener, FocusLi
         this(new Date(), timeFormat, separator);
     }
 
-    public TimeField(Date timeString, int timeFormat, char separator) {
-        super();
-        setInputMode("123");
-        //addDataChangeListener(this);
-        //addFocusListener(this);
-        this.timeFormat = timeFormat;
-        try {
-            setTime(time);
-            parseDate();
-            buildTime();
-        } catch (Exception ex) {
-            //TODO
-        }
-        if(Display.getInstance().isTouchScreenDevice()) {
-            VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
-            onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
-            VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);
-        }
-    }
-
-    public TimeField(String time, int timeFormat, char separator) {
+    public TimeField(Date time, int timeFormat, char separator) {
         super();
         setInputMode("123");
         addDataChangeListener(this);
         addFocusListener(this);
         this.timeFormat = timeFormat;
-        setText(time);
-        if(Display.getInstance().isTouchScreenDevice()) {
+        setTime(time);
+        if (Display.getInstance().isTouchScreenDevice()) {
             VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
             onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
             VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);

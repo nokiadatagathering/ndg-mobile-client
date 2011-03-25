@@ -1,6 +1,7 @@
 
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.mobile.Utils;
 import java.util.Stack;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -69,7 +70,7 @@ public class SettingsHandler extends DefaultHandler {
                 int protocolId = Integer.parseInt(protocolIdAtr);
                 structure.setProtocolId(protocolId);
             } catch ( Exception ex ){
-                structure.setProtocolId(0);
+                structure.setProtocolId(Utils.NDG_FORMAT);
             }
         }
         else if (qName.equals("photoResolution")) {
@@ -106,6 +107,7 @@ public class SettingsHandler extends DefaultHandler {
             else if (qName.equals("url_receive_survey")) structure.setReceiveSurveyURL(chars);
             else if (qName.equals("url_update_check")) structure.setUpdateCheckURL(chars);
             else if (qName.equals("url_register_imei")) structure.setRegisterIMEIUrl(chars);
+            else if (qName.equals("url_results_openrosa")) structure.setServerUrl_ResultsOpenRosa(chars);
          }
     }
 
