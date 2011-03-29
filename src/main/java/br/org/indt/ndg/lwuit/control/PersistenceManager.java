@@ -18,9 +18,7 @@ import br.org.indt.ndg.mobile.SortsKeys;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
-import com.nokia.xfolite.xforms.model.Instance;
 import com.nokia.xfolite.xforms.submission.XFormsXMLSerializer;
-import com.nokia.xfolite.xml.dom.Attr;
 import com.nokia.xfolite.xml.dom.Document;
 import com.nokia.xfolite.xml.dom.Element;
 import java.io.IOException;
@@ -35,7 +33,6 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Location;
-import org.kxml2.io.KXmlSerializer;
 
 /**
  *
@@ -84,6 +81,10 @@ public class PersistenceManager {
         vQuestions = _vQuestions;
 
         mAnswers = SurveysControl.getInstance().getResult();
+
+        if(!AddCoordinates()){
+           return;
+        }
 
         WaitingScreen.show(Resources.SAVING_RESULT);
         SaveResultRunnable srr = new SaveResultRunnable();
@@ -262,6 +263,47 @@ public class PersistenceManager {
         connection.close();
     }
 
+    /***
+     *
+     * @return boolean - if false saving will be aborted
+     */
+    private boolean AddCoordinates(){
+        AppMIDlet.getInstance().getFileStores().createResultStructure();
+        if (!AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured())
+        {
+            AppMIDlet.getInstance().getFileStores().getResultStructure().resetLocation();
+            return true; //gps in settings is switched off
+        }
+
+        if(AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid()){
+            // we do not set new location if it was already in survey and survey is modified
+            // it is kept by resultHandler
+            return true;
+        }
+
+        Location loc = AppMIDlet.getInstance().getLocation();
+        if (loc == null || loc.getQualifiedCoordinates() == null) {
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
+            return true;
+        }
+
+        if(!AppMIDlet.getInstance().locationObtained()){
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
+            int dialogRetVal = GeneralAlert.getInstance().show( Resources.WARNING, Resources.LOCATION_OUT_OF_DATE, GeneralAlert.DIALOG_YES_NO);
+            if(GeneralAlert.RESULT_NO == dialogRetVal){
+                return false;
+            }
+        }
+
+        double latitude = loc.getQualifiedCoordinates().getLatitude();
+        double longtitude = loc.getQualifiedCoordinates().getLongitude();
+        AppMIDlet.getInstance().getFileStores().getResultStructure().setLatitude(Double.toString(latitude));
+        AppMIDlet.getInstance().getFileStores().getResultStructure().setLongitude(Double.toString(longtitude));
+
+        return true;
+    }
+
     private void writeAnswerToStream( OutputStream out, boolean appendBinaryData ) {
         PrintStream output = new PrintStream(out);
         output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
@@ -281,28 +323,18 @@ public class PersistenceManager {
         output.print("time=\"" + String.valueOf(timeTaken) + "\" " );//convert to seconds
         output.print( "version=\"" + VERSION + "\">" );
         output.println();
-        if (AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
-            // we do not set new location if it was already in survey and survey is modified
-            // it is kept by resultHandler
-            String longitude = null;
-            String latitude = null;
-            if (AppMIDlet.getInstance().getFileStores().getResultStructure() != null) {
-                latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
-                longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
-            }
-            if (longitude != null && latitude != null) {
-                output.println("<latitude>" + latitude + "</latitude>");
-                output.println("<longitude>" + longitude + "</longitude>");
-            } else {
-                Location loc = AppMIDlet.getInstance().getLocation();
-                if (loc != null) {
-                    if (loc.getQualifiedCoordinates() != null) {
-                        output.println("<latitude>" + loc.getQualifiedCoordinates().getLatitude() + "</latitude>");
-                        output.println("<longitude>" + loc.getQualifiedCoordinates().getLongitude() + "</longitude>");
-                    }
-                }
-            }
+
+        if( AppMIDlet.getInstance().getFileStores().getResultStructure() != null &&
+            AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid())
+        {
+            String latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
+            String longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
+
+            output.println("<latitude>" + latitude + "</latitude>");
+            output.println("<longitude>" + longitude + "</longitude>");
         }
+
+
         output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName()) + "</title>");
 
         Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();

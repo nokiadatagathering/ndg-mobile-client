@@ -50,6 +50,12 @@ public class FileStores {
         return resultStructure;
     }
 
+    public void createResultStructure(){
+        if(resultStructure == null){
+            resultStructure = new ResultStructure();
+        }
+    }
+
     public void resetResultStructure()
     {
         resultStructure = null;

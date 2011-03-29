@@ -65,6 +65,10 @@ public class AppMIDlet extends MIDlet {
         else return locationHandler.getLocation();
     }
 
+    public boolean locationObtained(){
+        return locationHandler.locationObtained();
+    }
+
     public Coordinates getCoordinates() {
         if (getLocation() == null) return null;
         else return getLocation().getQualifiedCoordinates();

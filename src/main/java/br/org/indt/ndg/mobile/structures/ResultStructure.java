@@ -15,6 +15,23 @@ public class ResultStructure {
 
     private Vector/*<CategoryAnwser>*/ answers = new Vector();
 
+    public boolean isLocationValid(){
+        if(latitude == null && longitude == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public void resetLocation(){
+        longitude = null;
+        latitude = null;
+    }
+
+    public void resetAnswers(){
+        answers.removeAllElements();
+    }
+
     public void addAnswer( CategoryAnswer _answer) {
         answers.addElement(_answer);
     }
