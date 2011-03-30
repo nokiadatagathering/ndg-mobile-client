@@ -53,7 +53,7 @@ public class ResultHandler extends DefaultHandler {
             answers.setName( name );
             answers.setId( id );
         } else if (qName.equals("subcategory")) {
-            String id = attributes.getValue(attributes.getIndex("id"));
+            String id = attributes.getValue(attributes.getIndex("subCatId"));
             subCategory = Integer.parseInt(id);
         } else if (qName.equals("answer")) {
             String _type = attributes.getValue(attributes.getIndex("type"));
@@ -64,7 +64,7 @@ public class ResultHandler extends DefaultHandler {
             else if (_type.equals("_date")) currentAnswer = new DateAnswer();
             else if (_type.equals("_time")){
                 currentAnswer = new TimeAnswer();
-                String sconvention = attributes.getValue(attributes.getIndex("convention")) ;
+                String sconvention = attributes.getValue(attributes.getIndex("convention"));
                 long convention  = 0;
                 if(sconvention.equals("am")){
                     convention = 1;

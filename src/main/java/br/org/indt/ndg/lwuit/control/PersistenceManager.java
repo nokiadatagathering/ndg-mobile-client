@@ -181,7 +181,7 @@ public class PersistenceManager {
 
             String filename;  //check whether to create new file or use existing filename
             String fname;  //filename without root/survey directory part
-            
+
             if (isLocalFile) {
                 fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
             } else {
@@ -344,7 +344,7 @@ public class PersistenceManager {
             output.println("id=\"" + category.getId() + "\">");
             for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
                 /** Subcategory **/
-                output.print("<subcategory id=\"" + (subCat + 1) + "\">" );
+                output.println("<subcategory subCatId=\"" + (subCat + 1) + "\">" );
                 Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
                 Vector keys = new Vector(category.getSubCategoryAnswers( subCat ).size());
                 while( questionIndex.hasMoreElements() ) {
@@ -375,7 +375,7 @@ public class PersistenceManager {
                     }
                     output.println("</answer>");
                 }
-                output.print("</subcategory>");
+                output.println("</subcategory>");
             }
             output.println("</category>");
         }
