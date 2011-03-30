@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.ui.style;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import com.sun.lwuit.Font;
@@ -16,6 +17,10 @@ import org.xml.sax.SAXException;
 
 public class NDGStyleToolbox {
 
+    public static final String FONTSANS = "NokiaSansWide";
+    public static final String FONTSANSBOLD = "NokiaSansWideBold";
+    public static final int MAX_DEFINED_FONT_SIZE = 30;
+    public static final int MIN_DEFINED_FONT_SIZE = 11;
     public static NDGStyleToolbox instance;
 
     public ListStyleProxy listStyle;
@@ -27,19 +32,28 @@ public class NDGStyleToolbox {
     public Style unselectedStyle = new Style();
     public Style selectedStyle = new Style();
 
-    static public Font fontLargeBold = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_LARGE );
-    static public Font fontLarge = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE );
-    static public Font fontMediumBold = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_MEDIUM );
-    static public Font fontMedium = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM );
-    static public Font fontMediumItalic = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_MEDIUM );
-    static public Font fontSmallBold = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL );
-    static public Font fontSmall = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL );
+    static public Font fontMediumBold;
+    static public Font fontMedium;
+    static public Font fontSmall;
 
+    static public int smallSize;
+    static public int mediumSize;
 
     private NDGStyleToolbox() {
+        mediumSize = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM ).getHeight();
+        smallSize = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL ).getHeight();
+
         listStyle = new ListStyleProxy();
+        listStyle.updateFonts();
         menuStyle = new MenuStyleProxy();
+        menuStyle.updateFonts();
         dialogTitleStyle = new DialogTitleStyleProxy();
+        dialogTitleStyle.updateFonts();
+
+        fontMedium = getFont( FONTSANS , mediumSize );
+        fontSmall = getFont( FONTSANS , smallSize );
+        fontMediumBold = getFont( FONTSANSBOLD, mediumSize );
+
         focusGainColor = UIManager.getInstance().getComponentStyle("").getFgColor();
         focusLostColor = UIManager.getInstance().getComponentStyle("Form").getFgColor();
     }
@@ -54,7 +68,6 @@ public class NDGStyleToolbox {
     public void reset() {
         instance = new NDGStyleToolbox();
     }
-
 
     public void saveSettings() {
         String filename = Resources.ROOT_DIR + Resources.STYLE_FILE;
@@ -112,5 +125,25 @@ public class NDGStyleToolbox {
         } catch (ParserConfigurationException ex) {
             ex.printStackTrace();
         }
+    }
+
+    static public Font getFont( String aBaseName, int size ) {
+        Font font = null;
+        for( int i = size; size <= MAX_DEFINED_FONT_SIZE; i++) {
+            font = Screen.getRes().getFont( aBaseName + i );
+            if( font != null ){
+                return font;
+            }
+        }
+        for( int i = size; size >= MIN_DEFINED_FONT_SIZE ; i--) {
+            font = Screen.getRes().getFont( aBaseName + i );
+            if( font != null ){
+                return font;
+            }
+        }
+        if( font == null ) {
+            font = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM );
+        }
+        return font;
     }
 }

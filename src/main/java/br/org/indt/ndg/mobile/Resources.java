@@ -289,8 +289,6 @@ public class Resources {
 
     private boolean error = false;
 
-    public static Image splashPortrait;
-    public static Image splashLandscape;
     public static Image check;
     public static Image question;
     public static Image logo;
@@ -299,9 +297,7 @@ public class Resources {
         try {
             question = Image.createImage("/resources/images/redquestion.png");
             check = Image.createImage("/resources/images/greencheck.png");
-            splashPortrait = Image.createImage("/resources/images/splash_screen_portrait.jpg");
-            splashLandscape = Image.createImage("/resources/images/splash_screen_landscape.jpg");
-            logo = Image.createImage("/resources/images/icon_Finlandia.png");
+            logo = Image.createImage("/resources/images/logo02_32x32.png");
         } catch (IOException ex) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());

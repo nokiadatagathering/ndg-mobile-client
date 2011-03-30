@@ -37,4 +37,23 @@ public class ListStyleProxy extends StyleProxy {
     public Style getSelectedStyle() {
         return selectedStyle;
     }
+
+    public void updateFonts() {
+        super.updateFonts();
+        if( secondarySelectedFont.getStyle() == Font.STYLE_PLAIN ) {
+            secondarySelectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS , NDGStyleToolbox.smallSize );
+        } else if ( secondarySelectedFont.getStyle() == Font.STYLE_BOLD ) {
+            secondarySelectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.smallSize );
+        } else if ( secondarySelectedFont.getStyle() == Font.STYLE_ITALIC ) {
+            secondarySelectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.smallSize );
+        }
+
+        if( secondaryUnselectedFont.getStyle() == Font.STYLE_PLAIN ) {
+            secondaryUnselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS , NDGStyleToolbox.smallSize );
+        } else if ( secondaryUnselectedFont.getStyle() == Font.STYLE_BOLD ) {
+            secondaryUnselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.smallSize );
+        } else if ( secondaryUnselectedFont.getStyle() == Font.STYLE_ITALIC ) {
+            secondaryUnselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.smallSize );
+        }
+    }
 }

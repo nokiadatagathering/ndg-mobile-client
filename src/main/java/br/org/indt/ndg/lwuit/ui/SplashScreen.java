@@ -1,38 +1,40 @@
 package br.org.indt.ndg.lwuit.ui;
 
-
-import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
+import com.sun.lwuit.Form;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.layouts.BorderLayout;
+import java.io.IOException;
 
-public class SplashScreen extends Screen {
+public class SplashScreen extends Form{
     private final int WHITE = 0xffffff;
 
-    protected void loadData() {
-    }
-
-    protected void customize() {
-        form.removeAll();
-        form.setFocusable(false);
-        form.getStyle().setBgColor( WHITE );
-        form.setScrollable(false);
-        form.setLayout( new BorderLayout() );
+    public SplashScreen() {
+        super();
+        setFocusable(false);
+        getStyle().setBgColor( WHITE );
+        setScrollable(false);
+        setLayout( new BorderLayout() );
 
         Label label = new Label( ScaleToCurrentDisplay() );
         label.setVerticalAlignment( Component.BOTTOM );
         label.getStyle().setMargin(0,0,0,0);
         label.getStyle().setPadding(0,0,0,0);
 
-        form.addComponent(BorderLayout.SOUTH, label );
+        addComponent(BorderLayout.SOUTH, label );
     }
-    
-    private Image ScaleToCurrentDisplay() {
-        int dispWidth = form.getWidth();
-        int dispHeigh = form.getHeight();
-        Image image = dispHeigh < dispWidth ? Resources.splashLandscape : Resources.splashPortrait;
 
-        return image.scaledWidth( form.getWidth() );
+    private Image ScaleToCurrentDisplay() {
+        Image image = null;
+        try {
+            int dispWidth = getWidth();
+            int dispHeigh = getHeight();
+            image = dispHeigh < dispWidth ? Image.createImage("/resources/images/splash_screen_landscape.jpg")
+                                          : Image.createImage("/resources/images/splash_screen_portrait.jpg");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return image.scaledWidth(getWidth());
     }
 }

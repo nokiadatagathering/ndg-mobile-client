@@ -26,7 +26,6 @@ import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
-import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -52,10 +51,9 @@ public class ResultView extends Screen implements ActionListener {
     private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;
     private Font categoryFont = NDGStyleToolbox.fontMediumBold;
-    private Font questionFont = NDGStyleToolbox.fontMediumItalic;
+    private Font questionFont = NDGStyleToolbox.fontMedium;
     private Font answerFont = NDGStyleToolbox.fontMedium;
     private Survey survey;
-    private ResultStructure results;
     int labelheight = 18;
     int labelheightspace = 8;
 
@@ -64,7 +62,6 @@ public class ResultView extends Screen implements ActionListener {
     protected void loadData() {
         title1 = surveysControl.getSurveyTitle();
         survey = surveysControl.getSurvey();
-        results = SurveysControl.getInstance().getResult();
     }
 
     private void setPreferredHeight(Component component, int labelHeight) {
@@ -102,7 +99,7 @@ public class ResultView extends Screen implements ActionListener {
             Label labelCategory = new Label(category.getName());
             labelCategory.getStyle().setFont(categoryFont);
             labelCategory.setSelectedStyle( labelCategory.getUnselectedStyle() );
-            setPreferredHeight(labelCategory, labelheight);
+            setPreferredHeight(labelCategory, categoryFont.getHeight());
 
             form.addComponent(labelCategory);
 

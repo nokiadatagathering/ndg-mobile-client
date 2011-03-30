@@ -26,12 +26,9 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
     protected static Hashtable resources = new Hashtable();
 
     private static OpenRosaResourceManager resourceManager = new OpenRosaResourceManager();
-    private Vector createdContainers = new Vector();
 
-    private Font questionFont = NDGStyleToolbox.fontMediumItalic;
+    private Font questionFont = NDGStyleToolbox.fontMedium;
     private Font answerFont = NDGStyleToolbox.fontMedium;
-
-    private static String UNSUPPORTED_STRING = "Unsuportted type"; //TODO add to resource
 
     int labelheight = 18;
     int labelheightspace = 8;

@@ -40,7 +40,7 @@ public class AppMIDlet extends MIDlet {
     private ResultList resultList = null;
     private FileSystem fileSystem = null;
     private FileStores fileStores = null;
-    private Resources resources = null; 
+    private Resources resources = null;
 
     private Settings settings = null;
     private Conversor unicode = null;
@@ -73,7 +73,7 @@ public class AppMIDlet extends MIDlet {
         if (getLocation() == null) return null;
         else return getLocation().getQualifiedCoordinates();
     }
-    
+
     public static AppMIDlet getInstance() {
         return instance;
     }
@@ -113,7 +113,7 @@ public class AppMIDlet extends MIDlet {
             getAppProperty("server-servlet_PostResultsOpenRosa")
         };
     }
-    
+
     public void setTimeTracker(long _time) {
         timeTracker = _time;
     }
@@ -121,7 +121,7 @@ public class AppMIDlet extends MIDlet {
     public long getTimeTracker() {
         return timeTracker;
     }
-    
+
     public SurveyList getSurveyList() {
         return surveyList;
     }
@@ -146,35 +146,35 @@ public class AppMIDlet extends MIDlet {
     public void setResultList(ResultList _list) {
         resultList = _list;
     }
-    
+
     public FileSystem getFileSystem() {
         return fileSystem;
     }
-    
+
     public void setFileSystem(FileSystem _fs) {
         fileSystem = _fs;
     }
-    
+
     public void setSettings(Settings _settings) {
         settings = _settings;
     }
-    
+
     public Settings getSettings() {
         return settings;
     }
-    
+
     public FileStores getFileStores() {
         return fileStores;
     }
-    
+
     public String x2u(String _value) {
         return unicode.xml2uni(_value);
     }
-    
+
     public String u2x(String _value) {
         return unicode.uni2xml(_value);
     }
-    
+
     private void writeIMEIToFileSystem(){
         try {
             FileConnection con = (FileConnection) Connector.open(Resources.ROOT_DIR + "imei");
@@ -197,16 +197,14 @@ public class AppMIDlet extends MIDlet {
     }
 
     public void init(boolean showSplashScreen) {
-
-        
         VKBImplementationFactory.init();    //virtual keyboard will be shown on touch devices
-        Display.init(this);        
+        Display.init(this);
+        if (showSplashScreen) {
+            new SplashScreen().show();
+        }
         resources = new Resources();
         locationHandler = new LocationHandler();
         initLWUIT();
-        if (showSplashScreen) {
-            Screen.show(SplashScreen.class,true);
-        }
 
         this.setIMEI();
 
@@ -217,10 +215,8 @@ public class AppMIDlet extends MIDlet {
         fileStores = new FileStores();
         registerApp();
     }
-    
 
     public void initLWUIT() {
-
         // This is the charset used to all fonts in NDG.res LWUIT Resource File
         // When creating a new font in a resource file, this charset must be used
         // ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:!@/\*()[]{}|#$%^&<>?'"+- _`~¡¿¤§=£¥€ÀÁÂÃÇÈÉÊÌÍÑÒÓÔÕÙÚÜàáâãçèéêìíñòóôõ÷ùúü
@@ -233,6 +229,7 @@ public class AppMIDlet extends MIDlet {
         TextField.setQwertyAutoDetect(true);//this is sucks, but does not work inside the NumericField and DescritionField constructor
         try {
             com.sun.lwuit.util.Resources res = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/NDG.res");
+            Screen.setRes(res);
             NDGLookAndFeel ndgLF = new NDGLookAndFeel();
             //Dialog
             ndgLF.setDefaultDialogTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, false, 500));
@@ -249,7 +246,7 @@ public class AppMIDlet extends MIDlet {
             //style = UIManager.getInstance().getComponentStyle("DialogBody");
             //style.setBorder(Border.createEmpty());
             UIManager.getInstance().setLookAndFeel(ndgLF);
-            
+
             switch( AppMIDlet.getInstance().getSettings().getStructure().getStyleId() ) {
                 case StyleConst.DEFAULT:
                     UIManager.getInstance().setThemeProps(res.getTheme("SurveyList"));
@@ -276,7 +273,6 @@ public class AppMIDlet extends MIDlet {
 
             UIManager.getInstance().getLookAndFeel().setReverseSoftButtons(true);
             UIManager.getInstance().setResourceBundle(i18n);
-            Screen.setRes(res);
         } catch (java.io.IOException e) {
             Logger.getInstance().log(e.getMessage());
         }
@@ -293,7 +289,7 @@ public class AppMIDlet extends MIDlet {
         unicode = null;
         settings = null;
     }
-    
+
     protected void startApp() throws MIDletStateChangeException {
         init(true);
     }
@@ -304,7 +300,7 @@ public class AppMIDlet extends MIDlet {
 
     protected void pauseApp() {
     }
-    
+
     public void destroyApp(boolean unconditional) throws MIDletStateChangeException {
         destroy();
         notifyDestroyed();

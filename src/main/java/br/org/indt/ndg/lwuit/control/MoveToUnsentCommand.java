@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
@@ -10,7 +5,6 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.XmlResultFile;
-import br.org.indt.ndg.lwuit.ui.SentResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.ResultList;
 import com.nokia.mid.appl.cmd.Local;
@@ -43,7 +37,7 @@ public class MoveToUnsentCommand extends CommandControl{
         for (int i=0; i < size; i++){
             if (listFlags[i]) {
                 String xmlFileName = ((XmlResultFile) xmlResultFile.elementAt(i)).getFileName();
-                if(xmlFileName.startsWith("s_") || xmlFileName.startsWith("p_")) {
+                if(xmlFileName.startsWith("s_")) {
                     fs.moveUnsentResult(xmlFileName);
                 }
             }

@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 
 abstract public class StyleProxy {
+
     public int bgUnselectedColor;
     public int bgSelectedStartColor;
     public int bgSelectedEndColor;
@@ -12,8 +13,6 @@ abstract public class StyleProxy {
     public int unselectedFontColor;
     public Font selectedFont;
     public Font unselectedFont;
-
-
 
     public void writeSettings( PrintStream _out ) {
         _out.print("<bgUnselectedColor>");
@@ -31,5 +30,23 @@ abstract public class StyleProxy {
         _out.print("<unselectedFontColor>");
         _out.print( String.valueOf( unselectedFontColor ) );
         _out.println("</unselectedFontColor>");
+    }
+
+    public void updateFonts() {
+        if( selectedFont.getStyle() == Font.STYLE_PLAIN ) {
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS , NDGStyleToolbox.mediumSize );
+        } else if ( selectedFont.getStyle() == Font.STYLE_BOLD ) {
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.mediumSize );
+        } else if ( selectedFont.getStyle() == Font.STYLE_ITALIC) {
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.mediumSize );
+        }
+
+        if( unselectedFont.getStyle() == Font.STYLE_PLAIN ) {
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS , NDGStyleToolbox.mediumSize );
+        } else if ( unselectedFont.getStyle() == Font.STYLE_BOLD ) {
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.mediumSize );
+        } else if ( unselectedFont.getStyle() == Font.STYLE_ITALIC) {
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD , NDGStyleToolbox.mediumSize );
+        }
     }
 }

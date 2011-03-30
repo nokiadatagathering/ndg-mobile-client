@@ -28,12 +28,12 @@ public class ComboBox extends com.sun.lwuit.ComboBox implements FocusListener{
 
     public void focusGained(Component cmp) {
         getStyle().setBgPainter(focusBGPainter);
-        getStyle().setFont( NDGStyleToolbox.fontLargeBold );
+        getStyle().setFont( NDGStyleToolbox.fontMediumBold );
     }
 
     public void focusLost(Component cmp) {
         getStyle().setBgPainter(bgPainter);
-        getStyle().setFont( NDGStyleToolbox.fontLarge );
+        getStyle().setFont( NDGStyleToolbox.fontMedium );
     }
 
     public void setOther(boolean _val) {

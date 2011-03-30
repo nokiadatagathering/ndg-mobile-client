@@ -36,6 +36,7 @@ public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRender
             }
             int actualPosition = position % width;
             g.setColor(NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
+            g.setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
             g.translate(-actualPosition, 0);
             g.drawString(text, getX(), yPos);
             g.translate(width, 0);
