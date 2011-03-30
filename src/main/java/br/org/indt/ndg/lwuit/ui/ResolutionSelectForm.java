@@ -29,13 +29,14 @@ public class ResolutionSelectForm extends Screen implements ActionListener, Choi
         }
         form.addCommandListener(this);
         form.removeAll();
-        TextArea questionName = new TextArea(5, 20);
-        questionName.setText(Resources.RESOLUTIONS);
+        TextArea questionName = new TextArea();
+        questionName.setText(Resources.RESOLUTIONS); // TODO localization, change to "Pick a photo resolution" or sth more user friendly
         questionName.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
         questionName.getStyle().setFont( NDGStyleToolbox.fontSmall );
         questionName.setRows(questionName.getLines() - 1);
         questionName.setEditable(false);
         questionName.setFocusable(false);
+        questionName.setGrowByContent(true);
         form.addComponent(questionName);
 
         String[] choices = AppMIDlet.getInstance().getSettings().getStructure().getResolutionList();

@@ -45,7 +45,6 @@ public class SettingsStructure {
 
     private int selectedProtocolId = DEFAULT_PROTOCOL_ID;
     private int selectedResolution = DEFAULT_PHOTO_RESULUTION_ID;
-    private PhotoSettings photoSettings = new PhotoSettings();
     private int selectedStyle = DEFAULT_STYLE_ID;
 
     private boolean logSupport = DEFAULT_LOG_SUPPORT;
@@ -299,15 +298,15 @@ public class SettingsStructure {
     }
 
     public int getPhotoX( ) {
-        return photoSettings.getX( selectedResolution );
+        return PhotoSettings.getX( selectedResolution );
     }
 
     public int getPhotoY( ) {
-        return photoSettings.getY( selectedResolution );
+        return PhotoSettings.getY( selectedResolution );
     }
 
     public String[] getResolutionList() {
-        return photoSettings.getResolutionList();
+        return PhotoSettings.getResolutionList();
     }
 
 }
