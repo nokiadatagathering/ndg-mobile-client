@@ -19,6 +19,7 @@ public class ImageData {
     final static private String imageExtenstion = ".ndgImg";
     final public static int THUMBNAIL_SIZE = 50;
 
+    // This directory is used to store original images in case user decides to revert the changes
     private String imgDir = Resources.ROOT_DIR
                           + AppMIDlet.getInstance().getFileSystem().getSurveyDirName()
                           + "imgTmp/";
@@ -44,8 +45,7 @@ public class ImageData {
     }
 
     public ImageData( String aPath ){
-        myLocation = null;
-        loadResult( aPath );
+        this(aPath, null);
     }
 
     public ImageData( String aPath, Coordinates location ){
@@ -53,14 +53,11 @@ public class ImageData {
         loadResult( aPath );
     }
 
-    public ImageData( byte[] data ){
-        createDir();
-        saveData(data);
-        myLocation = null;
+    public ImageData( byte[] data ) {
+        this(data, null);
     }
 
     public ImageData( byte[] data, Coordinates location ){
-        createDir();
         saveData(data);
         myLocation = location;
     }
@@ -152,6 +149,7 @@ public class ImageData {
     }
 
     private void saveData(byte[] data) {
+        createDir();
         createThumbnail(data);
 
         try {

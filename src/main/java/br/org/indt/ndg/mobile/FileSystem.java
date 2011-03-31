@@ -204,37 +204,45 @@ public class FileSystem {
     }
 
     public void deleteDir(String dirname) {
-        FileConnection fcFile = null;
-        FileConnection fc = null;
         if( !dirname.endsWith("/")) {
             dirname = dirname + '/';
         }
+        FileConnection directory = null;
         try {
-            fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname);
-            if( fc.exists() ) {
-                Enumeration filelist = fc.list("*", true);
+            directory = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname);
+            if( directory.exists() ) {
+                Enumeration filelist = directory.list("*", true);
                 String fileName = null;
-                while(filelist.hasMoreElements()) {
+                while ( filelist.hasMoreElements() ) {
                     fileName = (String) filelist.nextElement();
-                    fcFile = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname + fileName);
-                    if (fcFile.exists()) {
-                        try{ fcFile.delete(); }catch (IOException ex){}
-                    }
-                    if(fcFile != null) {
-                        fcFile.close();
-                        fcFile = null;
+                    FileConnection file = null;
+                    try {
+                        file = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName() + dirname + fileName);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                    } catch ( IOException ex ) {
+                    } finally {
+                        try {
+                            if ( file != null ) {
+                                file.close();
+                                file = null;
+                            }
+                        } catch ( IOException ex ) {
+                            file = null;
+                        }
                     }
                 }
-                fc.delete();
+                directory.delete();
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
             Logger.getInstance().logException( ioe.getMessage() );
         }
         finally {
-            if(fc != null) {
+            if(directory != null) {
                 try {
-                    fc.close();
+                    directory.close();
                 } catch (IOException ex) {}
             }
         }

@@ -1,13 +1,15 @@
 package br.org.indt.ndg.lwuit.extended;
 
 import com.sun.lwuit.list.ListModel;
+import br.org.indt.ndg.lwuit.ui.SurveyListContextMenu;
 import br.org.indt.ndg.lwuit.ui.renderers.SurveyListCellRenderer;
+import com.sun.lwuit.List;
 import com.sun.lwuit.events.SelectionListener;
 
 public class AnimatedList extends List implements SelectionListener {
 
-    final private int ANIMATION_DELAY = 300;
-    final private int ANIMATION_START_DELAY = 1000;
+    private static final int ANIMATION_DELAY = 300;
+    private static final int ANIMATION_START_DELAY = 1000;
 
     private long tickTime = System.currentTimeMillis();
     private int lastSelection = -1;
@@ -31,7 +33,9 @@ public class AnimatedList extends List implements SelectionListener {
     }
 
     public void stopAnimation() {
-        la.stop();
+        if ( la != null ) {
+            la.stop();
+        }
     }
 
     public boolean animate() {
@@ -48,6 +52,9 @@ public class AnimatedList extends List implements SelectionListener {
                 }
                 val = true;
             }
+        } else {
+            slcr.resetPosition();
+            stopAnimation();
         }
         return val;
     }
@@ -57,8 +64,19 @@ public class AnimatedList extends List implements SelectionListener {
         startAnimation();
     }
 
+    public synchronized void longPointerPress(int x, int y) {
+        super.longPointerPress(x, y);
+        if ( getSelectedSurvey() >= 0 ) {
+            SurveyListContextMenu resultContextMenu = new SurveyListContextMenu(getSelectedSurvey(), this.size());
+            resultContextMenu.show(x, y);
+        }
+    }
 
-    class ListAnimation implements Runnable {
+    private int getSelectedSurvey() {
+        return getSelectedIndex() - 1; // skip 'check for surveys' list element
+    }
+
+    static class ListAnimation implements Runnable {
 
         private List list;
         private boolean stop = false;

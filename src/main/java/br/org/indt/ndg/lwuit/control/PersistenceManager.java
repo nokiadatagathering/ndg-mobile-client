@@ -15,6 +15,7 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SortsKeys;
+import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
@@ -42,10 +43,10 @@ public class PersistenceManager {
     private static final int VERSION = 2;//1-without conditional categories;2-with conditional categories
 
     private static PersistenceManager instance = null;
+
     private SaveResultsObserver m_saveObserver = null;
     private boolean error = false;
     private String resultId;
-    private Vector vQuestions;
     private ResultStructure mAnswers = null;
     private XFormsDocument xFormDoc = null;
 
@@ -66,23 +67,20 @@ public class PersistenceManager {
         return instance;
     }
 
-    public String generateUniqueID() {
-        Random rnd = new Random();
-        long uniqueID = (((System.currentTimeMillis() >>>16)<<16)+rnd.nextLong());
-        return Integer.toHexString((int) uniqueID);
-    }
-
     public boolean getError() {
         return error;
     }
 
-    public void save(Vector _vQuestions, SaveResultsObserver saveObserver) {
+    public boolean isEditing() {
+        return AppMIDlet.getInstance().getFileSystem().isLocalFile();
+    }
+
+    public void saveNdgResult( SaveResultsObserver saveObserver ) {
         m_saveObserver = saveObserver;
-        vQuestions = _vQuestions;
 
         mAnswers = SurveysControl.getInstance().getResult();
 
-        if(!AddCoordinates()){
+        if ( !addCoordinates() ) {
            return;
         }
 
@@ -93,7 +91,7 @@ public class PersistenceManager {
         t.start();
     }
 
-    public void saveXForm(XFormsDocument document, SaveResultsObserver saveObserver){
+    public void saveOpenRosaResult(XFormsDocument document, SaveResultsObserver saveObserver){
         m_saveObserver = saveObserver;
         xFormDoc = document;
 
@@ -104,31 +102,97 @@ public class PersistenceManager {
         t.start();
     }
 
-    public void saveXFormRun(){
-        //Create path
-        if(xFormDoc == null){
-            return;
+    private void saveSurvey( int surveyType ) {
+        String surveyId = null;
+        switch (surveyType) {
+            case Utils.NDG_FORMAT:
+                surveyId = String.valueOf(SurveysControl.getInstance().getSurveyIdNumber());
+                break;
+            case Utils.OPEN_ROSA_FORMAT:
+                surveyId = ""; //TODO get OpenRosa surveyId
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized survey format");
         }
-
-        String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        String UID = generateUniqueID();
-
-        String filename;  //check whether to create new file or use existing filename
-        String fname;  //filename without root/survey directory part
-        Document instanceDocument = xFormDoc.getModel().getDefaultInstance().getDocument();
         boolean isLocalFile = AppMIDlet.getInstance().getFileSystem().isLocalFile();
-        if (isLocalFile) {
-            fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
-        } else {
-            fname = "r_" + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
-            AddMeta(instanceDocument);
-        }
+        String surveyFilename = getSurveyFilename(surveyId, isLocalFile);
+        String surveyFilepath = getSurveyFilePath(surveyFilename);
+        resultId = extractResultId(surveyFilename);
 
-        filename = Resources.ROOT_DIR + surveyDir + fname;
+        try {
+            switch (surveyType) {
+                case Utils.NDG_FORMAT:
+                    persistNdgResult( surveyFilepath, surveyFilename );
+                    break;
+                case Utils.OPEN_ROSA_FORMAT:
+                    persistOpenRosaResult( surveyFilepath, surveyFilename, isLocalFile );
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unrecognized survey format");
+            }
+        } catch ( ConnectionNotFoundException e ) {
+            error = true;
+            Logger.getInstance().log(e.getMessage());
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ECREATE_RESULT, GeneralAlert.ERROR );
+        } catch ( IOException e ) {
+            error = true;
+            Logger.getInstance().log(e.getMessage());
+            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EWRITE_RESULT, GeneralAlert.ERROR );
+        } catch ( Exception e ) {
+            Logger.getInstance().log(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            System.gc();
+        }
+    }
+
+    private void persistNdgResult( String surveyFilepath, String surveyFilename ) throws IOException {
+        // Delete old binaries (do not move this line unless you KNOW that you can, it has to be here. i mean it.)
+        AppMIDlet.getInstance().getFileSystem().deleteDir( "b_" + surveyFilename );
+        // Add result to logical structure
+        String displayName = getResultDisplayName();
+        FileSystem fs = AppMIDlet.getInstance().getFileSystem();
+        fs.storeFilename(displayName, surveyFilename);
+        AppMIDlet.getInstance().setFileSystem(fs);
+        // Save result file without binaries
+        boolean includeBinaries = false;
+        writeNdgResult(surveyFilepath, includeBinaries);
+        if ( hasBinaryData() ) {
+            // Save result file with binaries
+            includeBinaries = true;
+            // Create directory for binaries
+            String surveyDirname = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+            String surveyFilenameWithBinaries = "b_" + surveyFilename;
+            String surveyDirnameWithBinaries = Resources.ROOT_DIR + surveyDirname + surveyFilenameWithBinaries;
+            FileConnection directory = null;
+            try {
+                directory = (FileConnection) Connector.open(surveyDirnameWithBinaries);
+                if ( !directory.exists() ) {
+                    directory.mkdir();
+                }
+            } finally {
+                if ( directory != null )
+                    directory.close();
+            }
+            String surveyFilePathWithBinaries = surveyDirnameWithBinaries + "/" + surveyFilenameWithBinaries;
+            writeNdgResult(surveyFilePathWithBinaries, includeBinaries);
+        }
+    }
+
+    private void persistOpenRosaResult(String surveyFilepath, String surveyFilename, boolean fileExists) {
+        if ( xFormDoc == null ) {
+            throw new IllegalArgumentException("Tried to save OpenRosa survey when document not available");
+        }
+        Document instanceDocument = xFormDoc.getModel().getDefaultInstance().getDocument();
+        if ( !fileExists ) {
+            addOpenRosaMetadata(instanceDocument);
+        }
 
         XFormsXMLSerializer serilizer = new XFormsXMLSerializer();
         try {
-            FileConnection fCon = (FileConnection)Connector.open(filename);
+            FileConnection fCon = (FileConnection)Connector.open(surveyFilepath);
             if(!fCon.exists()){
                 fCon.create();
             }
@@ -143,243 +207,122 @@ public class PersistenceManager {
         }
     }
 
-    /***
-     * Adds required javaRosa meta tags.
-     * https://bitbucket.org/javarosa/javarosa/wiki/OpenRosaMetaDataSchema
-     * @param instanceDocument
-     */
-    private void AddMeta(Document instanceDocument){
-
-        Element docElem = instanceDocument.getDocumentElement();
-        docElem.setAttribute("xmlns:orx", ORX_NAMESPACE);
-
-        Element metaElem = instanceDocument.createElement(META_NAME);
-        Element instanceElem = instanceDocument.createElement(INSTANCE_NAME);
-        Element timeStartElem = instanceDocument.createElement(TIME_START_NAME);
-        Element timeEndElem = instanceDocument.createElement(TIME_END_NAME);
-        Element deviceIdElem = instanceDocument.createElement(DEVICE_ID_NAME);
-
-        instanceElem.setText(generateUniqueID());
-        deviceIdElem.setText(AppMIDlet.getInstance().getIMEI());
-
-        metaElem.appendChild(instanceElem);
-        metaElem.appendChild(deviceIdElem);
-        metaElem.appendChild(timeStartElem);
-        metaElem.appendChild(timeEndElem);
-
-        docElem.insertBefore(metaElem, docElem.getChild(0));
-    }
-
-
-    private void save2() {
-        String surveyId = String.valueOf(SurveysControl.getInstance().getSurveyIdNumber());
+    private void writeNdgResult( String surveyFilepath, boolean appendBinaryData ) throws IOException {
+        FileConnection connection = null;
+        OutputStream out = null;
         try {
-            String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-            boolean isLocalFile = AppMIDlet.getInstance().getFileSystem().isLocalFile();
-
-            String UID = generateUniqueID();
-
-            String filename;  //check whether to create new file or use existing filename
-            String fname;  //filename without root/survey directory part
-
-            if (isLocalFile) {
-                fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
-            } else {
-                fname = "r_" + surveyId/*survey.getIdNumber()*/ + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
-            }
-
-            AppMIDlet.getInstance().getFileSystem().deleteDir( "b_" + fname );//delete old binaries
-
-            filename = Resources.ROOT_DIR + surveyDir + fname;
-
-            resultId = extractResultId(fname);
-            if (!isLocalFile) {
-                resultId = UID;
-            }
-
-            FileConnection connection = (FileConnection) Connector.open(filename);
-            if(!connection.exists()) connection.create();
-
-            if (isLocalFile) {
+            connection = (FileConnection) Connector.open(surveyFilepath);
+            if ( connection.exists() ) {
                 connection.delete();
-                connection.create();
+            }
+            connection.create();
+            out = connection.openOutputStream();
+
+            PrintStream output = new PrintStream(out);
+            output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
+            output.print("<result ");
+            output.print("r_id=\"" + resultId + "\" ");
+            // *****************************   PROTOCOL DEFINITION *************************
+            //
+            //****************************************************************************************************
+            //Type of Msg |      SurveyID			  |      Number of  Msgs  |    	ResultID  	   | UserID
+            //      9           9999999999                          99             a9b9c9d9       999999999999999
+            //****************************************************************************************************
+            //end of header
+            output.print("s_id=\"" + String.valueOf(SurveysControl.getInstance().getSurveyIdNumber()) + "\" ");
+            output.print("u_id=\"" + AppMIDlet.getInstance().getIMEI() + "\" ");
+
+            long timeTaken = new Date().getTime();
+            output.print("time=\"" + String.valueOf(timeTaken) + "\" " );//convert to seconds
+            output.print( "version=\"" + VERSION + "\">" );
+            output.println();
+
+            if( AppMIDlet.getInstance().getFileStores().getResultStructure() != null &&
+                AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid())
+            {
+                String latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
+                String longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
+
+                output.println("<latitude>" + latitude + "</latitude>");
+                output.println("<longitude>" + longitude + "</longitude>");
             }
 
-            String displayName = getResultDisplayName();
 
-            FileSystem fs = AppMIDlet.getInstance().getFileSystem();
-            fs.storeFilename(displayName, fname);
-            AppMIDlet.getInstance().setFileSystem(fs);
+            output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName()) + "</title>");
 
-            OutputStream out = connection.openOutputStream();
-            writeAnswerToStream(out, false);
-
-            out.close();
-            connection.close();
-            save3( fname );//this file is used to send reuslt to server
-        } catch( ConnectionNotFoundException e ) {
-            error = true;
-            Logger.getInstance().log(e.getMessage());
-            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ECREATE_RESULT, GeneralAlert.ERROR );
-        } catch( IOException e ) {
-            error = true;
-            Logger.getInstance().log(e.getMessage());
-            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.EWRITE_RESULT, GeneralAlert.ERROR );
-        }
-        catch(Exception e){
-            Logger.getInstance().log(e.getMessage());
-            e.printStackTrace();
-        }
-        finally {
-            System.gc();
-        }
-    }
-
-    private void save3( String name ) throws IOException {
-        String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-
-        String fname = "b_"+ name;
-        String dirname = Resources.ROOT_DIR + surveyDir + fname;
-
-        FileConnection directory = (FileConnection) Connector.open(dirname);
-        if( !directory.exists() ) {
-            directory.mkdir();
-        }
-        directory.close();
-
-        String filename = Resources.ROOT_DIR + surveyDir + fname + "/" + fname;
-        FileConnection connection = (FileConnection) Connector.open(filename);
-        if( connection.exists() ) {
-            connection.delete();
-        }
-        connection.create();
-
-        OutputStream out = connection.openOutputStream();
-        writeAnswerToStream(out, true);
-
-        out.close();
-        connection.close();
-    }
-
-    /***
-     *
-     * @return boolean - if false saving will be aborted
-     */
-    private boolean AddCoordinates(){
-        AppMIDlet.getInstance().getFileStores().createResultStructure();
-        if (!AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured())
-        {
-            AppMIDlet.getInstance().getFileStores().getResultStructure().resetLocation();
-            return true; //gps in settings is switched off
-        }
-
-        if(AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid()){
-            // we do not set new location if it was already in survey and survey is modified
-            // it is kept by resultHandler
-            return true;
-        }
-
-        Location loc = AppMIDlet.getInstance().getLocation();
-        if (loc == null || loc.getQualifiedCoordinates() == null) {
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
-            return true;
-        }
-
-        if(!AppMIDlet.getInstance().locationObtained()){
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-            int dialogRetVal = GeneralAlert.getInstance().show( Resources.WARNING, Resources.LOCATION_OUT_OF_DATE, GeneralAlert.DIALOG_YES_NO);
-            if(GeneralAlert.RESULT_NO == dialogRetVal){
-                return false;
-            }
-        }
-
-        double latitude = loc.getQualifiedCoordinates().getLatitude();
-        double longtitude = loc.getQualifiedCoordinates().getLongitude();
-        AppMIDlet.getInstance().getFileStores().getResultStructure().setLatitude(Double.toString(latitude));
-        AppMIDlet.getInstance().getFileStores().getResultStructure().setLongitude(Double.toString(longtitude));
-
-        return true;
-    }
-
-    private void writeAnswerToStream( OutputStream out, boolean appendBinaryData ) {
-        PrintStream output = new PrintStream(out);
-        output.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
-        output.print("<result ");
-        output.print("r_id=\"" + resultId + "\" ");
-        // *****************************   PROTOCOL DEFINITION *************************
-        //
-        //****************************************************************************************************
-        //Type of Msg |      SurveyID			  |      Number of  Msgs  |    	ResultID  	   | UserID
-        //      9           9999999999                          99             a9b9c9d9       999999999999999
-        //****************************************************************************************************
-        //end of header
-        output.print("s_id=\"" + String.valueOf(SurveysControl.getInstance().getSurveyIdNumber()) + "\" ");
-        output.print("u_id=\"" + AppMIDlet.getInstance().getIMEI() + "\" ");
-
-        long timeTaken = new Date().getTime();
-        output.print("time=\"" + String.valueOf(timeTaken) + "\" " );//convert to seconds
-        output.print( "version=\"" + VERSION + "\">" );
-        output.println();
-
-        if( AppMIDlet.getInstance().getFileStores().getResultStructure() != null &&
-            AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid())
-        {
-            String latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
-            String longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
-
-            output.println("<latitude>" + latitude + "</latitude>");
-            output.println("<longitude>" + longitude + "</longitude>");
-        }
-
-
-        output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName()) + "</title>");
-
-        Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();
-        for( int i = 0; i< anwsers.size(); i++ ){
-            CategoryAnswer category = (CategoryAnswer)anwsers.elementAt(i);
-            output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(category.getName() ) + "\" ");
-            output.println("id=\"" + category.getId() + "\">");
-            for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
-                /** Subcategory **/
-                output.println("<subcategory subCatId=\"" + (subCat + 1) + "\">" );
-                Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
-                Vector keys = new Vector(category.getSubCategoryAnswers( subCat ).size());
-                while( questionIndex.hasMoreElements() ) {
-                    keys.addElement(questionIndex.nextElement());
-                }
-                SortsKeys sorts = new SortsKeys();
-                sorts.qsort(keys);
-                questionIndex = keys.elements();
-                while( questionIndex.hasMoreElements() ) {
-                    NDGAnswer answer = (NDGAnswer) category.getSubCategoryAnswers( subCat ).get( questionIndex.nextElement() );
-                    String type = answer.getType();
-                    output.print("<answer " + "type=\"" + type + "\" ");
-                    output.print("id=\"" + answer.getId() + "\" ");
-                    output.print("visited=\"" + answer.getVisited() + "\"");
-                    if (answer instanceof TimeAnswer ) {
-                        output.print(" convention=\"" + ((TimeAnswer)answer).getConvetionString() + "\"");
-                        output.print(">");
-                        output.println();
-                        answer.save(output);
-                    } else if ( answer instanceof ImageAnswer ) {
-                        output.print(">");
-                        output.println();
-                        ((ImageAnswer)answer).save( output, appendBinaryData );
-                    } else {
-                        output.print(">");
-                        output.println();
-                        answer.save(output);
+            Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();
+            for( int i = 0; i< anwsers.size(); i++ ){
+                CategoryAnswer category = (CategoryAnswer)anwsers.elementAt(i);
+                output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(category.getName() ) + "\" ");
+                output.println("id=\"" + category.getId() + "\">");
+                for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
+                    /** Subcategory **/
+                    output.println("<subcategory subCatId=\"" + (subCat + 1) + "\">" );
+                    Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
+                    Vector keys = new Vector(category.getSubCategoryAnswers( subCat ).size());
+                    while( questionIndex.hasMoreElements() ) {
+                        keys.addElement(questionIndex.nextElement());
                     }
-                    output.println("</answer>");
+                    SortsKeys sorts = new SortsKeys();
+                    sorts.qsort(keys);
+                    questionIndex = keys.elements();
+                    while( questionIndex.hasMoreElements() ) {
+                        NDGAnswer answer = (NDGAnswer) category.getSubCategoryAnswers( subCat ).get( questionIndex.nextElement() );
+                        String type = answer.getType();
+                        output.print("<answer " + "type=\"" + type + "\" ");
+                        output.print("id=\"" + answer.getId() + "\" ");
+                        output.print("visited=\"" + answer.getVisited() + "\"");
+                        if (answer instanceof TimeAnswer ) {
+                            output.print(" convention=\"" + ((TimeAnswer)answer).getConvetionString() + "\"");
+                            output.print(">");
+                            output.println();
+                            answer.save(output);
+                        } else if ( answer instanceof ImageAnswer ) {
+                            output.print(">");
+                            output.println();
+                            ((ImageAnswer)answer).save( output, appendBinaryData );
+                        } else {
+                            output.print(">");
+                            output.println();
+                            answer.save(output);
+                        }
+                        output.println("</answer>");
+                    }
+                    output.println("</subcategory>");
                 }
-                output.println("</subcategory>");
+                output.println("</category>");
             }
-            output.println("</category>");
+            output.println("</result>");
+        } finally {
+            if ( out != null )
+                out.close();
+            if ( connection != null )
+                connection.close();
         }
-        output.println("</result>");
+    }
+
+    /**
+     * @param surveyId      Id of results survey
+     * @param isLocalFile   Indicates whether file already exists or new name should be generated
+     * @return  Filename without survey directory part
+     */
+    private String getSurveyFilename( String surveyId, boolean isLocalFile ) {
+        String fname;
+        if (isLocalFile) { //check whether to create new file or use existing surveyFilePathWithBinaries
+            fname = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+        } else {
+            String UID = generateUniqueID();
+            fname = "r_" + surveyId + "_" + AppMIDlet.getInstance().getIMEI() + "_" + UID + ".xml";
+        }
+        return fname;
+    }
+
+    private String getSurveyFilePath( String fname ) {
+        String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
+        String filename;
+
+        filename = Resources.ROOT_DIR + surveyDir + fname;
+        return filename;
     }
 
     private String extractResultId(String filename){
@@ -390,6 +333,32 @@ public class PersistenceManager {
             result = filename.substring(i+1,z);
         }
         return result;
+    }
+
+    private boolean hasBinaryData() {
+        boolean result = false;
+        Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();
+        try {
+            for ( int i = 0; i< anwsers.size(); i++ ) {
+                CategoryAnswer category = (CategoryAnswer)anwsers.elementAt(i);
+                for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
+                    Enumeration questionIndex = category.getSubCategoryAnswers( subCat ).keys();
+                    while( questionIndex.hasMoreElements() ) {
+                        NDGAnswer answer = (NDGAnswer) category.getSubCategoryAnswers( subCat ).get( questionIndex.nextElement() );
+                        if ( answer instanceof ImageAnswer ) {
+                            throw new FoundBinaryDataException();
+                        }
+                    }
+                }
+            }
+        } catch ( FoundBinaryDataException ex ) {
+            result = true;
+        }
+        return result;
+    }
+
+    private class FoundBinaryDataException extends Exception {
+        public FoundBinaryDataException() {}
     }
 
     private String getResultDisplayName() {
@@ -429,8 +398,76 @@ public class PersistenceManager {
         return result;
     }
 
-    public boolean isEditing() {
-        return AppMIDlet.getInstance().getFileSystem().isLocalFile();
+    private String generateUniqueID() {
+        Random rnd = new Random();
+        long uniqueID = (((System.currentTimeMillis() >>>16)<<16)+rnd.nextLong());
+        return Integer.toHexString((int) uniqueID);
+    }
+
+    /***
+     *  @return boolean - if false saving will be aborted
+     */
+    private boolean addCoordinates(){
+        AppMIDlet.getInstance().getFileStores().createResultStructure();
+        if (!AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured())
+        {
+            AppMIDlet.getInstance().getFileStores().getResultStructure().resetLocation();
+            return true; //gps in settings is switched off
+        }
+
+        if(AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid()){
+            // we do not set new location if it was already in survey and survey is modified
+            // it is kept by resultHandler
+            return true;
+        }
+
+        Location loc = AppMIDlet.getInstance().getLocation();
+        if (loc == null || loc.getQualifiedCoordinates() == null) {
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
+            return true;
+        }
+
+        if(!AppMIDlet.getInstance().locationObtained()){
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
+            int dialogRetVal = GeneralAlert.getInstance().show( Resources.WARNING, Resources.LOCATION_OUT_OF_DATE, GeneralAlert.DIALOG_YES_NO);
+            if(GeneralAlert.RESULT_NO == dialogRetVal){
+                return false;
+            }
+        }
+
+        double latitude = loc.getQualifiedCoordinates().getLatitude();
+        double longtitude = loc.getQualifiedCoordinates().getLongitude();
+        AppMIDlet.getInstance().getFileStores().getResultStructure().setLatitude(Double.toString(latitude));
+        AppMIDlet.getInstance().getFileStores().getResultStructure().setLongitude(Double.toString(longtitude));
+
+        return true;
+    }
+
+    /**
+     * Adds required OpenRosa meta tags.
+     * https://bitbucket.org/javarosa/javarosa/wiki/OpenRosaMetaDataSchema
+     */
+    private void addOpenRosaMetadata(Document instanceDocument){
+
+        Element docElem = instanceDocument.getDocumentElement();
+        docElem.setAttribute("xmlns:orx", ORX_NAMESPACE);
+
+        Element metaElem = instanceDocument.createElement(META_NAME);
+        Element instanceElem = instanceDocument.createElement(INSTANCE_NAME);
+        Element timeStartElem = instanceDocument.createElement(TIME_START_NAME);
+        Element timeEndElem = instanceDocument.createElement(TIME_END_NAME);
+        Element deviceIdElem = instanceDocument.createElement(DEVICE_ID_NAME);
+
+        instanceElem.setText(generateUniqueID());
+        deviceIdElem.setText(AppMIDlet.getInstance().getIMEI());
+
+        metaElem.appendChild(instanceElem);
+        metaElem.appendChild(deviceIdElem);
+        metaElem.appendChild(timeStartElem);
+        metaElem.appendChild(timeEndElem);
+
+        docElem.insertBefore(metaElem, docElem.getChild(0));
     }
 
     private void resultsSaved() {
@@ -442,7 +479,7 @@ public class PersistenceManager {
 
     class SaveResultRunnable implements Runnable {
         public void run() {
-            PersistenceManager.getInstance().save2();
+            PersistenceManager.getInstance().saveSurvey(Utils.NDG_FORMAT);
             AppMIDlet.getInstance().getFileStores().resetQuestions();
             AppMIDlet.getInstance().getFileSystem().loadResultFiles();
             AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
@@ -452,10 +489,11 @@ public class PersistenceManager {
 
     class SaveXFormResultRunnable implements Runnable {
         public void run() {
-            PersistenceManager.getInstance().saveXFormRun();
+            PersistenceManager.getInstance().saveSurvey(Utils.OPEN_ROSA_FORMAT);
             AppMIDlet.getInstance().getFileSystem().loadResultFiles();
             AppMIDlet.getInstance().setResultList(new br.org.indt.ndg.mobile.ResultList());
             PersistenceManager.getInstance().resultsSaved();
         }
     }
+
 }

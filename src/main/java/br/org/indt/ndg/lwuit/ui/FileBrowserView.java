@@ -1,7 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelPickPhotoFormCommand;
-import br.org.indt.ndg.lwuit.extended.List;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.lwuit.ui.camera.LoadedPhotoForm;
 import br.org.indt.ndg.lwuit.ui.renderers.FileBrowserCellRenderer;
@@ -16,6 +15,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.List;
 import com.sun.lwuit.layouts.GridLayout;
 import java.io.DataInputStream;
 import java.util.Stack;

@@ -2,13 +2,10 @@ package br.org.indt.ndg.lwuit.ui.camera;
 
 import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
-import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
-import javax.microedition.location.Coordinates;
 
 
 /**
@@ -51,24 +48,13 @@ public class NDGCameraManager {
     }
 
     public void updateInterviewForm() {
-        ImageData imageData = (ImageData)currentImageAnswer.getImages().elementAt(imageIndex);
         try {
             Button button = (Button) thumbnailButton;
-            button.setIcon(imageData.getThumbnail());
+            button.setIcon(((ImageData)currentImageAnswer.
+                    getImages().elementAt(imageIndex)).getThumbnail());
         } catch (IllegalArgumentException ex) {
         }
 
-        if ( AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
-            Coordinates location = AppMIDlet.getInstance().getCoordinates();
-
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            if(location == null){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
-            }else if(location != null && !AppMIDlet.getInstance().locationObtained()){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.LOCATION_OUT_OF_DATE_WARN, GeneralAlert.DIALOG_OK);
-            }
-            imageData.setGeoTag( location );
-        }
         listener.update();
     }
 
@@ -79,7 +65,9 @@ public class NDGCameraManager {
 
     public void updatePhotoForm(byte[] picture) {
         ImageData imageData = new ImageData(picture);
-
+        if ( AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
+            imageData.setGeoTag( AppMIDlet.getInstance().getCoordinates() );
+        }
         if ( imageIndex >= currentImageAnswer.getImages().size() ) {
             currentImageAnswer.getImages().addElement(imageData);
         } else {

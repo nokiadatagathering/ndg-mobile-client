@@ -7,7 +7,6 @@ import br.org.indt.ndg.lwuit.control.EnterDirectCategoryConditionalCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
-import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.ui.renderers.CategoryListCellRenderer;
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -82,7 +81,7 @@ public class CategoryList extends Screen implements ActionListener, SaveResultsO
         }
         else if (cmd == SaveResultCommand.getInstance().getCommand()) {
             SaveResultCommand.getInstance().setObserver(this);
-            SaveResultCommand.getInstance().execute(SurveysControl.getInstance().getQuestionsFlat());
+            SaveResultCommand.getInstance().execute(null);
         }
         else if (cmd == EnterCategoryCommand.getInstance().getCommand() || cmd == list) {
             EnterCategoryCommand.getInstance().execute(new Integer(list.getSelectedIndex()));

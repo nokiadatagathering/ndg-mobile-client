@@ -13,7 +13,6 @@ public class Resources {
     // TO BE INTERNATIONALIZED
     public static final String ADD_LOCATION_FAILURE = "Cannot access gps. Location info will not be added to result.";
     public static final String LOCATION_OUT_OF_DATE =  "Gps location is out of date. Save with old location?";
-    public static final String LOCATION_OUT_OF_DATE_WARN = "Added geotagging info is out of date";
     public static final String NEWUI_NOKIA_DATA_GATHERING = "Nokia Data Gathering";
     //public static final String NEWUI_TITLE_SURVEY_LIST = "List of Surveys";
     //public static final String NEWUI_TITLE_CATEGORIES = "Categories";

@@ -23,8 +23,7 @@ public class SaveResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        Vector questions = (Vector)parameter;
-        PersistenceManager.getInstance().save(questions, m_observer );
+        PersistenceManager.getInstance().saveNdgResult( m_observer );
         m_observer = null;
     }
 

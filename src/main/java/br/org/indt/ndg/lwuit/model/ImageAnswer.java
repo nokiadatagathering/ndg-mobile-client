@@ -10,6 +10,9 @@ import javax.microedition.location.Coordinates;
  *
  * @author alexandre martini
  */
+
+// TODO removing of tmp files during interview when one picture is repeated many times
+
 public class ImageAnswer extends NDGAnswer{
 
     private Vector images = new Vector();
@@ -35,7 +38,7 @@ public class ImageAnswer extends NDGAnswer{
                     _output.print(
                             "<img_data " +
                             "latitude=\"" + loc.getLatitude() + "\"" + " " +
-                            "longitude=\"" + loc.getLongitude() + "\"" +
+                            "longitude=\"" + loc.getLongitude() + "\"" + " " +
                             "type=\"binary\">");
                 } else {
                     _output.print("<img_data type=\"binary\">");

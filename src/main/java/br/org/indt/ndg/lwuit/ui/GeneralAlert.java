@@ -8,7 +8,6 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
@@ -103,7 +102,6 @@ public class GeneralAlert extends Screen implements ActionListener {
         dialog.getDialogStyle().setBgColor( NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor );
         dialog.setTitle(" ");
         dialog.setLayout(new BorderLayout());
-        dialog.setScrollable(false);
 
         Container c = new Container(new FlowLayout());
         Image img = getIcon(alertType);
@@ -115,10 +113,8 @@ public class GeneralAlert extends Screen implements ActionListener {
 
         Container c2 = new Container( new BoxLayout(BoxLayout.Y_AXIS));
 
-
         int displayW = Display.getInstance().getDisplayWidth();
         int displayH = Display.getInstance().getDisplayHeight();
-
 
         TextArea msg = new TextArea( );
         msg.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
@@ -127,6 +123,7 @@ public class GeneralAlert extends Screen implements ActionListener {
         int lineHeight = msg.getSelectedStyle().getFont().getHeight() + msg.getRowsGap();
         msg.setText(label);
         msg.setIsScrollVisible(false);
+        msg.setEditable(false);
 
         if (textWidth >= displayW)
         {
@@ -139,23 +136,16 @@ public class GeneralAlert extends Screen implements ActionListener {
             }
             msg.setPreferredH(preferredH);
             msg.setGrowByContent(true);
-            dialog.setScrollable(true);
         }
         else
         {
             msg.setGrowByContent(false);
             msg.setRows(1);
             msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );
-            dialog.setScrollable(false);
         }
-
-        msg.setEditable(false);
-
-        int rows = msg.getRows();
-        if( rows < 4)
-        {
-           c2.addComponent( new Label( Screen.getRes().getImage("dialogspace")));
-        }
+        // WARN: the following line is important!
+        // Setting it to false caused hard to track OutOfMemoryException
+        dialog.setScrollable(true);
 
         c2.addComponent(msg);
         dialog.addComponent(BorderLayout.CENTER,c2);

@@ -25,7 +25,8 @@ import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.Border;
-import java.util.Hashtable;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Vector;
 
 
@@ -373,20 +374,27 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     protected boolean validate() {
-        return OpenRosaConstraintHelper.getInstance().
+        boolean retVal = OpenRosaConstraintHelper.getInstance().
                 validateConstraint(dfDate.getText(), element);
+
+        if(!retVal){
+            long date = Calendar.getInstance().getTime().getTime();
+            dfDate.setDate(new Date(date));
+        }
+        return retVal;
     }
 
     public void setEnabled(boolean enabled) {
-      //  throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void addDateQuestion(BoundElement bindElem) {
         String value = bindElem.getStringValue().trim();
-        if (value != null && value != "") {
+        if (value == null || value == "") {
+            long date = Calendar.getInstance().getTime().getTime();
+            dfDate = new DateField(DateField.MMDDYYYY, '/');
+            dfDate.setDate(new Date(date));
+        } else{
             dfDate = new DateField(value, DateField.MMDDYYYY, '/');
-        } else {
-            dfDate = new DateField(DateField.MMDDYYYY);
         }
         dfDate.setEditable(true);
         dfDate.addFocusListener(this);

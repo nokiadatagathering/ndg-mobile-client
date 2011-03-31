@@ -2,16 +2,12 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.AcceptCategoryConditionalCommand;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
 import br.org.indt.ndg.lwuit.control.BackCategoryConditionalFormCommand;
-import br.org.indt.ndg.lwuit.control.EnterCategoryCommand;
 import br.org.indt.ndg.lwuit.control.EnterCategoryConditionalCommand;
-import br.org.indt.ndg.lwuit.control.SaveResultCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.CategoryConditional;
-import br.org.indt.ndg.lwuit.ui.renderers.CategoryListCellRenderer;
 import br.org.indt.ndg.lwuit.ui.renderers.SimpleListCellRenderer;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.List;
