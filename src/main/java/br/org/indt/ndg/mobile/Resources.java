@@ -297,7 +297,7 @@ public class Resources {
         try {
             question = Image.createImage("/resources/images/redquestion.png");
             check = Image.createImage("/resources/images/greencheck.png");
-            logo = Image.createImage("/resources/images/logo02_32x32.png");
+            logo = Image.createImage("/resources/images/logo02_48x48.png");
         } catch (IOException ex) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());

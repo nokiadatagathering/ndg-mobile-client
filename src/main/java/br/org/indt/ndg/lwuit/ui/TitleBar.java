@@ -1,9 +1,9 @@
 package br.org.indt.ndg.lwuit.ui;
 
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Painter;
@@ -15,14 +15,12 @@ import com.sun.lwuit.geom.Rectangle;
  */
 public class TitleBar implements Painter {
 
-    private static Font small = Screen.getRes().getFont("NokiaSansWide11");
-    private static Font large = Screen.getRes().getFont("NokiaSansWide18");
-    private static Image hr = Screen.getRes().getImage("bottom");
+    private static final Image hr = Screen.getRes().getImage("bottom");
     private static final Image imageGPS = Screen.getRes().getImage("gps");
-    private static int logoWidth;
-    private static int logoHeight;
     private static final int gpsWidth = imageGPS.getWidth();
     private static final int textPadding = 2;
+    private static int logoWidth;
+    private static int logoHeight;
 
     private String title1;
     private String title2;
@@ -44,13 +42,14 @@ public class TitleBar implements Painter {
                                 hr.getHeight()),
                                 rect.getX(), rect.getY() + height - 2 );
 
-        g.drawImage( Resources.logo, textPadding + gpsWidth + textPadding, (height - logoHeight)>>1 );
-        g.setFont( small );
+        g.drawImage( Resources.logo, textPadding + gpsWidth + textPadding, ( height - logoHeight )>>1 );
+        g.setFont( NDGStyleToolbox.fontSmall );
         g.setColor( 0x007b7b7b );
-        int textOffset = textPadding + gpsWidth + textPadding + logoWidth + textPadding;
-        g.drawString( title1, textOffset, textPadding );
-        g.setFont( large );
-        g.drawString(title2, textOffset, textPadding + small.getHeight() );
+        int textOffsetHorizontal = textPadding + gpsWidth + textPadding + logoWidth + textPadding;
+        int spacingVertical =  ( height - NDGStyleToolbox.smallSize - NDGStyleToolbox.mediumSize )/3;
+        g.drawString( title1, textOffsetHorizontal, spacingVertical );
+        g.setFont( NDGStyleToolbox.fontMedium );
+        g.drawString( title2, textOffsetHorizontal, spacingVertical + NDGStyleToolbox.smallSize + spacingVertical );
         if (AppMIDlet.getInstance().getLocationHandler().locationObtained()) {
             g.drawImage(imageGPS, textPadding, 22);
         }
