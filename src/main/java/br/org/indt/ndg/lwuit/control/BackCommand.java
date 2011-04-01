@@ -1,13 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import com.sun.lwuit.Command;
-import com.sun.lwuit.animations.CommonTransitions;
-import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
@@ -16,11 +10,11 @@ import com.sun.lwuit.plaf.UIManager;
 public abstract class BackCommand extends CommandControl {
     
     public void doBefore() {
-        UIManager.getInstance().getLookAndFeel().setDefaultFormTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL, true, 500));
+        NDGLookAndFeel.setDefaultFormTransitionInReversed();
     }
 
     public void doAfter() {
-        UIManager.getInstance().getLookAndFeel().setDefaultFormTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL, false, 500));
+        NDGLookAndFeel.setDefaultFormTransitionInForward();
     }
 
     protected abstract Command createCommand();

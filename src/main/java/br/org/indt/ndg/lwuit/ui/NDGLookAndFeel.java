@@ -5,10 +5,14 @@ import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Image;
+import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.TextField;
+import com.sun.lwuit.animations.CommonTransitions;
 import com.sun.lwuit.plaf.DefaultLookAndFeel;
 import com.sun.lwuit.plaf.Style;
+import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
@@ -222,6 +226,33 @@ public class NDGLookAndFeel extends DefaultLookAndFeel {
                 g.drawString(inputMode, drawXPos+1, ta.getY() + style.getPadding(Component.TOP));
             }
         }
+    }
+
+    public static void setDefaultFormTransitionInForward() {
+        UIManager.getInstance().getLookAndFeel().setDefaultFormTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL, false, 500));
+    }
+
+    public static void setDefaultFormTransitionInReversed() {
+        UIManager.getInstance().getLookAndFeel().setDefaultFormTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL, true, 500));
+    }
+
+    public static void setDefaultDialogTransitionInAndOut() {
+        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, false, 500));
+        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionOut(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, true, 500));
+    }
+    public static void removeDefaultDialogTransitionInAndOut() {
+        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionIn(null);
+        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionOut(null);
+    }
+
+    public static Image getRightContextMenuImage( int parentHeight ) {
+        Image arrow = Screen.getRes().getImage("right_arrow");
+        if ( parentHeight > 0 ) { // avoid scaling at first run when height is undetermined
+            // arrow does not scale too well so it is needed to set a reasonable limit
+            int newHeight = parentHeight/2 > 15 ? 15 : parentHeight/2;
+            arrow = arrow.scaledHeight(newHeight);
+        }
+        return arrow;
     }
 
 }

@@ -1,8 +1,10 @@
 package br.org.indt.ndg.lwuit.extended;
 
+import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.geom.Rectangle;
@@ -18,6 +20,7 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
     protected BackgroundPainter bgPainter;
     private boolean hasOther;
     private String txtOther;
+    private PointerListener mPointerListener = null;
 
     public CheckBox(String text) {
         super(text);
@@ -25,6 +28,13 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
         bgPainter = new BackgroundPainter(this);
         addFocusListener(this);
         hasOther = false;
+        getSelectedStyle().setFont(NDGStyleToolbox.fontMediumBold, false);
+        getUnselectedStyle().setFont(NDGStyleToolbox.fontMedium, false);
+    }
+
+    public CheckBox(String text, PointerListener listener) {
+        this(text);
+        mPointerListener = listener;
     }
 
     public void focusGained(Component cmp) {
@@ -53,6 +63,16 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
         return txtOther;
     }
 
+    public void paint(Graphics g) {
+        super.paint(g);
+        if ( isSelected() && hasOther()) {
+            Image arrow = NDGLookAndFeel.getRightContextMenuImage(getWidth());
+            int x = getX() + getWidth() - (int)(arrow.getWidth()*1.5);
+            int y = getY() + (getHeight() - arrow.getHeight())/2;
+            g.drawImage(arrow, x, y);
+        }
+    }
+
     class FocusBGPainter implements Painter {
 
         public void paint(Graphics g, Rectangle rect) {
@@ -71,4 +91,33 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
             g.fillRect(rect.getX()+width-1, rect.getY()+height-1, 1, 1);
         }
     }
+
+    /**
+     * Assumptions when listener should be informed:
+     * - it MUST have details
+     * - if checkbox has just been toggled to selected and details are empty
+     * - if checkbox is selected and right 1/5 od component is pointed
+     */
+    public void pointerPressed(int x, int y) {
+        if ( mPointerListener!= null && hasOther() && (x > (int)(0.8 * getWidth())) && isSelected() ) {
+            mPointerListener.pointerPressed(x, y);
+        } else if (mPointerListener != null && hasOther() && !isSelected() && getOtherText().length() == 0) {
+            super.pointerPressed(x,y);
+            mPointerListener.pointerPressed(x, y);
+        } else {
+            super.pointerPressed(x,y);
+        }
+    }
+
+    public void pointerReleased(int x, int y) {
+        if ( mPointerListener!= null && hasOther() && (x > (int)(0.8 * getWidth())) && isSelected() ) {
+            mPointerListener.pointerReleased(x, y);
+        } else if (mPointerListener != null && hasOther() && !isSelected() && getOtherText().length() == 0) {
+            super.pointerReleased(x,y);
+            mPointerListener.pointerReleased(x, y);
+        } else {
+            super.pointerReleased(x,y);
+        }
+    }
+
 }

@@ -5,6 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.SentResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -18,7 +19,7 @@ import com.sun.lwuit.Command;
 public class ViewSentResultsCommand extends CommandControl {
 
     private static ViewSentResultsCommand instance;
-
+    private boolean m_executeAsBackCommand = false;
     protected Command createCommand() {
         return new Command(Resources.NEWUI_VIEW_SENT_RESULTS);
     }
@@ -31,6 +32,13 @@ public class ViewSentResultsCommand extends CommandControl {
         t.start();
     }
 
+    /**
+     * Because action is executed in different thread doAfter would execute before
+     * action is finished thus most probably would execute in unexpected manner
+     */
+    public void doBefore() {}
+    public void doAfter(){}
+
     public static ViewSentResultsCommand getInstance() {
         if (instance == null)
             instance = new ViewSentResultsCommand();
@@ -41,8 +49,19 @@ public class ViewSentResultsCommand extends CommandControl {
         public void run() {
             try { Thread.sleep(200); } catch(Exception e){}
             AppMIDlet.getInstance().getFileSystem().loadSentFiles();
+            if (m_executeAsBackCommand) {
+                NDGLookAndFeel.setDefaultFormTransitionInReversed();
+            }
             AppMIDlet.getInstance().setDisplayable(SentResultList.class);
+            if (m_executeAsBackCommand) {
+                m_executeAsBackCommand = false;
+                NDGLookAndFeel.setDefaultFormTransitionInForward();
+            }
         }
+    }
+
+    public void registerToBeExecutedAsBackCommand() {
+        m_executeAsBackCommand = true;
     }
 
 }

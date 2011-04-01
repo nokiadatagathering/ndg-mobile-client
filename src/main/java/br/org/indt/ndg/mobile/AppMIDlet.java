@@ -231,11 +231,6 @@ public class AppMIDlet extends MIDlet {
             com.sun.lwuit.util.Resources res = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/NDG.res");
             Screen.setRes(res);
             NDGLookAndFeel ndgLF = new NDGLookAndFeel();
-            //Dialog
-            ndgLF.setDefaultDialogTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, false, 500));
-            ndgLF.setDefaultDialogTransitionOut(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, true, 500));
-            //Form
-            ndgLF.setDefaultFormTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL, false, 500));
             // checkbox
             ndgLF.setCheckBoxImages(res.getImage("checked"), res.getImage("unchecked"));
             ndgLF.setRadioButtonImages(res.getImage("radioon"), res.getImage("radiooff"));
@@ -246,6 +241,8 @@ public class AppMIDlet extends MIDlet {
             //style = UIManager.getInstance().getComponentStyle("DialogBody");
             //style.setBorder(Border.createEmpty());
             UIManager.getInstance().setLookAndFeel(ndgLF);
+            NDGLookAndFeel.setDefaultFormTransitionInForward();
+            NDGLookAndFeel.setDefaultDialogTransitionInAndOut();
 
             switch( AppMIDlet.getInstance().getSettings().getStructure().getStyleId() ) {
                 case StyleConst.DEFAULT:

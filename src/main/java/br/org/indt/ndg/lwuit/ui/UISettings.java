@@ -11,7 +11,7 @@ import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.lwuit.ui.style.PreviewStyleContainer;
 import br.org.indt.ndg.lwuit.ui.style.StyleUtils;
 import br.org.indt.ndg.mobile.Resources;
-import com.sun.lwuit.ComboBox;
+import br.org.indt.ndg.lwuit.extended.ComboBox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
@@ -311,5 +311,4 @@ public class UISettings extends Screen implements ActionListener, FocusListener,
             blueSpinner.repaint();
         }
     }
-
 }

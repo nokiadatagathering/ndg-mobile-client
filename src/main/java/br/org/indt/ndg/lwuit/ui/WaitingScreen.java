@@ -13,9 +13,7 @@ import com.sun.lwuit.Display;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
-import com.sun.lwuit.animations.CommonTransitions;
 import com.sun.lwuit.layouts.BorderLayout;
-import com.sun.lwuit.plaf.UIManager;
 
 /**
  *
@@ -27,8 +25,7 @@ public class WaitingScreen {
     private Dialog dialog;
 
     public static void show(String status) {
-        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionIn(null);
-        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionOut(null);
+        NDGLookAndFeel.removeDefaultDialogTransitionInAndOut();
         instance = new WaitingScreen(status);
         instance.showModeless();
     }
@@ -42,8 +39,7 @@ public class WaitingScreen {
 
     public static void dispose() {
         instance.dialog.dispose();
-        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionIn(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, false, 500));
-        UIManager.getInstance().getLookAndFeel().setDefaultDialogTransitionOut(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, true, 500));
+        NDGLookAndFeel.setDefaultDialogTransitionInAndOut();
     }
 
     private void showModeless() {

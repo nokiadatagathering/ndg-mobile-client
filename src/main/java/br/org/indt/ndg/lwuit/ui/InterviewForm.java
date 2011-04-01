@@ -13,6 +13,7 @@ import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.extended.FilterProxyListModel;
 import br.org.indt.ndg.lwuit.extended.NumericField;
+import br.org.indt.ndg.lwuit.extended.PointerListener;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.extended.TimeField;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
@@ -747,6 +748,18 @@ abstract class ContainerUI extends Container implements FocusListener {
     ////////////////////////// Choice Multiple Question ////////////////////////
     class ChoiceFieldUI extends ContainerUI{
         private Vector mGroupButton;
+        private CheckBox mCurrentlyFocused = null;
+        private ActionListener mRightKeyListener = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                handleMoreDetails(mCurrentlyFocused);
+            }
+        };
+        private PointerListener mPointerListener = new PointerListener() {
+            public void pointerPressed(int x, int y) {}
+            public void pointerReleased(int x, int y) {
+                handleMoreDetails(mCurrentlyFocused);
+            }
+        };
 
         public ChoiceFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
             super( aQuestion, aAnswer );
@@ -766,11 +779,16 @@ abstract class ContainerUI extends Container implements FocusListener {
             String[] choices = new String[totalChoices];
             for (int i = 0; i < totalChoices; i++) {
                 choices[i] = (String) vChoices.elementAt(i);
-                CheckBox cb = new CheckBox(choices[i]);
-                cb.setOther(((String) vOthers.elementAt(i)).equals("1"));
+                boolean canHaveOther = ((String) vOthers.elementAt(i)).equals("1");
+                PointerListener pointerListener = null;
+                if ( canHaveOther )
+                    pointerListener = mPointerListener;
+                CheckBox cb = new CheckBox(choices[i], pointerListener);
+                cb.setOther(canHaveOther);
                 cb.setOtherText(""); // Initializes with empty string
-                cb.addActionListener(new HandleMoreDetails()); // More Details
                 cb.addFocusListener(this); // Controls when changing to a new question
+                cb.setNextFocusRight(cb);
+                cb.setNextFocusLeft(cb);
                 mGroupButton.addElement(cb);
                 addComponent(cb);
             }
@@ -789,6 +807,20 @@ abstract class ContainerUI extends Container implements FocusListener {
             spacer.setFocusable(false);
             addComponent(spacer);
        }
+
+        public void focusGained(Component cmpnt) {
+            super.focusGained(cmpnt);
+            if ( cmpnt instanceof CheckBox ) {
+                mCurrentlyFocused = (CheckBox)cmpnt;
+                form.addGameKeyListener(Display.GAME_RIGHT, mRightKeyListener);
+            }
+        }
+        public void focusLost(Component cmpnt) {
+            super.focusLost(cmpnt);
+            if ( cmpnt instanceof CheckBox ) {
+                form.removeGameKeyListener(Display.GAME_RIGHT, mRightKeyListener);
+            }
+        }
 
         public void commitValue()
         {
@@ -1119,12 +1151,7 @@ abstract class ContainerUI extends Container implements FocusListener {
     public void actionPerformed(ActionEvent evt) {
             setModifiedInterview(true);
             Object cmd = evt.getSource();
-            if ( cmd instanceof CheckBox )
-            {
-                ContainerUI parent = (ContainerUI)((CheckBox)cmd).getParent();
-                parent.handleMoreDetails( cmd );
-            }
-            else if (cmd instanceof RadioButton)
+            if (cmd instanceof RadioButton)
             {
                 ContainerUI parent = (ContainerUI)((RadioButton)cmd).getParent();
                 parent.handleMoreDetails(cmd);

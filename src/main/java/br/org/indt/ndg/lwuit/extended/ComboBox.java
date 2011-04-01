@@ -2,10 +2,8 @@ package br.org.indt.ndg.lwuit.extended;
 
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
-import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.events.FocusListener;
-import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.painter.BackgroundPainter;
 
 /**
@@ -21,19 +19,21 @@ public class ComboBox extends com.sun.lwuit.ComboBox implements FocusListener{
 
     public ComboBox() {
         super();
-        focusBGPainter = new FocusBGPainter();
-        bgPainter = new BackgroundPainter(this);
+        focusBGPainter = new ListFocusBGPainter(this);
+        bgPainter = new ListBGPainter(this);
         addFocusListener(this);
+        getStyle().setBgPainter(bgPainter);
+        getSelectedStyle().setBgPainter(focusBGPainter);
     }
 
     public void focusGained(Component cmp) {
         getStyle().setBgPainter(focusBGPainter);
-        getStyle().setFont( NDGStyleToolbox.fontMediumBold );
+        getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.selectedFont );
     }
 
     public void focusLost(Component cmp) {
         getStyle().setBgPainter(bgPainter);
-        getStyle().setFont( NDGStyleToolbox.fontMedium );
+        getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.unselectedFont );
     }
 
     public void setOther(boolean _val) {
@@ -50,24 +50,5 @@ public class ComboBox extends com.sun.lwuit.ComboBox implements FocusListener{
 
     public String getOtherText() {
         return txtOther;
-    }
-
-    class FocusBGPainter implements Painter {
-
-        public void paint(Graphics g, Rectangle rect) {
-            int width = rect.getSize().getWidth();
-            int height = rect.getSize().getHeight();
-
-            int endColor = NDGStyleToolbox.getInstance().listStyle.bgSelectedEndColor;
-            int startColor = NDGStyleToolbox.getInstance().listStyle.bgSelectedStartColor;
-            g.fillLinearGradient(startColor, endColor, rect.getX(), rect.getY(), width, height, false);
-
-            int borderColor =  NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor;
-            g.setColor(borderColor);
-            g.fillRect(rect.getX(), rect.getY(), 1, 1);
-            g.fillRect(rect.getX()+width-1, rect.getY(), 1, 1);
-            g.fillRect(rect.getX(), rect.getY()+height-1, 1, 1);
-            g.fillRect(rect.getX()+width-1, rect.getY()+height-1, 1, 1);
-        }
     }
 }

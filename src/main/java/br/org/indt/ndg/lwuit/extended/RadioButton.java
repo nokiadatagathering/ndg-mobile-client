@@ -24,6 +24,8 @@ public class RadioButton extends com.sun.lwuit.RadioButton implements FocusListe
         focusBGPainter = new FocusBGPainter();
         bgPainter = new BackgroundPainter(this);
         addFocusListener(this);
+        getSelectedStyle().setFont(NDGStyleToolbox.fontMediumBold, false);
+        getUnselectedStyle().setFont(NDGStyleToolbox.fontMedium, false);
     }
 
     public void focusGained(Component cmp) {

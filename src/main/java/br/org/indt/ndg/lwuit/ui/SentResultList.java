@@ -1,5 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
+import br.org.indt.ndg.lwuit.control.BackResultViewCommand;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackSentResultListCommand;
@@ -9,6 +10,7 @@ import br.org.indt.ndg.lwuit.control.MoveToUnsentCommand;
 import br.org.indt.ndg.lwuit.control.ResultControl;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.UnmarkAllResultsCommand;
+import br.org.indt.ndg.lwuit.control.ViewResultCommand;
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
 import br.org.indt.ndg.lwuit.ui.renderers.SentResultListCellRenderer;
@@ -50,6 +52,7 @@ public class SentResultList extends Screen implements ActionListener{
             form.addCommand(UnmarkAllResultsCommand.getInstance().getCommand());
             form.addCommand(MarkAllResultsCommand.getInstance().getCommand());
             form.addCommand(MoveToUnsentCommand.getInstance().getCommand());
+            form.addCommand(ViewResultCommand.getInstance().getCommand());
         }
 
         try{
@@ -90,12 +93,20 @@ public class SentResultList extends Screen implements ActionListener{
         else if (cmd == BackSentResultListCommand.getInstance().getCommand()) {
             BackSentResultListCommand.getInstance().execute(this);
         }
+        else if (cmd == ViewResultCommand.getInstance().getCommand()) {
+            BackResultViewCommand.getInstance().setReturnScreen(this);
+            ViewResultCommand.getInstance().execute(new Integer(getSelectedResult()));
+        }
         else if(cmd == list){
             //CREATE COMMAND FOR THIS ACTION
             underlyingModel.updateCheckbox(list.getSelectedIndex());
         }
         else
             throw new IllegalArgumentException("Invalid command");
+    }
+
+    private int getSelectedResult() {
+        return list.getSelectedIndex();
     }
 
 }

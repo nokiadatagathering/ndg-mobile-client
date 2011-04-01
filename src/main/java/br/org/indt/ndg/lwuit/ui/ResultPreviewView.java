@@ -46,7 +46,7 @@ import java.util.Vector;
  *
  * @author mluz
  */
-public class ResultView extends Screen implements ActionListener {
+public class ResultPreviewView extends Screen implements ActionListener {
 
     private String title2 = Resources.RESULTS_LIST_TITLE;
     private String title1;

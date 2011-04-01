@@ -2,13 +2,13 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackResultListCommand;
+import br.org.indt.ndg.lwuit.control.BackResultViewCommand;
 
 import br.org.indt.ndg.lwuit.control.DeleteResultNowCommand;
 import br.org.indt.ndg.lwuit.control.ExitCommand;
 import br.org.indt.ndg.lwuit.control.MarkAllResultsCommand;
 import br.org.indt.ndg.lwuit.control.NewResultCommand;
 import br.org.indt.ndg.lwuit.control.OpenResultCommand;
-import br.org.indt.ndg.lwuit.control.ResultListOnShow;
 import br.org.indt.ndg.lwuit.control.SendResultNowCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.control.UnmarkAllResultsCommand;
@@ -53,8 +53,6 @@ public class ResultList extends Screen implements ActionListener {
         if ( results.size()<=0 || !results.elementAt(0).equals( newResultItem ) ) {
             results.insertElementAt( newResultItem, 0 );
         }
-
-        registerEvent(new ResultListOnShow(), ON_SHOW);
     }
 
     protected void customize() {
@@ -119,6 +117,7 @@ public class ResultList extends Screen implements ActionListener {
             if (list.size() > 0)
                 OpenResultCommand.getInstance().execute(new Integer(getSelectedResult()));
         } else if (cmd == ViewResultCommand.getInstance().getCommand()) {
+                BackResultViewCommand.getInstance().setReturnScreen(this);
                 ViewResultCommand.getInstance().execute(new Integer(getSelectedResult()));
         } else if (cmd == SendResultNowCommand.getInstance().getCommand()) {
                 if(underlyingModel.getQtSelecteds()==0){
