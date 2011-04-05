@@ -63,9 +63,9 @@ public class NDGCameraManager {
 
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
             if(location == null){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
+                GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.WARNING);
             }else if(location != null && !AppMIDlet.getInstance().locationObtained()){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.LOCATION_OUT_OF_DATE_WARN, GeneralAlert.DIALOG_OK);
+                GeneralAlert.getInstance().show(Resources.WARNING, Resources.LOCATION_OUT_OF_DATE_WARN, GeneralAlert.WARNING);
             }
             imageData.setGeoTag( location );
         }

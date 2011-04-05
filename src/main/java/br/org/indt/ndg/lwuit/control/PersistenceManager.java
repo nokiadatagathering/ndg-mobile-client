@@ -424,13 +424,13 @@ public class PersistenceManager {
         Location loc = AppMIDlet.getInstance().getLocation();
         if (loc == null || loc.getQualifiedCoordinates() == null) {
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.DIALOG_OK);
+            GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.WARNING);
             return true;
         }
 
         if(!AppMIDlet.getInstance().locationObtained()){
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-            int dialogRetVal = GeneralAlert.getInstance().show( Resources.WARNING, Resources.LOCATION_OUT_OF_DATE, GeneralAlert.DIALOG_YES_NO);
+            int dialogRetVal = GeneralAlert.getInstance().show( Resources.WARNING, Resources.LOCATION_OUT_OF_DATE, GeneralAlert.WARNING );
             if(GeneralAlert.RESULT_NO == dialogRetVal){
                 return false;
             }
