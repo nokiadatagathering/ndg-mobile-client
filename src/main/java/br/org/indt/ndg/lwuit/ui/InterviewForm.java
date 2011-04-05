@@ -74,7 +74,6 @@ public class InterviewForm extends Screen implements ActionListener {
     private boolean answerChanged = false;
 
     protected void loadData() {
-        createScreen();
         vContainers = new Vector();
         title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.NEW_INTERVIEW;
@@ -184,6 +183,9 @@ public class InterviewForm extends Screen implements ActionListener {
             title2 = Resources.EDITING;
         }
         setTitle(title1, title2);
+        if( vContainers!= null && vContainers.size() > 0 ) {
+            ((ContainerUI)vContainers.elementAt(0)).requestFocus();
+        }
     }
 
     private void setModifiedInterview(boolean _val) {
@@ -296,6 +298,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     protected TextArea createQuestionName( String aQuestionText ) {
         TextArea questionName = new TextArea();
+        questionName.getStyle().setFont(NDGStyleToolbox.fontSmall);
         questionName.setEditable(false);
         questionName.setFocusable(false);
         questionName.setColumns(NUMBER_OF_COLUMNS);
@@ -897,15 +900,15 @@ abstract class ContainerUI extends Container implements FocusListener {
 
             ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
 
-            mImageContainer = new Container (new FlowLayout());
+            mImageContainer = new Container( new FlowLayout() );
 
             ImageData imgData = null;
 
-            Label spacer = new Label(mQuestion.getName());
-            spacer.setFocusable(false);
-            addComponent(spacer);
+
+            TextArea questionText = createQuestionName( mQuestion.getName() );
+            addComponent(questionText);
             Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
-            maxPhotoCount.getStyle().setFont(NDGStyleToolbox.fontSmall);
+            maxPhotoCount.getStyle().setFont( NDGStyleToolbox.fontSmall );
             addComponent(maxPhotoCount);
 
             if(imgAnswer.getImages().size() > 0){

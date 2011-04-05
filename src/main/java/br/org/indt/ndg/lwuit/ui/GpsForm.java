@@ -10,6 +10,7 @@ import com.sun.lwuit.TextArea;
 import com.sun.lwuit.plaf.UIManager;
 import br.org.indt.ndg.lwuit.extended.ChoiceGroup;
 import br.org.indt.ndg.lwuit.extended.ChoiceGroupListener;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.events.FocusListener;
@@ -43,6 +44,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
         TextArea useGpsQuestion = new TextArea(5, 20);
         useGpsQuestion.setText(Resources.GPSCONFIG);
         useGpsQuestion.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        useGpsQuestion.getStyle().setFont(NDGStyleToolbox.fontSmall);
         useGpsQuestion.setRows(useGpsQuestion.getLines() - 1);
         useGpsQuestion.setEditable(false);
 
@@ -77,6 +79,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
         useGeoTagQuestion = new TextArea(5, 20);
         useGeoTagQuestion.setText(Resources.GEO_TAGGING_CONF);
         useGeoTagQuestion.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        useGeoTagQuestion.getStyle().setFont(NDGStyleToolbox.fontSmall);
         useGeoTagQuestion.setRows(useGeoTagQuestion.getLines() - 1);
         useGeoTagQuestion.setEditable(false);
         useGeoTagQuestion.setFocusable(false);

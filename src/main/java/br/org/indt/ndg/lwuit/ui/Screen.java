@@ -69,21 +69,6 @@ public abstract class Screen {
             s.onCreate();
     }
 
-    public static final boolean isVisible(Class c) {
-        if (!Screen.class.isAssignableFrom(c)) {
-            throw new IllegalArgumentException("The argument must extends br.org.indt.ndg.lwuit.ui.Screen class");
-        }
-
-        Screen s = null;
-
-        if (screens.containsKey(c)) {
-            s = (Screen)screens.get(c);
-            return s.form.isVisible();
-        }
-
-        return false;
-    }
-
     protected final void setTitle(String title1, String title2) {
         titlebar.setTitle1(title1);
         titlebar.setTitle2(title2);

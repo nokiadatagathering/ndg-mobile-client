@@ -25,7 +25,6 @@ public class ViewFinderForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
-        createScreen();
         form.setLayout(new BorderLayout());
 
         MediaComponent comp = Camera.getInstance().getViewFinderLWUIT();
@@ -36,6 +35,7 @@ public class ViewFinderForm extends Screen implements ActionListener {
 
         container.addComponent(BorderLayout.CENTER, comp);
         form.removeAll(); // does not always work?
+        form.removeAllCommands();
         form.addCommand(BackPhotoFormCommand.getInstance().getCommand());
         form.addCommand(CapturePhotoCommand.getInstance().getCommand());
         form.addGameKeyListener(Display.GAME_FIRE, this);

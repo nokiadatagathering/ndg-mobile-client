@@ -30,7 +30,6 @@ public class OpenRosaResultView extends OpenRosaScreen implements UserInterface,
     }
 
     protected void loadData() {
-        createScreen();
         title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.RESULTS_LIST_TITLE;
         rootContainer = new Container();

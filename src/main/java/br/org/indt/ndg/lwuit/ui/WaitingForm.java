@@ -32,7 +32,7 @@ public class WaitingForm extends Screen {
     }
 
     protected void customize() {
-        createScreen();
+        form.removeAll();
         setTitle(title1, title2);
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         form.addComponent(new Label(" "));

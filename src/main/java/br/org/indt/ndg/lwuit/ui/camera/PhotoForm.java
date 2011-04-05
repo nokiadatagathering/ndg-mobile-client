@@ -22,7 +22,8 @@ public class PhotoForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
-        createScreen();
+        form.removeAll();
+        form.removeAllCommands();
 
         form.addCommand(TakePictureAgainCommand.getInstance().getCommand());
         form.addCommand(OKPhotoFormCommand.getInstance().getCommand());

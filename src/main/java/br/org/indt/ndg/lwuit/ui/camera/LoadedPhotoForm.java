@@ -21,7 +21,8 @@ public class LoadedPhotoForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
-        createScreen();        
+        form.removeAll();
+        form.removeAllCommands();
         byte[] imageData = NDGCameraManager.getInstance().getCurrentImageData().getData();
         Image image = null;
         try {

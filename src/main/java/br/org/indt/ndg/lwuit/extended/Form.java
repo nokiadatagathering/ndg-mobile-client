@@ -7,6 +7,7 @@ import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.List;
+import com.sun.lwuit.events.StyleListener;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
 
@@ -14,9 +15,16 @@ import com.sun.lwuit.plaf.UIManager;
  *
  * @author mluz
  */
-public class Form extends com.sun.lwuit.Form {
+public class Form extends com.sun.lwuit.Form implements StyleListener {
     final static int MIN_MARGIN = 30;
     final static int LEFT_MARGIN_OFFSET = 10;
+
+    public Form() {
+        super();
+        Style style = getSoftButtonStyle();
+        style.setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        setSoftButtonStyle( style );
+    }
 
     protected Command showMenuDialog(Dialog menu) {
         menu.getDialogStyle().setBgColor(NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor);
@@ -99,6 +107,7 @@ public class Form extends com.sun.lwuit.Form {
 
     public void styleChanged(String propertyName, Style source) {
         super.styleChanged(propertyName, source);
+        getSoftButtonStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
         this.invalidate();
     }
 }

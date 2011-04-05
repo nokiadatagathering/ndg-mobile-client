@@ -34,6 +34,13 @@ public class StyleHandler  extends DefaultHandler {
                   ) {
             tagStack.addElement(qName);
         } else if( qName.equals("settings") ) {
+            int size = NDGStyleToolbox.DEFAULT;
+            try{
+                String fontSize = attributes.getValue( attributes.getIndex( "fontSize" ) );
+                size = Integer.parseInt( fontSize );
+            } catch( Exception ex ) {
+            }
+            toolbox.fontSizeSetting = size;
             tagStack.addElement(qName);
         }
     }

@@ -7,17 +7,17 @@ import com.sun.lwuit.Command;
 
 
 
-public class AdvancedUISettingsCommand extends CommandControl {
+public class UISettingsColorCommand extends CommandControl {
 
-    private static  AdvancedUISettingsCommand instance;
+    private static  UISettingsColorCommand instance;
 
     protected Command createCommand() {
-        return new Command( "Customize" );//Resources.UI_SETTINGS
+        return new Command( "Colors" );//Resources.UI_SETTINGS
     }
 
-    public static AdvancedUISettingsCommand getInstance() {
+    public static UISettingsColorCommand getInstance() {
         if (instance == null)
-            instance = new  AdvancedUISettingsCommand();
+            instance = new  UISettingsColorCommand();
         return instance;
     }
 

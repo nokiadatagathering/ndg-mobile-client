@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
@@ -73,6 +68,7 @@ public class WaitingScreen {
         msg.setSingleLineTextArea(true);
         msg.setAlignment( Component.CENTER );
         msg.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
+        msg.getSelectedStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
         msg.getSelectedStyle().setBgTransparency(0x00);
         msg.setEditable(false);
         msg.setPreferredW(msg.getSelectedStyle().getFont().stringWidth( status ) + 5);

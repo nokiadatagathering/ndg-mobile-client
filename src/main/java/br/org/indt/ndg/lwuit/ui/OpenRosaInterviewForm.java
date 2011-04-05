@@ -32,7 +32,6 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
     }
 
     protected void loadData() {
-        createScreen();
         title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.NEW_INTERVIEW;
         rootContainer = new Container();
