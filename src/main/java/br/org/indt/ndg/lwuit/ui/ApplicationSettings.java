@@ -41,7 +41,7 @@ public class ApplicationSettings extends Screen implements ActionListener, Choic
         protocolTypeQuestion.setEditable(false);
         protocolTypeQuestion.setFocusable(false);
 
-        String[] choices = {"NDG Protocol", "XForms Protocol"};
+        String[] choices = { Resources.NDG_STANDARD_NAME, Resources.OPENROSA_STANDARD_NAME };
         int selectedProtocol = 0;
         int currentProtocolId = AppMIDlet.getInstance().getSettings().getStructure().getProtocolId();
         if ( currentProtocolId == Utils.NDG_FORMAT ) {

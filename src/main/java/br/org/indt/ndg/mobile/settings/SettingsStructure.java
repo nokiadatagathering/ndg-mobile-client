@@ -4,6 +4,7 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import java.io.PrintStream;
 
 import br.org.indt.ndg.mobile.Utils;
+import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
 
 /**
  * READ FIRST!
@@ -297,16 +298,12 @@ public class SettingsStructure {
         return selectedStyle;
     }
 
-    public int getPhotoX( ) {
-        return PhotoSettings.getX( selectedResolution );
-    }
-
-    public int getPhotoY( ) {
-        return PhotoSettings.getY( selectedResolution );
+    public PhotoResolution getPhotoResolution() {
+        return PhotoSettings.getInstance().getPhotoResolution( selectedResolution );
     }
 
     public String[] getResolutionList() {
-        return PhotoSettings.getResolutionList();
+        return PhotoSettings.getInstance().getResolutionList();
     }
 
 }

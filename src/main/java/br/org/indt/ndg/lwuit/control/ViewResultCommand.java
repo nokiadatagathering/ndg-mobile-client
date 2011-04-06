@@ -3,7 +3,7 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.ui.ResultPreviewView;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
-import br.org.indt.ndg.lwuit.ui.OpenRosaResultView;
+import br.org.indt.ndg.lwuit.ui.OpenRosaResultPreviewView;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
@@ -47,7 +47,7 @@ public class ViewResultCommand extends CommandControl {
 
                 if(AppMIDlet.getInstance().isCurrentDirXForm()){
                     AppMIDlet.getInstance().getFileStores().loadXFormResult();
-                    AppMIDlet.getInstance().setDisplayable(OpenRosaResultView.class);
+                    AppMIDlet.getInstance().setDisplayable(OpenRosaResultPreviewView.class);
                 }else{
                     AppMIDlet.getInstance().getFileStores().parseResultFile();
                     if (AppMIDlet.getInstance().getFileStores().getError()) {

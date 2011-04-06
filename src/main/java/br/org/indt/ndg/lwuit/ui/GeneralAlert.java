@@ -1,24 +1,24 @@
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CommandControl;
+import br.org.indt.ndg.lwuit.ui.renderers.TitlePainterDialog;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.NetworkErrCode;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
-import com.sun.lwuit.Painter;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
+import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
 import java.util.Vector;
 
@@ -44,7 +44,7 @@ public class GeneralAlert extends Screen implements ActionListener {
 
     private static GeneralAlert instance;
     private Dialog dialog;
-    private TitlePainter tp = new TitlePainter();
+    private TitlePainterDialog tp = new TitlePainterDialog();
 
     private static String title;
     private static String label;
@@ -99,7 +99,13 @@ public class GeneralAlert extends Screen implements ActionListener {
         dialog.getTitleStyle().setBgPainter(tp);
         dialog.setDialogStyle( NDGStyleToolbox.getInstance().menuStyle.getBaseStyle() );
         dialog.getDialogStyle().setBgColor( NDGStyleToolbox.getInstance().menuStyle.bgUnselectedColor );
+        dialog.getTitleComponent().setPreferredH( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont.getHeight()
+                                                + dialog.getTitleStyle().getPadding( Component.TOP )
+                                                + dialog.getTitleStyle().getPadding( Component.BOTTOM )
+                                                + dialog.getTitleStyle().getMargin( Component.TOP )
+                                                + dialog.getTitleStyle().getMargin( Component.BOTTOM ) );
         dialog.setTitle(" ");
+        tp.setTitle(title);
         dialog.setLayout(new BorderLayout());
 
         Container c = new Container(new FlowLayout());
@@ -142,6 +148,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             msg.setGrowByContent(false);
             msg.setRows(1);
             msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );
+            msg.setPreferredH( msg.getSelectedStyle().getFont().getHeight() );
         }
         // WARN: the following line is important!
         // Setting it to false caused hard to track OutOfMemoryException
@@ -153,6 +160,10 @@ public class GeneralAlert extends Screen implements ActionListener {
         for ( int i = 0; i< hCommands.size(); i++ ) {
             dialog.addCommand( ((CommandControl)hCommands.elementAt(i)).getCommand());
         }
+
+        Style style = dialog.getSoftButtonStyle();
+        style.setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        dialog.setSoftButtonStyle(style);
 
         dialog.addCommandListener(this);
     }
@@ -181,11 +192,11 @@ public class GeneralAlert extends Screen implements ActionListener {
             }
         }
     }
-    
+
     public int show( Exception ex ) {
         return show(Resources.ERROR_TITLE, (ex.getMessage() == null) ? ex.toString() : ex.getMessage() ,GeneralAlert.ERROR );
     }
-    
+
     public int show(String _title, String _label, int _alertType) {
         UIManager.getInstance().getLookAndFeel().setReverseSoftButtons(false);
         title = _title;
@@ -210,7 +221,7 @@ public class GeneralAlert extends Screen implements ActionListener {
         Container cont1 = dialog.getContentPane();
         int hi = 0;
         int wi = cont1.getPreferredW() + 2*5;
-        int wi2 = dialog.getTitleStyle().getFont().stringWidth( title ) + 2*5 + TitlePainter.TITLE_LEFT_MARGIN;
+        int wi2 = dialog.getTitleStyle().getFont().stringWidth( title ) + 2*5 + TitlePainterDialog.TITLE_LEFT_MARGIN;
         wi = Math.max(wi, wi2);
 
         for( int i = 0 ; i< dialog.getComponentCount() ; i ++ ){
@@ -225,45 +236,13 @@ public class GeneralAlert extends Screen implements ActionListener {
         dialog.show( H_Margin, H_Margin, V_Margin, V_Margin, true);
     }
 
-    class TitlePainter implements Painter {
-        static final public int TITLE_LEFT_MARGIN = 10;
-
-        public void paint(Graphics g, Rectangle rect) {
-            int width = rect.getSize().getWidth();
-            int height = rect.getSize().getHeight();
-
-            int bgColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgUnselectedColor;
-            g.setColor(bgColor);
-            g.fillRect(rect.getX(), rect.getY(), width, height);
-
-            int endColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedEndColor;
-            int startColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedStartColor;
-            g.fillLinearGradient(startColor, endColor, rect.getX()+1, rect.getY()+1, width-2, height, false);
-
-            // curve left side
-            g.fillRect(rect.getX()+1, rect.getY()+1, 1, 1);
-
-            // curve right side
-            g.fillRect(rect.getX()+width-2, rect.getY()+1, 1, 1);
-
-            int tintColor = UIManager.getInstance().getLookAndFeel().getDefaultFormTintColor();
-            g.setColor(tintColor);
-            g.fillRect(rect.getX(), rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
-            g.fillRect(rect.getX()+width-1, rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
-
-            g.setFont( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont );
-            g.setColor( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFontColor );
-            g.drawString(title, rect.getX() + TITLE_LEFT_MARGIN, rect.getY()+5);
-        }
-    }
-
     class OkCommandControl extends CommandControl {
 
         protected Command createCommand() {
             return new Command(br.org.indt.ndg.mobile.Resources.OK);
         }
 
-        protected void doAction(Object parameter) {   
+        protected void doAction(Object parameter) {
         }
     }
 

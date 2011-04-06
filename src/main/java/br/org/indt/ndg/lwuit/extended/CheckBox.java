@@ -95,14 +95,10 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
     /**
      * Assumptions when listener should be informed:
      * - it MUST have details
-     * - if checkbox has just been toggled to selected and details are empty
      * - if checkbox is selected and right 1/5 od component is pointed
      */
     public void pointerPressed(int x, int y) {
         if ( mPointerListener!= null && hasOther() && (x > (int)(0.8 * getWidth())) && isSelected() ) {
-            mPointerListener.pointerPressed(x, y);
-        } else if (mPointerListener != null && hasOther() && !isSelected() && getOtherText().length() == 0) {
-            super.pointerPressed(x,y);
             mPointerListener.pointerPressed(x, y);
         } else {
             super.pointerPressed(x,y);
@@ -111,10 +107,7 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
 
     public void pointerReleased(int x, int y) {
         if ( mPointerListener!= null && hasOther() && (x > (int)(0.8 * getWidth())) && isSelected() ) {
-            mPointerListener.pointerReleased(x, y);
-        } else if (mPointerListener != null && hasOther() && !isSelected() && getOtherText().length() == 0) {
-            super.pointerReleased(x,y);
-            mPointerListener.pointerReleased(x, y);
+            mPointerListener.pointerPressed(x, y);
         } else {
             super.pointerReleased(x,y);
         }

@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.AcceptQuestionListFormCommand;
 import br.org.indt.ndg.lwuit.control.BackInterviewFormCommand;
+import br.org.indt.ndg.lwuit.control.ExclusiveChoiceFieldController;
 import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
 import br.org.indt.ndg.lwuit.control.PersistenceManager;
 import br.org.indt.ndg.lwuit.control.RemovePhotoCommand;
@@ -13,6 +14,10 @@ import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.extended.FilterProxyListModel;
 import br.org.indt.ndg.lwuit.extended.NumericField;
+import br.org.indt.ndg.lwuit.extended.ExclusiveChoiceList;
+import br.org.indt.ndg.lwuit.extended.ExclusiveChoiceList.ExclusiveChoiceListListener;
+import br.org.indt.ndg.lwuit.extended.ListBGPainter;
+import br.org.indt.ndg.lwuit.extended.ListFocusBGPainter;
 import br.org.indt.ndg.lwuit.extended.PointerListener;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.extended.TimeField;
@@ -36,6 +41,7 @@ import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManagerListener;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
@@ -50,16 +56,13 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.DataChangedListener;
 import com.sun.lwuit.events.FocusListener;
-import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.list.DefaultListModel;
-import com.sun.lwuit.list.ListCellRenderer;
 import com.sun.lwuit.list.ListModel;
 import com.sun.lwuit.plaf.Border;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -178,7 +181,7 @@ public class InterviewForm extends Screen implements ActionListener {
             //this ensure that we have registered listener once
         }
         form.addCommandListener(this);
-        
+
         if (PersistenceManager.getInstance().isEditing()) {
             title2 = Resources.EDITING;
         }
@@ -273,7 +276,6 @@ public class InterviewForm extends Screen implements ActionListener {
     }
 
 abstract class ContainerUI extends Container implements FocusListener {
-    private final int NUMBER_OF_COLUMNS = 20;
 
     protected TextArea mQuestionTextArea;
     protected NDGQuestion mQuestion;
@@ -294,29 +296,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                                                         NDGStyleToolbox.getInstance().focusLostColor ));
         mQuestion  = aQuestion;
         mAnswer = aAnswer;
-    }
-
-    protected TextArea createQuestionName( String aQuestionText ) {
-        TextArea questionName = new TextArea();
-        questionName.getStyle().setFont(NDGStyleToolbox.fontSmall);
-        questionName.setEditable(false);
-        questionName.setFocusable(false);
-        questionName.setColumns(NUMBER_OF_COLUMNS);
-        questionName.setRows(1);
-        questionName.setGrowByContent(false);
-        questionName.setText(aQuestionText);
-
-        int pw = Display.getInstance().getDisplayWidth();
-        int w = questionName.getStyle().getFont().stringWidth(aQuestionText);
-        if (w > pw) {
-            questionName.setGrowByContent(true);
-            questionName.setRows(2);
-        } else {
-            questionName.setGrowByContent(false);
-            questionName.setRows(1);
-        }
-
-        return questionName;
     }
 
     public NDGQuestion getQuestion() {
@@ -350,7 +329,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 }
 
 
-     class DescriptiveFieldUI extends ContainerUI{
+    class DescriptiveFieldUI extends ContainerUI{
         private DescriptiveField mDescriptionTextField;
 
         public DescriptiveFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
@@ -359,7 +338,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName( mQuestion.getName() );
+            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
             addComponent(mQuestionTextArea);
 
             mDescriptionTextField = new DescriptiveField(((DescriptiveQuestion) mQuestion).getLength());
@@ -436,7 +415,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion( ) {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName(mQuestion.getName());
+            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
             addComponent(mQuestionTextArea);
 
             mNumberTextField = new NumericField( ((NumericQuestion) mQuestion).getLength(),
@@ -475,8 +454,8 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout( new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName( mQuestion.getName() );
-            
+            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
+
             addComponent(mQuestionTextArea);
             mDateTextField = new DateField(DateField.DDMMYYYY);
             long datelong = ((DateAnswer)mAnswer).getDate();
@@ -491,7 +470,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             spacer.setFocusable(false);
             addComponent(spacer);
         }
-        
+
         public void commitValue() {
             Date date = mDateTextField.getDate();
             Long datelong = new Long(date.getTime());
@@ -506,245 +485,228 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
     }
 
-    class ExclusiveChoiceFieldUI extends ContainerUI {
-        private ButtonGroup mGroupButton;
+    abstract class ExclusiveChoiceFieldBaseUI extends ContainerUI {
 
-        public ExclusiveChoiceFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
-            super( aQuestion, aAnswer );
+        protected RadioChoiceModel mDataModel;
+        protected ExclusiveChoiceList mChoiceList;
+        protected int mMaxQuestionLength = 20;
+        protected ActionListener mSelectionListener = new ActionListener() {
+
+            public void actionPerformed( ActionEvent evt ) {
+
+                if (evt.getKeyEvent() == Display.GAME_RIGHT) {
+                    handleMoreDetails(evt);
+                    mChoiceList.setHandlesInput(true);
+                } else if (evt.getKeyEvent() == Display.GAME_LEFT) {
+                    mChoiceList.setHandlesInput(true);
+                } else {
+                    handleSelection(mChoiceList);
+                    mChoiceList.setHandlesInput(true);
+                }
+            }
+
+        };
+        protected ExclusiveChoiceListListener mListListener = new ExclusiveChoiceListListener() {
+
+            public void detailsRequested() {
+                handleMoreDetails(mChoiceList);
+            }
+
+        };
+
+        public ExclusiveChoiceFieldBaseUI(NDGQuestion aQuestion, NDGAnswer aAnswer) {
+            super(aQuestion, aAnswer);
         }
 
-        public void registerQuestion(){
+        public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName(mQuestion.getName());
-
+            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
             addComponent(mQuestionTextArea);
 
-            mGroupButton = new ButtonGroup();
-            Vector vChoices = ((ChoiceQuestion)mQuestion).getChoices();
-            Vector vOthers = ((ChoiceQuestion)mQuestion).getOthers();
-
+            Vector vChoices = ((ChoiceQuestion) mQuestion).getChoices();
+            Vector vOthers = ((ChoiceQuestion) mQuestion).getOthers();
             int totalChoices = vChoices.size();
-            String[] choices = new String[totalChoices];
+            mDataModel = new RadioChoiceModel();
+            mMaxQuestionLength = 0;
             for (int i = 0; i < totalChoices; i++) {
-                choices[i] = (String) vChoices.elementAt(i);
-                RadioButton rb = new RadioButton(choices[i]);
-                rb.setOther(((String) vOthers.elementAt(i)).equals("1"));
-                rb.setOtherText(""); // Initializes with empty string
-                rb.addActionListener(new HandleMoreDetails()); // More Details
+                String choice = (String) vChoices.elementAt(i);
+                RadioChoiceItem item = new RadioChoiceItem(choice, mDataModel);
+                RadioButton rb = new RadioButton(choice);
+                rb.setFocusable(false);
                 rb.addFocusListener(this); // Controls when changing to a new question
-                mGroupButton.add(rb);
-                addComponent(rb);
+                boolean hasMoreDetails = ((String) vOthers.elementAt(i)).equals("1");
+                if ( hasMoreDetails ) {
+                    item.setMoreDetailsText("");
+                    rb.useMoreDetails(true);
+                }
+                mDataModel.addItem(item);
+                mMaxQuestionLength = (choice.length() > mMaxQuestionLength) ? choice.length() : mMaxQuestionLength;
             }
 
-            Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
-            for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
-                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
-                mGroupButton.setSelected(index);
-
-                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(index);
-                String other  = (String)((ChoiceAnswer)mAnswer).getOtherText( (String)vSelectedIndexes.elementAt(i ) );
-                if( other != null ) {
-                    rb.setOtherText( other );
+            Vector vSelectedIndexes = ((ChoiceAnswer) mAnswer).getSelectedIndexes();
+            for (int i = 0; i < vSelectedIndexes.size(); i++) {
+                int index = Integer.parseInt((String) vSelectedIndexes.elementAt(i));
+                mDataModel.setItemChecked(index);
+                RadioChoiceItem item = (RadioChoiceItem) mDataModel.getItemAt(index);
+                String moreDetails = (String) ((ChoiceAnswer) mAnswer).getOtherText((String) vSelectedIndexes.elementAt(i));
+                if (moreDetails != null) {
+                    item.setMoreDetailsText(moreDetails);
                 }
             }
-
-            Label spacer = new Label("");
-            spacer.setFocusable(false);
-            addComponent(spacer);
+            ExclusiveChoiceFieldController controller = ExclusiveChoiceFieldController.getInstance();
+            controller.setData( mDataModel, mQuestion.getName(), mMaxQuestionLength);
+            mChoiceList = controller.getListForModel();
+            mChoiceList.addActionListener(mSelectionListener);
+            mChoiceList.addExclusiveChoiceListListener(mListListener);
+            mChoiceList.getStyle().setBorder(Border.createEmpty());
         }
 
-        public void commitValue()
-        {
-            Vector selectedIndexes = new Vector();
-            Hashtable selectedOtherText = new Hashtable();
-
-            for (int i = 0; i < mGroupButton.getButtonCount(); i++)
-            {
-                RadioButton rb = (RadioButton)mGroupButton.getRadioButton(i);
-                if (rb.isSelected())
-                {
-                    selectedIndexes.addElement( Integer.toString(i) );
-                    if( rb.hasOther() ) {
-                        selectedOtherText.put( Integer.toString(i), rb.getOtherText() );
+        public void commitValue() {
+            Vector checkedIndexes = new Vector();
+            Hashtable checkedItemsMoreDetails = new Hashtable();
+            for (int i = 0; i < mDataModel.getSize(); i++) {
+                RadioChoiceItem item = (RadioChoiceItem) mDataModel.getItemAt(i);
+                if (item.isChecked()) {
+                    checkedIndexes.addElement(Integer.toString(i));
+                    if (item.hasMoreDetails()) {
+                        checkedItemsMoreDetails.put(Integer.toString(i), item.getMoreDetails());
                     }
-                    break;
+                    break; // this is radio choice so only 1 option is checked
                 }
             }
-
-            ((ChoiceAnswer)mAnswer).setSelectedIndex( selectedIndexes );
-            ((ChoiceAnswer)mAnswer).setOtherText(selectedOtherText);
-
+            ((ChoiceAnswer) mAnswer).setSelectedIndex(checkedIndexes);
+            ((ChoiceAnswer) mAnswer).setOtherText(checkedItemsMoreDetails);
             mAnswer.setVisited(true);
             mQuestion.setVisited(true);
         }
 
-        public void setEnabled(boolean enabled) {
-            mQuestionTextArea.setEnabled(enabled);
-            for( int i = 0; i<mGroupButton.getButtonCount(); i++)
-            {
-                mGroupButton.getRadioButton(i).setEnabled(enabled);
+        public void handleSelection(Object obj) {
+            List list = (List) obj;
+            Object selectedItem = list.getSelectedItem();
+            if (selectedItem != null) {
+                RadioChoiceItem item = (RadioChoiceItem) list.getSelectedItem();
+                boolean checkedNew = !item.isChecked();
+                item.setChecked(checkedNew);
+                if ( checkedNew && item.hasMoreDetails() && item.getMoreDetails().length() == 0 )
+                    handleMoreDetails(obj);
+                updateSkippedQuestion((ChoiceQuestion) getQuestion(), (ChoiceAnswer) getAnswer());
             }
         }
 
-        public void handleMoreDetails( Object obj )
-        {
-            for( int i = 0; i<mGroupButton.getButtonCount();i++)
-            {
-                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(i);
-                if ((rb.hasOther()) && (rb.isSelected())) {
-                    DetailsForm.show(rb.getText(), rb.getOtherText());
-                    rb.setOtherText(SurveysControl.getInstance().getItemOtherText());
-                }
-                if ( (rb.hasOther()) && (!rb.isSelected()))
-                {
-                    rb.setOtherText("");
+        public void handleMoreDetails(Object obj) {
+            super.handleMoreDetails(obj);
+            RadioChoiceItem item = (RadioChoiceItem)mDataModel.getItemAt(mDataModel.getSelectedIndex());
+            if ( item.hasMoreDetails() ) {
+                if ( item.isChecked() ) {
+                    DetailsForm.show(item.getValue(), item.getMoreDetails());
+                    item.setMoreDetailsText( SurveysControl.getInstance().getItemOtherText() );
                 }
             }
-            commitValue();
-        }
-    }
-
-    class ExclusiveChoiceFieldAutoCompleteUI extends ContainerUI {
-        private ButtonGroup mGroupButton;
-        private DescriptiveField mExclusiveChoiceTextField;
-        private ListModel mDataModel;
-
-        public ExclusiveChoiceFieldAutoCompleteUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
-            super( aQuestion, aAnswer );
+            commitValue(); // TODO remove?
         }
 
         public void focusGained(Component cmpnt) {
             super.focusGained(cmpnt);
-            mExclusiveChoiceTextField.keyPressed(Display.GAME_FIRE);
+            if (cmpnt instanceof List) {
+                form.addGameKeyListener(Display.GAME_RIGHT, mSelectionListener);
+                form.addGameKeyListener(Display.GAME_LEFT, mSelectionListener);
+            }
         }
 
-        public void registerQuestion(){
-            setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName(mQuestion.getName());
-            addComponent(mQuestionTextArea);
-
-            mGroupButton = new ButtonGroup();
-
-            Vector vChoices = ((ChoiceQuestion)mQuestion).getChoices();
-            Vector vOthers = ((ChoiceQuestion)mQuestion).getOthers();
-            int totalChoices = vChoices.size();
-            String[] choices = new String[totalChoices];
-
-            mDataModel = new DefaultListModel();
-            final ManagerOptionSelectableRadio managerOptionSelectableRadio = new ManagerOptionSelectableRadio();
-            int maxQuestionLength = 0;
-            for (int i = 0; i < totalChoices; i++) {
-                    choices[i] = (String) vChoices.elementAt(i);
-                    RadioButton rb = new RadioButton(choices[i]);
-                    mDataModel.addItem(new OptionSelectableRadio(choices[i], managerOptionSelectableRadio));
-                    rb.setOther(((String) vOthers.elementAt(i)).equals("1"));
-                    rb.setOtherText(""); // Initializes with empty string
-                    rb.setFocusable(false);
-                    mGroupButton.add(rb);
-                    maxQuestionLength = (choices[i].length() > maxQuestionLength) ? choices[i].length() : maxQuestionLength;
+        public void focusLost(Component cmpnt) {
+            super.focusLost(cmpnt);
+            if (cmpnt instanceof List) {
+                form.removeGameKeyListener(Display.GAME_RIGHT, mSelectionListener);
+                form.removeGameKeyListener(Display.GAME_LEFT, mSelectionListener);
             }
-
-            mExclusiveChoiceTextField = new DescriptiveField(maxQuestionLength);
-            Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
-            for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
-                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
-                mGroupButton.setSelected(index);
-                ((OptionSelectableRadio) mDataModel.getItemAt(index)).setSelected(true);
-
-                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(index);
-                String other  = (String)((ChoiceAnswer)mAnswer).getOtherText( (String)vSelectedIndexes.elementAt(i ) );
-                if( other != null ) {
-                    rb.setOtherText( other );
-                }
-            }
-
-            final FilterProxyListModel proxyModel = new FilterProxyListModel(mDataModel);
-            proxyModel.setMaxDisplay(-1);//Unlimited.
-
-            final List choice = new List(proxyModel);
-            choice.setFocusable(true);
-            choice.setPaintFocusBehindList(true);
-            choice.setHandlesInput(false);
-            choice.setListCellRenderer(new RadioButtonRenderer(""));
-            choice.addActionListener(new HandleMoreDetails());
-            if( mGroupButton.getSelectedIndex() >=1 )
-            {
-                choice.setSelectedIndex(mGroupButton.getSelectedIndex()-1);
-            }
-
-            mExclusiveChoiceTextField.addDataChangeListener(new DataChangedListener() {
-                public void dataChanged(int arg0, int arg1) {
-                proxyModel.filter(mExclusiveChoiceTextField.getText());
-                }
-            });
-
-            mExclusiveChoiceTextField.addFocusListener(this);
-            Container cList = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-            cList.setFocusable(false);
-            cList.addComponent(choice);
-            cList.setPreferredSize(new Dimension(30, 90));
-
-            addComponent(mExclusiveChoiceTextField);
-            addComponent(cList);
-
-            Label spacer = new Label("");
-            spacer.setFocusable(false);
-            addComponent(spacer);
         }
 
-        public void commitValue()
-        {
-            Vector selectedIndexes = new Vector();
-            Hashtable selectedOtherText = new Hashtable();
+    }
 
-            for (int i = 0; i < mGroupButton.getButtonCount(); i++)
-            {
-                RadioButton rb = (RadioButton)mGroupButton.getRadioButton(i);
-                if (rb.isSelected())
-                {
-                    selectedIndexes.addElement( Integer.toString(i) );
-                    if( rb.hasOther() ) {
-                        selectedOtherText.put( Integer.toString(i), rb.getOtherText() );
-                    }
-                    break;
-                }
-            }
+    class ExclusiveChoiceFieldUI extends ExclusiveChoiceFieldBaseUI {
 
-            ((ChoiceAnswer)mAnswer).setSelectedIndex( selectedIndexes );
-            ((ChoiceAnswer)mAnswer).setOtherText(selectedOtherText);
-            mAnswer.setVisited(true);
-            mQuestion.setVisited(true);
+        public ExclusiveChoiceFieldUI(NDGQuestion aQuestion, NDGAnswer aAnswer) {
+            super(aQuestion, aAnswer);
+        }
+
+        public void registerQuestion() {
+            super.registerQuestion();
+            mChoiceList.addFocusListener(this);
+            mChoiceList.setNextFocusLeft(mChoiceList);
+            mChoiceList.setNextFocusRight(mChoiceList);
+            addComponent(mChoiceList);
         }
 
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
-            mExclusiveChoiceTextField.setEnabled(enabled);
-            for( int i = 0; i<mGroupButton.getButtonCount(); i++)
-            {
-                mGroupButton.getRadioButton(i).setEnabled(enabled);
+            mChoiceList.setEnabled(enabled);
+        }
+    }
+
+    class ExclusiveChoiceFieldAutoCompleteUI extends ExclusiveChoiceFieldBaseUI {
+
+        private static final String mEmpty = "----";
+        private final Button mShowChoiceDialogButton = new Button("-> " + "Show choices" + " <-"); // TODO Localization
+        private final TextArea mSelectedChoice = UIUtils.createTextArea( mEmpty, NDGStyleToolbox.fontSmall );
+        private final ActionListener mChoiceDialogListener = new ActionListener() {
+
+            public void actionPerformed(ActionEvent evt) {
+                Object source = evt.getSource();
+                ExclusiveChoiceFieldController controller = ExclusiveChoiceFieldController.getInstance();
+                if (source == mShowChoiceDialogButton) {
+                    controller.addActionListener(mChoiceDialogListener);
+                    AppMIDlet.getInstance().setDisplayable(ExclusiveChoiceFieldView.class);
+                } else if (source == controller) {
+                    switch ( evt.getKeyEvent() ) {
+                        case ExclusiveChoiceFieldController.FINALIZE:
+                            updateSelectedChoice();
+                            controller.removeActionListener(mChoiceDialogListener);
+                            form.showBack();
+                            break;
+                        case ExclusiveChoiceFieldController.MORE_DETAILS:
+                            handleMoreDetails(source);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unknown action for ExclusiveChoiceField");
+                    }
+                }
             }
+        };
+
+        public ExclusiveChoiceFieldAutoCompleteUI(NDGQuestion aQuestion, NDGAnswer aAnswer) {
+            super(aQuestion, aAnswer);
         }
 
-        public void handleMoreDetails( Object obj )
-        {
-            List list = (List)obj;
-            int filterOffset = list.getSelectedIndex();
-            int selItem = ((FilterProxyListModel)(list.getModel())).getFilterOffset(filterOffset);
+        public void registerQuestion() {
+            super.registerQuestion();
+            // TODO make default button style in NDGLookAndFeel
+            mShowChoiceDialogButton.getSelectedStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+            mShowChoiceDialogButton.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
+            mShowChoiceDialogButton.getSelectedStyle().setBgPainter(new ListFocusBGPainter(mShowChoiceDialogButton));
+            mShowChoiceDialogButton.getSelectedStyle().setBorder(Border.createEmpty());
+            mShowChoiceDialogButton.getSelectedStyle().setMargin(10, 10, 10, 10);
+            mShowChoiceDialogButton.getUnselectedStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
+            mShowChoiceDialogButton.getUnselectedStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
+            mShowChoiceDialogButton.getUnselectedStyle().setBgPainter(new ListBGPainter(mShowChoiceDialogButton));
+            mShowChoiceDialogButton.getUnselectedStyle().setBorder(Border.createEmpty());
+            mShowChoiceDialogButton.getUnselectedStyle().setMargin(10, 10, 10, 10);
+            mShowChoiceDialogButton.setAlignment(CENTER);
+            mShowChoiceDialogButton.addActionListener(mChoiceDialogListener);
 
-            mGroupButton.setSelected(selItem);
-            for( int i = 0; i<mGroupButton.getButtonCount();i++)
-            {
-                RadioButton rb = (RadioButton) mGroupButton.getRadioButton(i);
-                if ((rb.hasOther()) && (rb.isSelected())) {
-                    DetailsForm.show(rb.getText(), rb.getOtherText());
-                    rb.setOtherText(SurveysControl.getInstance().getItemOtherText());
-                }
-                if ( (rb.hasOther()) && (!rb.isSelected()))
-                {
-                    rb.setOtherText("");
-                }
-            }
-            commitValue();
+            addComponent(mSelectedChoice);
+            addComponent(mShowChoiceDialogButton);
+
+            updateSelectedChoice();
+        }
+
+        public void setEnabled(boolean enabled) {
+            mQuestionTextArea.setEnabled(enabled);
+            mShowChoiceDialogButton.setEnabled(enabled);
+        }
+
+        public void updateSelectedChoice() {
+            RadioChoiceItem selectedItem = (RadioChoiceItem)mDataModel.getCheckedItem();
+            mSelectedChoice.setText( selectedItem.toString().length() == 0 ? mEmpty : selectedItem.toString());
         }
     }
 
@@ -752,9 +714,15 @@ abstract class ContainerUI extends Container implements FocusListener {
     class ChoiceFieldUI extends ContainerUI{
         private Vector mGroupButton;
         private CheckBox mCurrentlyFocused = null;
-        private ActionListener mRightKeyListener = new ActionListener() {
+        private ActionListener mActionListener = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                handleMoreDetails(mCurrentlyFocused);
+                if (evt.getSource() == form && evt.getKeyEvent() == Display.GAME_RIGHT) {
+                    handleMoreDetails(mCurrentlyFocused);
+                } else if ( evt.getSource() instanceof CheckBox ) {
+                    CheckBox checkbox = (CheckBox)evt.getSource();
+                    if (checkbox.isSelected() && checkbox.hasOther() && checkbox.getOtherText().length() == 0)
+                        handleMoreDetails(checkbox);
+                }
             }
         };
         private PointerListener mPointerListener = new PointerListener() {
@@ -770,7 +738,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName(mQuestion.getName());
+            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
 
             addComponent(mQuestionTextArea);
 
@@ -788,8 +756,9 @@ abstract class ContainerUI extends Container implements FocusListener {
                     pointerListener = mPointerListener;
                 CheckBox cb = new CheckBox(choices[i], pointerListener);
                 cb.setOther(canHaveOther);
-                cb.setOtherText(""); // Initializes with empty string
+                cb.setOtherText("");
                 cb.addFocusListener(this); // Controls when changing to a new question
+                cb.addActionListener(mActionListener);
                 cb.setNextFocusRight(cb);
                 cb.setNextFocusLeft(cb);
                 mGroupButton.addElement(cb);
@@ -798,7 +767,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
             Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
             for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
-                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
                 ((CheckBox) mGroupButton.elementAt(i)).setSelected(true);
 
                 if ( ((ChoiceAnswer)mAnswer).getOtherText( String.valueOf(i) )!= null ) {
@@ -815,28 +783,26 @@ abstract class ContainerUI extends Container implements FocusListener {
             super.focusGained(cmpnt);
             if ( cmpnt instanceof CheckBox ) {
                 mCurrentlyFocused = (CheckBox)cmpnt;
-                form.addGameKeyListener(Display.GAME_RIGHT, mRightKeyListener);
+                form.addGameKeyListener(Display.GAME_RIGHT, mActionListener);
             }
         }
         public void focusLost(Component cmpnt) {
             super.focusLost(cmpnt);
             if ( cmpnt instanceof CheckBox ) {
-                form.removeGameKeyListener(Display.GAME_RIGHT, mRightKeyListener);
+                form.removeGameKeyListener(Display.GAME_RIGHT, mActionListener);
+                mCurrentlyFocused = null;
             }
         }
 
-        public void commitValue()
-        {
+        public void commitValue() {
             Vector selectedIndexes = new Vector();
             Hashtable othersText = new Hashtable();
 
-            for (int i = 0; i < mGroupButton.size(); i++)
-            {
+            for ( int i = 0; i < mGroupButton.size(); i++ ) {
                 CheckBox cb = (CheckBox) mGroupButton.elementAt(i);
-                if (cb.isSelected())
-                {
+                if ( cb.isSelected() ) {
                     selectedIndexes.addElement( Integer.toString(i) );
-                    if( cb.hasOther() ) {
+                    if ( cb.hasOther() ) {
                         othersText.put( Integer.toString(i), cb.getOtherText() );
                     }
                 }
@@ -850,23 +816,18 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
-            for( int i = 0; i< mGroupButton.size(); i++)
-            {
+            for ( int i = 0; i< mGroupButton.size(); i++) {
                 ((CheckBox)mGroupButton.elementAt(i)).setEnabled(enabled);
             }
         }
 
-        public void handleMoreDetails( Object obj )
-        {
-            CheckBox cb = (CheckBox)obj;
-            if ((cb.hasOther()) && (cb.isSelected()))
-            {
-               DetailsForm.show(cb.getText(), cb.getOtherText());
-               cb.setOtherText(SurveysControl.getInstance().getItemOtherText());
-            }
-            if ((cb.hasOther()) && (!cb.isSelected()))
-            {
-                 cb.setOtherText("");
+        public void handleMoreDetails( Object obj ) {
+            if (obj == null)
+                return;
+            CheckBox choiceCheckbox = (CheckBox)obj;
+            if ( (choiceCheckbox.hasOther()) && (choiceCheckbox.isSelected()) ) {
+               DetailsForm.show(choiceCheckbox.getText(), choiceCheckbox.getOtherText());
+               choiceCheckbox.setOtherText(SurveysControl.getInstance().getItemOtherText());
             }
         }
    }
@@ -905,7 +866,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             ImageData imgData = null;
 
 
-            TextArea questionText = createQuestionName( mQuestion.getName() );
+            TextArea questionText = UIUtils.createQuestionName( mQuestion.getName() );
             addComponent(questionText);
             Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
             maxPhotoCount.getStyle().setFont( NDGStyleToolbox.fontSmall );
@@ -1006,7 +967,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName( mQuestion.getName() );
+            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
 
             addComponent(mQuestionTextArea);
             mTimeTextField = new TimeField(TimeField.HHMM1);
@@ -1049,7 +1010,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = createQuestionName(mQuestion.getName());
+            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
 
             addComponent(mQuestionTextArea);
             mTimeTextField = new TimeField(TimeField.HHMM);
@@ -1149,168 +1110,148 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
     }
 
-  class HandleMoreDetails implements ActionListener {
+    class HandleMoreDetails implements ActionListener {
 
-    public void actionPerformed(ActionEvent evt) {
-            setModifiedInterview(true);
-            Object cmd = evt.getSource();
-            if (cmd instanceof RadioButton)
-            {
-                ContainerUI parent = (ContainerUI)((RadioButton)cmd).getParent();
-                parent.handleMoreDetails(cmd);
-                if ( parent instanceof ExclusiveChoiceFieldUI
-                  && parent.getQuestion() instanceof ChoiceQuestion )
+        public void actionPerformed(ActionEvent evt) {
+                setModifiedInterview(true);
+                Object cmd = evt.getSource();
+                if (cmd instanceof RadioButton)
                 {
-                    updateSkippedQuestion( (ChoiceQuestion)((ExclusiveChoiceFieldUI)parent).getQuestion(),
-                                           (ChoiceAnswer)((ExclusiveChoiceFieldUI)parent).getAnswer() );
+                    ContainerUI parent = (ContainerUI)((RadioButton)cmd).getParent();
+                    parent.handleMoreDetails(cmd);
                 }
-            }
-            else if((cmd instanceof List))
-            {
-                final List list = (List) cmd;
-                if (list.getRenderer() instanceof CheckBox) {
-                    ((OptionSelectable) list.getSelectedItem()).toggleSelection();
-                    //Component[] group = (Component[]) vGroups.elementAt(focusIndex);
-                    //((CheckBox) group[list.getSelectedIndex()]).setSelected(((OptionSelectable) list.getSelectedItem()).getSelected());
-                } else if (list.getRenderer() instanceof RadioButton) {
-                    Object obj = list.getSelectedItem();
-                    if( obj != null )
-                    {
-                        ((OptionSelectableRadio) list.getSelectedItem()).setSelected(true);
-                        ExclusiveChoiceFieldAutoCompleteUI parent = (ExclusiveChoiceFieldAutoCompleteUI)list.getParent().getParent();
-                        parent.handleMoreDetails(list);
-                        updateSkippedQuestion( (ChoiceQuestion)parent.getQuestion(),
-                                               (ChoiceAnswer)parent.getAnswer() );
-                    }
-                }
-            }
         }
     }
 
-   class ManagerOptionSelectableRadio {
+    class MultipleChoiceItem { // TODO use it in ChoiceField
 
-        private Vector options = new Vector();
+        private boolean mSelected = false;
+        private String mValue;
 
-        public void addOption(OptionSelectableRadio option) {
-            if (!options.contains(option)) {
-                options.addElement(option);
-            }
-        }
-        //todo remove from vector
-
-        public void selectOption(OptionSelectableRadio option) {
-            if (option.getSelected()) {
-                Enumeration options = this.options.elements();
-                while (options.hasMoreElements()) {
-                    OptionSelectableRadio opt = (OptionSelectableRadio) options.nextElement();
-                    if (!opt.toString().equals(option.toString()))
-                    {
-                        opt.setSelected(false);
-                    }
-                }
-            }
-        }
-    }
-
-   class OptionSelectable {
-
-        private boolean selected = false;
-        private String value;
-
-        public OptionSelectable(String value) {
-            this.value = value;
+        public MultipleChoiceItem(String value) {
+            this.mValue = value;
         }
 
-        //public void toggleSelection() {
         public boolean toggleSelection() {
-            this.selected = !selected;
-            //return selected;
-            return selected;
+            this.mSelected = !mSelected;
+            return mSelected;
         }
 
         public String toString() {
-            return value;
+            return mValue;
         }
 
         public boolean getSelected() {
-            return selected;
+            return mSelected;
         }
     }
 
-    class OptionSelectableRadio {
+    public static class RadioChoiceModel extends DefaultListModel {
 
-        private boolean selected = false;
-        private String value;
-        private ManagerOptionSelectableRadio group;
+        int mCheckedIndex = -1;
 
-        public OptionSelectableRadio(String value, ManagerOptionSelectableRadio group) {
-            this.value = value;
-            this.group = group;
-            this.group.addOption(this);
+        public void addItem(Object item) {
+            String value = (String) item;
+            RadioChoiceItem radioItem = new RadioChoiceItem(value, this);
+            super.addItem(radioItem);
         }
 
-        //public void toggleSelection() {
-        public boolean toggleSelection() {
-            this.selected = !selected;
-            if (this.selected) {
+        public void addItem(RadioChoiceItem radioItem) {
+            super.addItem(radioItem);
+        }
 
-                group.selectOption(this);
+        public void setItemChecked(RadioChoiceItem checkedItem, boolean checked) {
+            for (int index = 0; index < getSize(); index++) {
+                RadioChoiceItem item = (RadioChoiceItem) getItemAt(index);
+                if ( item == checkedItem ) {
+                    if ( checked )
+                        mCheckedIndex = index;
+                    else
+                        mCheckedIndex = -1;
+                    item.updateChecked(checked);
+                } else {
+                    item.updateChecked(false);
+                }
             }
-            return selected;
+        }
+
+        public void setItemChecked(int index) {
+            RadioChoiceItem item = (RadioChoiceItem) getItemAt(index);
+            setItemChecked(item, true);
+        }
+
+        public RadioChoiceItem getCheckedItem() {
+            if ( mCheckedIndex >= 0 )
+                return (RadioChoiceItem)getItemAt(mCheckedIndex);
+            else
+                return new RadioChoiceItem("", null);
+        }
+
+    }
+
+    public static class RadioChoiceItem {
+
+        private boolean mIsChecked = false;
+        private final String mValue;
+        private final RadioChoiceModel mModel;
+        private String mDetailedValue = null;
+
+        public RadioChoiceItem(String value, RadioChoiceModel model) {
+            mValue = value;
+            mModel = model;
         }
 
         public String toString() {
-            return value;
-        }
-
-        public boolean getSelected() {
-            return selected;
-        }
-
-        public void setSelected(boolean selected) {
-            this.selected = selected;
-            if (this.selected) {
-                group.selectOption(this);
+            String result = mValue;
+            if ( hasMoreDetails() && getMoreDetails().length() != 0 ) {
+                result = result + " : " + getMoreDetails();
             }
+            return result;
+        }
+
+        public String getValue() {
+            return mValue;
+        }
+
+        public boolean isChecked() {
+            return mIsChecked;
+        }
+
+        public void setChecked(boolean selected) {
+            mIsChecked = selected;
+            mModel.setItemChecked(this, mIsChecked);
+        }
+
+        public boolean toggleSelection() {
+            setChecked(!mIsChecked);
+            return mIsChecked;
+        }
+
+        /**
+         * Does not update model
+         */
+        public void updateChecked(boolean selected) {
+            mIsChecked = selected;
+        }
+
+        public boolean hasMoreDetails() {
+            return (mDetailedValue != null);
+        }
+
+        public void setMoreDetailsText(String moreDetails) {
+            mDetailedValue = moreDetails;
+        }
+
+        public String getMoreDetails() {
+            return mDetailedValue;
         }
 
         public boolean equals(Object obj) {
-            return value.equals(obj);
+            return mValue.equals(obj);
         }
 
         public int hashCode() {
-            return value.hashCode();
-        }
-    }
-
-    class RadioButtonRenderer extends RadioButton implements ListCellRenderer {
-
-        public RadioButtonRenderer(String text) {
-            super(text);
-        }
-
-        public Component getListCellRendererComponent(com.sun.lwuit.List list, Object o, int i, boolean isSelected) {
-            if( o == null )
-            {
-                return this;
-            }
-            setSelected(((OptionSelectableRadio) o).getSelected());
-            setText(o.toString());
-
-            if (isSelected) {
-                setFocus(true);
-                getStyle().setBgPainter(focusBGPainter);
-//                getStyle().setFont( NDGStyleToolbox.fontLargeBold );
-            } else {
-                setFocus(false);
-                getStyle().setBgPainter(bgPainter);
-//                getStyle().setFont( NDGStyleToolbox.fontLarge );
-            }
-            return this;
-        }
-
-        public Component getListFocusComponent(com.sun.lwuit.List list) {
-            return this;
+            return mValue.hashCode();
         }
     }
 }

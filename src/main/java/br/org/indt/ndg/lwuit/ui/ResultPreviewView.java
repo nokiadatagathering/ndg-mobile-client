@@ -28,7 +28,6 @@ import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
-import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
@@ -37,7 +36,6 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.GridLayout;
-import com.sun.lwuit.plaf.UIManager;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -54,8 +52,6 @@ public class ResultPreviewView extends Screen implements ActionListener {
     private Font questionFont = NDGStyleToolbox.fontMedium;
     private Font answerFont = NDGStyleToolbox.fontMedium;
     private Survey survey;
-    int labelheight = 18;
-    int labelheightspace = 8;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
 
@@ -71,9 +67,8 @@ public class ResultPreviewView extends Screen implements ActionListener {
     }
 
     protected void customize() {
-
-        form.removeAllCommands();
         form.removeAll();
+        form.removeAllCommands();
 
         form.setCyclicFocus(false);
 
@@ -81,7 +76,6 @@ public class ResultPreviewView extends Screen implements ActionListener {
         form.addCommand(SendResultCommand.getInstance().getCommand());
         form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
         form.addCommand(OpenResultCommand.getInstance().getCommand());
-        form.setSmoothScrolling(true);
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {
@@ -96,8 +90,7 @@ public class ResultPreviewView extends Screen implements ActionListener {
 
         for ( int categoryIndex=0; categoryIndex < categories.size(); categoryIndex++) {
             Category category = (Category) categories.elementAt( categoryIndex );
-            Label labelCategory = new Label(category.getName());
-            labelCategory.getStyle().setFont(categoryFont);
+            TextArea labelCategory = UIUtils.createTextArea( category.getName(), categoryFont );
             labelCategory.setSelectedStyle( labelCategory.getUnselectedStyle() );
             setPreferredHeight(labelCategory, categoryFont.getHeight());
 
@@ -110,15 +103,14 @@ public class ResultPreviewView extends Screen implements ActionListener {
             int subCategoriesCount = categoryAnswer.getSubcategoriesCount();
 
             if( subCategoriesCount == 0 ) {
-                TextArea labelSubCategory = createWrappedTextArea( "Category has been disabled", categoryFont );
+                TextArea labelSubCategory = UIUtils.createTextArea( "Category has been disabled", categoryFont );
                 form.addComponent( labelSubCategory );
             }
 
 
             for( int subCatIndex = 0; subCatIndex < subCategoriesCount; subCatIndex++ ) {
                 if( category instanceof CategoryConditional ) {
-                    Label labelSubCategory = new Label( "Sub-category: #" + (subCatIndex + 1) );//TODO localize
-                    labelSubCategory.getStyle().setFont(categoryFont);
+                    TextArea labelSubCategory = UIUtils.createTextArea( "Sub-category: #" + (subCatIndex + 1), categoryFont );//TODO localize
                     labelSubCategory.setSelectedStyle( labelSubCategory.getUnselectedStyle() );
                     form.addComponent( labelSubCategory );
                 }
@@ -129,9 +121,13 @@ public class ResultPreviewView extends Screen implements ActionListener {
                     NDGQuestion question = (NDGQuestion)questions.elementAt( questionIndex );
                     NDGAnswer answer = (NDGAnswer)table.get( String.valueOf( question.getIdNumber()));
 
-                    TextArea componentQuestion = createWrappedTextArea( question.getName() + ":", questionFont );
-                    componentQuestion.getStyle().setFont(questionFont);
+                    TextArea componentQuestion = UIUtils.createTextArea( question.getName() + ":",
+                                                                         questionFont,
+                                                                         NDGStyleToolbox.getInstance().questionPreviewColor );
+                    componentQuestion.getStyle().setFgColor( 0x000000 );
                     Component componentAnswer = getFormattedAnswer(question, answer);
+                    componentAnswer.getStyle().setFgColor( NDGStyleToolbox.getInstance().answerPreviewColor );
+                    componentAnswer.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().answerPreviewColor );
                     Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
                     container.addComponent(componentQuestion);
                     container.addComponent(componentAnswer);
@@ -139,8 +135,11 @@ public class ResultPreviewView extends Screen implements ActionListener {
                 }
             }
             Label space = new Label(" ");
-            setPreferredHeight(space, labelheightspace);
+            setPreferredHeight(space, categoryFont.getHeight());
             form.addComponent(space);
+        }
+        if( form.getContentPane().getComponentCount() > 0 ) {
+            form.getContentPane().getComponentAt(0).requestFocus();
         }
     }
 
@@ -190,7 +189,7 @@ public class ResultPreviewView extends Screen implements ActionListener {
                             choiceAnswer+= " ";
                         }
                     }
-                    componentAnswer = createWrappedTextArea(choiceAnswer, answerFont);
+                    componentAnswer = UIUtils.createTextArea(choiceAnswer, answerFont);
 
                 } else {
                     try {
@@ -200,17 +199,17 @@ public class ResultPreviewView extends Screen implements ActionListener {
                         if( other!= null && other.length()>0) {
                             choiceAnswer += "="+other;
                         }
-                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont);
+                        componentAnswer = UIUtils.createTextArea(choiceAnswer, answerFont);
                     } catch ( NumberFormatException ex ) {
-                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont); // empty question
+                        componentAnswer = UIUtils.createTextArea(choiceAnswer, answerFont); // empty question
                     } catch ( ArrayIndexOutOfBoundsException ex ) {
-                        componentAnswer = createWrappedTextArea(choiceAnswer, answerFont); // empty question
+                        componentAnswer = UIUtils.createTextArea(choiceAnswer, answerFont); // empty question
                     }
                 }
             } else if ( aQuestion instanceof DateQuestion ) {
                 DateField dfDate = new DateField(DateField.DDMMYYYY);
                 dfDate.setDate( new Date( ((DateAnswer)aAnswer).getDate() ) );
-                componentAnswer = new Label(dfDate.getText());
+                componentAnswer = UIUtils.createTextArea( dfDate.getText(), answerFont );
             }
             else if ( aQuestion instanceof TimeQuestion ) {
                 TimeQuestion timeQuestion = (TimeQuestion) aQuestion;
@@ -229,12 +228,12 @@ public class ResultPreviewView extends Screen implements ActionListener {
                 }else if(timeAnswer.getAmPm24() == 2){
                     convention = " pm";
                 }
-                componentAnswer = new Label(tfDate.getText()+convention);
+                componentAnswer = UIUtils.createTextArea( tfDate.getText()+convention, answerFont );
             }
             else if ( aQuestion instanceof NumericQuestion ) {
-                componentAnswer = createWrappedTextArea(((NumericAnswer)aAnswer).getValueString(), answerFont) ;
+                componentAnswer = UIUtils.createTextArea(((NumericAnswer)aAnswer).getValueString(), answerFont) ;
             } else {
-                componentAnswer = createWrappedTextArea((String)aAnswer.getValue(), answerFont);
+                componentAnswer = UIUtils.createTextArea((String)aAnswer.getValue(), answerFont);
             }
         }
         return componentAnswer;
@@ -250,30 +249,5 @@ public class ResultPreviewView extends Screen implements ActionListener {
             DeleteCurrentResultCommand.getInstance().execute(null);
         else if (cmd == SendResultCommand.getInstance().getCommand())
             SendResultCommand.getInstance().execute(null);
-    }
-
-        private TextArea createWrappedTextArea(String name, Font font) {
-        TextArea item = new TextArea();
-        item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
-        item.setSelectedStyle( item.getUnselectedStyle() );
-        item.getStyle().setFont(font);
-        item.setEditable(false);
-        item.setFocusable(false);
-        item.setColumns(20);
-        item.setGrowByContent(true);
-        item.setText(name);
-
-        // code below seems uncecessary
-        int pw = Display.getInstance().getDisplayWidth();
-        int w = item.getStyle().getFont().stringWidth(name);
-        if (w > pw)
-        {
-            item.setRows(2);
-        }
-        else
-        {
-            item.setRows(1);
-        }
-        return item;
     }
 }

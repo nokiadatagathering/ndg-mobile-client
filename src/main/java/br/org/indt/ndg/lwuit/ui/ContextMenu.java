@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
@@ -14,6 +15,7 @@ import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
 import com.sun.lwuit.plaf.Border;
+import com.sun.lwuit.plaf.Style;
 
 public abstract class ContextMenu {
 
@@ -22,6 +24,7 @@ public abstract class ContextMenu {
     protected List optionsList = null;
     protected int indexList;
     protected int sizeList;
+    private boolean mIgnoreFirstRelease = false; // fix for issue when menu is activated with long press
 
     protected int displayWidth, displayHeight;
 
@@ -38,15 +41,33 @@ public abstract class ContextMenu {
         menuDialog.setScrollable(true);
         menuDialog.setLayout(new BorderLayout());
 
-        optionsList = new List();
+        optionsList = new List() {
+
+            public void pointerPressed(int x, int y) {
+                super.pointerPressed(x, y);
+                mIgnoreFirstRelease = false;
+            }
+
+            public void pointerReleased(int x, int y) {
+                if ( mIgnoreFirstRelease )
+                    mIgnoreFirstRelease = false;
+                else
+                    super.pointerReleased(x, y);
+            }
+        };
         optionsList.getStyle().setBorder(Border.createEmpty());
         optionsList.setFixedSelection(List.FIXED_NONE_CYCLIC);
 
         setTransitions();
         buildMenu();
+
+        Style style = menuDialog.getSoftButtonStyle();
+        style.setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        menuDialog.setSoftButtonStyle(style);
     }
 
     public void show( int leftMargin, int topMargin ) {
+        mIgnoreFirstRelease = true;
         leftMargin += 5; // offset to avoid automatic selection of item that shows under the pointer
         int rightMargin = getHorizontalMargin() - leftMargin;
         int bottomMargin = getVerticalMargin() - topMargin;
@@ -152,27 +173,32 @@ public abstract class ContextMenu {
     }
 
     protected int getMenuHeight() {
-        int fontHigh = NDGStyleToolbox.getInstance().menuStyle.selectedFont.getHeight(); //this font is used in cell
-        MenuCellRenderer rendererItem = (MenuCellRenderer)optionsList.getRenderer();
         int height = menuDialog.getStyle().getMargin( Component.BOTTOM )
                 + menuDialog.getStyle().getMargin( Component.TOP )
                 + menuDialog.getStyle().getPadding( Component.BOTTOM )
                 + menuDialog.getStyle().getPadding( Component.TOP )
+                + menuDialog.getBottomGap()
                 + optionsList.getStyle().getMargin( Component.BOTTOM )
                 + optionsList.getStyle().getMargin( Component.TOP )
                 + optionsList.getStyle().getPadding( Component.BOTTOM )
                 + optionsList.getStyle().getPadding( Component.TOP )
-                + optionsList.size() * ( fontHigh
-                                        + rendererItem.getStyle().getPadding(Component.BOTTOM)
-                                        + rendererItem.getStyle().getPadding(Component.TOP)
-                                        + rendererItem.getStyle().getMargin(Component.BOTTOM)
-                                        + rendererItem.getStyle().getMargin(Component.TOP)
-                                        + 2 * rendererItem.getStyle().getBorder().getThickness()
-                                        + optionsList.getItemGap() )
-                + menuDialog.getBottomGap()
+                + optionsList.size() * (getSingleOptionHeight() + optionsList.getItemGap())
                 + 2 * optionsList.getBorderGap()
                 + optionsList.getBottomGap()
+
                 + 15; // magic number, could not find all height influencing factors
+        return height;
+    }
+
+    protected int getSingleOptionHeight() {
+        int fontHigh = NDGStyleToolbox.getInstance().menuStyle.selectedFont.getHeight(); //this font is used in cell
+        MenuCellRenderer rendererItem = (MenuCellRenderer)optionsList.getRenderer();
+        int height = fontHigh
+                     + rendererItem.getStyle().getPadding(Component.BOTTOM)
+                     + rendererItem.getStyle().getPadding(Component.TOP)
+                     + rendererItem.getStyle().getMargin(Component.BOTTOM)
+                     + rendererItem.getStyle().getMargin(Component.TOP)
+                     + 2 * rendererItem.getStyle().getBorder().getThickness();
         return height;
     }
 

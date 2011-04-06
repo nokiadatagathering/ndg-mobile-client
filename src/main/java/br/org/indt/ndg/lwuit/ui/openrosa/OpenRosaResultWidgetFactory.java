@@ -1,20 +1,16 @@
 package br.org.indt.ndg.lwuit.ui.openrosa;
 
+import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
 import com.nokia.xfolite.xml.dom.Element;
 import com.nokia.xfolite.xml.dom.WidgetFactory;
 import com.nokia.xfolite.xml.xpath.XPathNSResolver;
-import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
-import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
-import com.sun.lwuit.TextArea;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.sun.lwuit.plaf.UIManager;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  *
@@ -22,16 +18,12 @@ import java.util.Vector;
  */
 public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolver{
 
-    private Container rootContainer = null;
+    private static OpenRosaResourceManager resourceManager = new OpenRosaResourceManager();
     protected static Hashtable resources = new Hashtable();
 
-    private static OpenRosaResourceManager resourceManager = new OpenRosaResourceManager();
-
+    private Container rootContainer = null;
     private Font questionFont = NDGStyleToolbox.fontMedium;
     private Font answerFont = NDGStyleToolbox.fontMedium;
-
-    int labelheight = 18;
-    int labelheightspace = 8;
 
     public OpenRosaResultWidgetFactory(Container cont){
         rootContainer = cont;
@@ -48,13 +40,12 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
         if (el instanceof BoundElement) {
             binding = (BoundElement) el;
         }
-        Component comp = null;
 
-        if( tagName == "input"  || tagName == "secret"){
+        if( tagName.equals("input")  || tagName.equals("secret")){
             addInputPreview(binding);
-        } else if (tagName == "select" || tagName == "select1") {
+        } else if (tagName.equals("select") || tagName.equals("select1")) {
             addSelectPreview(binding);
-        } else if (tagName == "value") {
+        } else if (tagName.equals("value")) {
             addTextValue(el);
         }
     }
@@ -74,7 +65,7 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
 
         DataTypeBase a = element.getDataType();
         if (a != null && a.getBaseTypeID() == DataTypeBase.XML_SCHEMAS_UNKNOWN) {
-            questionValue = "Unsuportted type";
+            questionValue = "Unsuportted type";//TODO Localize
         } else{
             questionValue = element.getStringValue();
         }
@@ -83,16 +74,16 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
     }
 
     private void addQuestionComponent(String label, String value){
-        Container container = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-        container.addComponent(createWrappedTextArea(label + ":", questionFont));
-        container.addComponent(createWrappedTextArea( value, answerFont));
+        Container container = new Container( new BoxLayout( BoxLayout.Y_AXIS ) );
+        container.addComponent( UIUtils.createTextArea( label + ":", questionFont, NDGStyleToolbox.getInstance().questionPreviewColor) );
+        container.addComponent( UIUtils.createTextArea( value, answerFont, NDGStyleToolbox.getInstance().answerPreviewColor ) );
 
         rootContainer.addComponent(container);
     }
 
     public void addTextValue(Element el){
         Element parent = (Element)el.getParentNode();
-        if(parent.getNodeName() != "text"){
+        if(!parent.getNodeName().equals("text")){
             return;
         }
 
@@ -101,7 +92,6 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
 
         resourceManager.put(id, value);
     }
-
 
     public void removingElement(Element el) {
     }
@@ -113,32 +103,6 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
     }
 
     public String lookupNamespaceURI(String prefix) {
-                return "";
+        return "";
     }
-
-    private TextArea createWrappedTextArea(String name, Font font) {
-        TextArea item = new TextArea();
-        item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
-        item.setSelectedStyle( item.getUnselectedStyle() );
-        item.getStyle().setFont(font);
-        item.setEditable(false);
-        item.setFocusable(false);
-        item.setColumns(20);
-        item.setGrowByContent(true);
-        item.setText(name);
-
-        // code below seems uncecessary
-        int pw = Display.getInstance().getDisplayWidth();
-        int w = item.getStyle().getFont().stringWidth(name);
-        if (w > pw)
-        {
-            item.setRows(2);
-        }
-        else
-        {
-            item.setRows(1);
-        }
-        return item;
-    }
-
 }

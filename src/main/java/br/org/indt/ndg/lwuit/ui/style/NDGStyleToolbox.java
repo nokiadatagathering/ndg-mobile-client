@@ -36,6 +36,9 @@ public class NDGStyleToolbox {
     public int focusGainColor;
     public int focusLostColor;
 
+    public int questionPreviewColor;
+    public int answerPreviewColor;
+
     public Style unselectedStyle = new Style();
     public Style selectedStyle = new Style();
 
@@ -59,11 +62,13 @@ public class NDGStyleToolbox {
 
         focusGainColor = UIManager.getInstance().getComponentStyle("").getFgColor();
         focusLostColor = UIManager.getInstance().getComponentStyle("Form").getFgColor();
+        questionPreviewColor = UIManager.getInstance().getComponentStyle("PreviewQuestion").getFgColor();
+        answerPreviewColor = UIManager.getInstance().getComponentStyle("PreviewAnswer").getFgColor();
 
         fontSizeSetting = DEFAULT;
     }
 
-    public void initFonts() {
+    public final void initFonts() {
         fontMedium = getFont(FONTSANS, mediumSize);
         fontSmall = getFont(FONTSANS, smallSize);
         fontMediumBold = getFont(FONTSANSBOLD, mediumSize);
@@ -187,9 +192,9 @@ public class NDGStyleToolbox {
                             NDGStyleToolbox.getInstance().menuStyle.unselectedFont =
                                 NDGStyleToolbox.getInstance().dialogTitleStyle.selectedFont =
                                     NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont =
-                                        NDGStyleToolbox.getInstance().fontMedium =
-                                            NDGStyleToolbox.getInstance().fontMediumBold =
-                                                NDGStyleToolbox.getInstance().fontSmall =
+                                        NDGStyleToolbox.fontMedium =
+                                            NDGStyleToolbox.fontMediumBold =
+                                                NDGStyleToolbox.fontSmall =
                                                     newFont;
     }
 }

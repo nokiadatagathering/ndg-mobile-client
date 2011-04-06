@@ -4,6 +4,7 @@ import br.org.indt.ndg.lwuit.control.CapturePhotoCommand;
 import br.org.indt.ndg.lwuit.ui.*;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Camera;
+import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.MediaComponent;
@@ -45,9 +46,8 @@ public class ViewFinderForm extends Screen implements ActionListener {
     }
 
     private void capturePicture(){
-        int width = AppMIDlet.getInstance().getSettings().getStructure().getPhotoX();
-        int height = AppMIDlet.getInstance().getSettings().getStructure().getPhotoY();
-        byte[]  picture = Camera.getInstance().takePicture(width, height);
+        PhotoResolution resolution = AppMIDlet.getInstance().getSettings().getStructure().getPhotoResolution();
+        byte[]  picture = Camera.getInstance().takePicture(resolution.getWidth(), resolution.getHeight());
         NDGCameraManager.getInstance().updatePhotoForm(picture);
         Camera.getInstance().stopCamera();
     }

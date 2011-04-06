@@ -253,6 +253,9 @@ public class Resources {
     public static final String NDG_PROPERTIES_FILE = "ndg.properties";
     public static final String XFORM = "xform";
 
+    public static String NDG_STANDARD_NAME = "NDG Protocol";
+    public static String OPENROSA_STANDARD_NAME = "OpenRosa Protocol";
+
     /** Messages */
     public static final String MSG_SERVER_CANT_WRITE_RESULTS = Local.getText(Local.QTJ_MSG_SERVER_CANT_WRITE_RESULTS);
     //public static final String CONT_WITHOUT_SAVE = Local.getText(Local.CONT_WITHOUT_SAVE);

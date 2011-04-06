@@ -27,7 +27,7 @@ public class SurveyListContextMenu extends ContextMenu {
     }
 
     public void show( int leftMargin, int topMargin ) {
-        super.show(getHorizontalMargin(), topMargin );
+        super.show(getHorizontalMargin(), topMargin - getSingleOptionHeight()/2 );
     }
 
 }

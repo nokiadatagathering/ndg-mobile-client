@@ -1,8 +1,11 @@
 package br.org.indt.ndg.lwuit.extended;
 
+import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.geom.Rectangle;
@@ -14,15 +17,12 @@ import com.sun.lwuit.painter.BackgroundPainter;
  */
 public class RadioButton extends com.sun.lwuit.RadioButton implements FocusListener {
 
-    protected Painter focusBGPainter;
-    protected BackgroundPainter bgPainter;
-    private boolean hasOther;
-    private String txtOther;
+    protected final Painter focusBGPainter = new FocusBGPainter();
+    protected final BackgroundPainter bgPainter = new BackgroundPainter(this);
+    private boolean mUseMoreDetails = false;
 
     public RadioButton(String text) {
         super(text);
-        focusBGPainter = new FocusBGPainter();
-        bgPainter = new BackgroundPainter(this);
         addFocusListener(this);
         getSelectedStyle().setFont(NDGStyleToolbox.fontMediumBold, false);
         getUnselectedStyle().setFont(NDGStyleToolbox.fontMedium, false);
@@ -38,20 +38,22 @@ public class RadioButton extends com.sun.lwuit.RadioButton implements FocusListe
         getStyle().setFont( NDGStyleToolbox.fontMedium );
     }
 
-    public void setOther(boolean _val) {
-        hasOther = _val;
+    public void useMoreDetails(boolean _val) {
+        mUseMoreDetails = _val;
     }
 
-    public boolean hasOther() {
-        return hasOther;
+    public boolean hasMoreDetails() {
+        return mUseMoreDetails;
     }
 
-    public void setOtherText(String _val) {
-        txtOther = _val;
-    }
-
-    public String getOtherText() {
-        return txtOther;
+    public void paint(Graphics g) {
+        super.paint(g);
+        if ( isSelected() && hasMoreDetails() ) {
+            Image arrow = NDGLookAndFeel.getRightContextMenuImage(getWidth());
+            int x = getX() + getWidth() - (int)(arrow.getWidth()*1.5);
+            int y = getY() + (getHeight() - arrow.getHeight())/2;
+            g.drawImage(arrow, x, y);
+        }
     }
 
     class FocusBGPainter implements Painter {
@@ -72,4 +74,5 @@ public class RadioButton extends com.sun.lwuit.RadioButton implements FocusListe
             g.fillRect(rect.getX()+width-1, rect.getY()+height-1, 1, 1);
         }
     }
+
 }

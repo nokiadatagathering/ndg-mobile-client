@@ -18,7 +18,7 @@ import com.sun.lwuit.events.ActionListener;
  *
  * @author damian.janicki
  */
-public class OpenRosaResultView extends OpenRosaScreen implements UserInterface, ActionListener {
+public class OpenRosaResultPreviewView extends OpenRosaScreen implements UserInterface, ActionListener {
 
     private Container rootContainer;
 
@@ -57,8 +57,6 @@ public class OpenRosaResultView extends OpenRosaScreen implements UserInterface,
         setTitle(title1, title2);
         form.addComponent(rootContainer);
 
-        form.setSmoothScrolling(true);
-
         createXFormsDocument();
 
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
@@ -79,5 +77,4 @@ public class OpenRosaResultView extends OpenRosaScreen implements UserInterface,
             SendResultCommand.getInstance().execute(null);
         }
     }
-
 }

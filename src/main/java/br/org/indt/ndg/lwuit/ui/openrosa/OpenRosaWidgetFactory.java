@@ -6,6 +6,7 @@ import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.BoundElement;
@@ -19,7 +20,6 @@ import com.nokia.xfolite.xml.xpath.XPathNSResolver;
 import com.sun.lwuit.ButtonGroup;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
-import com.sun.lwuit.Display;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.FocusListener;
@@ -52,6 +52,7 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
     public static OpenRosaResourceManager getResoruceManager(){
         return resourceManager;
     }
+
     public boolean commitValues() {
         boolean result = true;
         for (int i = 0; i < createdContainers.size(); i++) {
@@ -114,7 +115,7 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
 
     public void addTextValue(Element el){
         Element parent = (Element)el.getParentNode();
-        if(parent.getNodeName() != "text"){
+        if(!parent.getNodeName().equals("text")){
             return;
         }
 
@@ -170,16 +171,13 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
     private Component addSelect(BoundElement bindElem) {
         Component question = new XfoilMultipleChoiceFieldUI(bindElem);
         return question;
-
     }
 
     private Component addSelect1(BoundElement bindElem) {
         Component question = new XfoilExclusiveChoiceFieldUI(bindElem);
         return question;
     }
-
 }
-
 
 abstract class ContainerUI extends Container implements FocusListener {
 
@@ -211,24 +209,9 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         addComponent(new Label(""));
         XFormsElement labelEl = (XFormsElement) element.getUserData(XFormsElement.LABEL_KEY);
-        TextArea questionName = new TextArea();
-        questionName.setEditable(false);
-        questionName.setFocusable(false);
-        questionName.setRows(1);
-        questionName.setGrowByContent(true);
-//        questionName.setText(labelEl.getText());
 
-        questionName.setText(OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(element));
+        TextArea questionName = UIUtils.createQuestionName( OpenRosaWidgetFactory.getResoruceManager().tryGetLabelForElement(element));
 
-        int pw = Display.getInstance().getDisplayWidth();
-        int w = questionName.getStyle().getFont().stringWidth(labelEl.getText());
-        if (w > pw) {
-            questionName.setGrowByContent(true);
-            questionName.setRows(2);
-        } else {
-            questionName.setGrowByContent(false);
-            questionName.setRows(1);
-        }
         this.addComponent(questionName);
     }
 
@@ -575,8 +558,8 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
         for (int i = 0; i < totalChoices; i++) {
             choicesStrings[i] = (String) names[i];
             RadioButton rb = new RadioButton(choicesStrings[i]);
-            rb.setOther(values[i].equals("1"));
-            rb.setOtherText(""); // Initializes with empty string
+            rb.useMoreDetails(values[i].equals("1"));
+//            rb.setOtherText(""); // TODO this probably should not be commented! for test only! //Initializes with empty string
             rb.setSelected(selected[i]);
             //rb.addActionListener(new HandleMoreDetails()); // More Details
             //rb.addFocusListener(this); // Controls when changing to a new question
@@ -607,6 +590,6 @@ class XfoilMockComponent extends ContainerUI {
     }
 
     private void addMockLabel() {
-        addComponent(new Label("Unsupported type"));
+        addComponent(UIUtils.createQuestionName("Unsupported type"));//TODO localize
     }
 }

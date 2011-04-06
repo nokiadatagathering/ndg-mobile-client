@@ -28,7 +28,7 @@ public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRender
         int width = getStyle().getFont().stringWidth(text);
         if (hasFocus() && (getWidth() <= width + PADDING)) {
             width+=PADDING*3;
-            int fontHeight = getStyle().getFont().getHeight();
+            int fontHeight = NDGStyleToolbox.getInstance().listStyle.selectedFont.getHeight();
             int yPos = getY()+ (getHeight()-fontHeight)/2;
             if (getWidth() >= width + PADDING) { // otherwise a letter is cut
                 super.paint(g);
@@ -46,5 +46,4 @@ public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRender
             super.paint(g);
         }
     }
-
 }

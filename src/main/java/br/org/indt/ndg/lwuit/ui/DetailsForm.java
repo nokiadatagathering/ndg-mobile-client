@@ -2,22 +2,19 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
+import br.org.indt.ndg.lwuit.ui.renderers.TitlePainterDialog;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.Graphics;
-import com.sun.lwuit.Label;
-import com.sun.lwuit.Painter;
-import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.impl.midp.VirtualKeyboard;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.sun.lwuit.plaf.UIManager;
+import com.sun.lwuit.plaf.Style;
 
 /**
  *
@@ -27,7 +24,7 @@ public class DetailsForm extends Screen implements ActionListener {
 
     private static DetailsForm df;
     private Dialog dialog;
-    private TitlePainter tp = new TitlePainter();
+    private TitlePainterDialog tp = new TitlePainterDialog();
 
     private static String title;
     private static String label;
@@ -44,14 +41,20 @@ public class DetailsForm extends Screen implements ActionListener {
     protected void customize() {
         dialog = new Dialog();
         dialog.setDialogStyle(NDGStyleToolbox.getInstance().menuStyle.getBaseStyle());
+        dialog.getTitleComponent().setPreferredH( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont.getHeight()
+                                                + dialog.getTitleStyle().getPadding( Component.TOP )
+                                                + dialog.getTitleStyle().getPadding( Component.BOTTOM )
+                                                + dialog.getTitleStyle().getMargin( Component.TOP )
+                                                + dialog.getTitleStyle().getMargin( Component.BOTTOM ) );
         dialog.setMenuCellRenderer(new MenuCellRenderer());
         dialog.getTitleStyle().setBgPainter(tp);
         dialog.setTitle(" ");
+        tp.setTitle(title);
         dialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         Container c = new Container(new BoxLayout(BoxLayout.Y_AXIS));
         c.setIsScrollVisible(false);
 
-        c.addComponent( createWrappedText( label ) );
+        c.addComponent( UIUtils.createTextArea( label, NDGStyleToolbox.getInstance().menuStyle.unselectedFont ) );
         tfDesc = new DescriptiveField(50);
         tfDesc.setText(otrText);
         tfDesc.setInputMode("Abc");
@@ -60,7 +63,6 @@ public class DetailsForm extends Screen implements ActionListener {
         dialog.addComponent(c);
         dialog.addCommand(cmdOk);
         dialog.addCommandListener(this);
-
 
         if(Display.getInstance().isTouchScreenDevice()) {
             VirtualKeyboard vkExtendedOk= new VirtualKeyboard() {
@@ -76,6 +78,10 @@ public class DetailsForm extends Screen implements ActionListener {
            //TODO add 'Clear' button to virtual keyboard if possible
             VirtualKeyboard.bindVirtualKeyboard(tfDesc, vkExtendedOk);
         }
+
+        Style style = dialog.getSoftButtonStyle();
+        style.setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        dialog.setSoftButtonStyle( style );
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -120,58 +126,5 @@ public class DetailsForm extends Screen implements ActionListener {
             SurveysControl.getInstance().setItemOtherText(tfDesc.getText());
             otrText = tfDesc.getText();
             dialog.dispose();
-    }
-
-    private TextArea createWrappedText( String aText ) {
-        TextArea questionName = new TextArea();
-        questionName.setEditable(false);
-        questionName.setFocusable(false);
-        questionName.setColumns(20);
-        questionName.setRows(1);
-        questionName.setGrowByContent(false);
-        questionName.setText(aText);
-
-        int pw = Display.getInstance().getDisplayWidth();
-        int w = questionName.getStyle().getFont().stringWidth(aText);
-        if ( w >= pw ) {
-            questionName.setGrowByContent(true);
-            questionName.setRows(2);
-        } else {
-            questionName.setGrowByContent(false);
-            questionName.setRows(1);
-        }
-
-        return questionName;
-    }
-
-    class TitlePainter implements Painter {
-
-        public void paint(Graphics g, Rectangle rect) {
-            int width = rect.getSize().getWidth();
-            int height = rect.getSize().getHeight();
-
-            int bgColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgUnselectedColor;
-            g.setColor(bgColor);
-            g.fillRect(rect.getX(), rect.getY(), width, height);
-
-            int endColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedEndColor;
-            int startColor = NDGStyleToolbox.getInstance().dialogTitleStyle.bgSelectedStartColor;
-            g.fillLinearGradient(startColor, endColor, rect.getX()+1, rect.getY()+1, width-2, height, false);
-
-            // curve left side
-            g.fillRect(rect.getX()+1, rect.getY()+1, 1, 1);
-
-            // curve right side
-            g.fillRect(rect.getX()+width-2, rect.getY()+1, 1, 1);
-
-            int tintColor = UIManager.getInstance().getLookAndFeel().getDefaultFormTintColor();
-            g.setColor(tintColor);
-            g.fillRect(rect.getX(), rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
-            g.fillRect(rect.getX()+width-1, rect.getY(), 1, 1, (byte) ((tintColor >> 24) & 0xff));
-
-            g.setFont( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont );
-            g.setColor( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFontColor );
-            g.drawString(title, rect.getX()+10, rect.getY()+5);
-        }
     }
 }
