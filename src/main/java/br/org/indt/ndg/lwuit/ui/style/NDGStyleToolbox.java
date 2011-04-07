@@ -149,13 +149,13 @@ public class NDGStyleToolbox {
 
     static public Font getFont( String aBaseName, int size ) {
         Font font = null;
-        for( int i = size; size <= MAX_DEFINED_FONT_SIZE; i++) {
+        for( int i = size; i <= MAX_DEFINED_FONT_SIZE; i++) {
             font = Screen.getRes().getFont( aBaseName + i );
             if( font != null ){
                 return font;
             }
         }
-        for( int i = size; size >= MIN_DEFINED_FONT_SIZE ; i--) {
+        for( int i = size; i >= MIN_DEFINED_FONT_SIZE ; i--) {
             font = Screen.getRes().getFont( aBaseName + i );
             if( font != null ){
                 return font;

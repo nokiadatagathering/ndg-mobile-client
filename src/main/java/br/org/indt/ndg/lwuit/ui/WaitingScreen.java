@@ -72,7 +72,7 @@ public class WaitingScreen {
         msg.getSelectedStyle().setBgTransparency(0x00);
         msg.setEditable(false);
         msg.setPreferredW(msg.getSelectedStyle().getFont().stringWidth( status ) + 5);
-        msg.setPreferredH(msg.getSelectedStyle().getFont().getHeight());
+        msg.setPreferredH(msg.getSelectedStyle().getFont().getHeight() + 3);
         msg.setIsScrollVisible(false);
 
         dialog.addComponent(BorderLayout.NORTH ,label);

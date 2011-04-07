@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
@@ -14,8 +14,8 @@ public class RemovePhotoCommand extends CommandControl{
     }
 
     protected void doAction(Object parameter) {
-        NDGCameraManager.getInstance().deletePhoto();
-        NDGCameraManager.getInstance().showLastInterviewForm();
+        AppMIDlet.getInstance().getCurrentCameraManager().deletePhoto();
+        AppMIDlet.getInstance().getCurrentCameraManager().showLastInterviewForm();
     }
 
     public static RemovePhotoCommand getInstance(){

@@ -1,5 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
+import br.org.indt.ndg.lwuit.ui.openrosa.OpenRosaWidgetFactory;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.nokia.xfolite.xforms.dom.UserInterface;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;

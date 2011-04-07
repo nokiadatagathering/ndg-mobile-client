@@ -5,7 +5,6 @@
 
 package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Command;
 import com.nokia.mid.appl.cmd.Local;
@@ -25,7 +24,7 @@ public class CancelPickPhotoFormCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        if (!NDGCameraManager.getInstance().showLastInterviewForm()) {
+        if (!AppMIDlet.getInstance().getCurrentCameraManager().showLastInterviewForm()) {
             AppMIDlet.getInstance().setDisplayable(InterviewForm.class);
         }
     }

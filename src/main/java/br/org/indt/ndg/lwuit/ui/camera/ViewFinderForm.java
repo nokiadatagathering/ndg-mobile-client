@@ -48,7 +48,7 @@ public class ViewFinderForm extends Screen implements ActionListener {
     private void capturePicture(){
         PhotoResolution resolution = AppMIDlet.getInstance().getSettings().getStructure().getPhotoResolution();
         byte[]  picture = Camera.getInstance().takePicture(resolution.getWidth(), resolution.getHeight());
-        NDGCameraManager.getInstance().updatePhotoForm(picture);
+        AppMIDlet.getInstance().getCurrentCameraManager().updatePhotoForm(picture);
         Camera.getInstance().stopCamera();
     }
 

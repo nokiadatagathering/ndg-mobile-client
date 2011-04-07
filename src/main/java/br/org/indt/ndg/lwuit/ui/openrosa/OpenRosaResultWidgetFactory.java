@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui.openrosa;
 
 import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
 import com.nokia.xfolite.xml.dom.Element;
@@ -9,6 +10,8 @@ import com.nokia.xfolite.xml.dom.WidgetFactory;
 import com.nokia.xfolite.xml.xpath.XPathNSResolver;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Font;
+import com.sun.lwuit.Image;
+import com.sun.lwuit.Label;
 import com.sun.lwuit.layouts.BoxLayout;
 import java.util.Hashtable;
 
@@ -20,6 +23,7 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
 
     private static OpenRosaResourceManager resourceManager = new OpenRosaResourceManager();
     protected static Hashtable resources = new Hashtable();
+    final public static int PREVIEW_PHOTO_SIZE = 80;
 
     private Container rootContainer = null;
     private Font questionFont = NDGStyleToolbox.fontMedium;
@@ -47,13 +51,33 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
             addSelectPreview(binding);
         } else if (tagName.equals("value")) {
             addTextValue(el);
+        }else if (tagName.equals("upload")) {
+            String mediatype = el.getAttribute("mediatype");
+            if(mediatype != null && mediatype.indexOf("image") > -1) {
+                addPhotoPreview(binding);
+            }
         }
+    }
+
+    public void addPhotoPreview(BoundElement element){
+        String questionLabel = resourceManager.tryGetLabelForElement(element);
+
+        Image samllImgage = null;
+        if(element.getStringValue() != null && !element.getStringValue().equals("")){
+            byte[] byteArray = Base64Coder.decode(element.getStringValue());
+            Image img = Image.createImage(byteArray, 0, byteArray.length);
+            samllImgage = img.scaled(PREVIEW_PHOTO_SIZE, PREVIEW_PHOTO_SIZE);
+        }
+        Container container = new Container( new BoxLayout( BoxLayout.Y_AXIS ) );
+        container.addComponent( UIUtils.createTextArea( questionLabel + ":", questionFont, NDGStyleToolbox.getInstance().questionPreviewColor) );
+        container.addComponent(new Label(samllImgage));
+        rootContainer.addComponent(container);
     }
 
     public void addSelectPreview(BoundElement element){
         String questionLabel = resourceManager.tryGetLabelForElement(element);
         String questionValue = element.getStringValue();
-        questionValue = questionValue.replace(' ', '\n');
+        questionValue = questionValue.replace(' ', '#');
 
         addQuestionComponent(questionLabel, questionValue);
     }

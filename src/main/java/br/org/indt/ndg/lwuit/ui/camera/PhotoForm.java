@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.ui.camera;
 import br.org.indt.ndg.lwuit.control.OKPhotoFormCommand;
 import br.org.indt.ndg.lwuit.control.TakePictureAgainCommand;
 import br.org.indt.ndg.lwuit.ui.*;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Container;
@@ -28,7 +29,7 @@ public class PhotoForm extends Screen implements ActionListener {
         form.addCommand(TakePictureAgainCommand.getInstance().getCommand());
         form.addCommand(OKPhotoFormCommand.getInstance().getCommand());
 
-        byte[] imageData = NDGCameraManager.getInstance().getCurrentImageData().getData();
+        byte[] imageData = AppMIDlet.getInstance().getCurrentCameraManager().getCurrentImageData();
         Image image = null;
         try {
             image = Image.createImage(imageData, 0, imageData.length);

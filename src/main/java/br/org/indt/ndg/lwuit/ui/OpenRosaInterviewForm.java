@@ -2,8 +2,12 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.OpenRosaInterviewSaveCommand;
 import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
+import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
+import br.org.indt.ndg.lwuit.control.RemovePhotoCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
+import br.org.indt.ndg.lwuit.control.ShowPhotoCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
+import br.org.indt.ndg.lwuit.control.TakePhotoCommand;
 import br.org.indt.ndg.lwuit.ui.openrosa.OpenRosaWidgetFactory;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
@@ -74,6 +78,14 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
                 OpenRosaInterviewSaveCommand.getInstance().setObserver(this);
                 OpenRosaInterviewSaveCommand.getInstance().execute(getXFormsDocument());
             }
+        } else if( cmd == OpenFileBrowserCommand.getInstance().getCommand() ) {
+            OpenFileBrowserCommand.getInstance().execute(null);
+        } else if ( cmd == TakePhotoCommand.getInstance().getCommand() ) {
+            TakePhotoCommand.getInstance().execute(null);
+        } else if ( cmd == ShowPhotoCommand.getInstance().getCommand() ) {
+            ShowPhotoCommand.getInstance().execute(null);
+        } else if ( cmd == RemovePhotoCommand.getInstance().getCommand() ) {
+            RemovePhotoCommand.getInstance().execute(null);
         }
     }
 

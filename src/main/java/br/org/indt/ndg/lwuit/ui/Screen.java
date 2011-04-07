@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.extended.Form;
 import br.org.indt.ndg.lwuit.control.Event;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
@@ -53,7 +54,7 @@ public abstract class Screen {
             }
             screens.put(c, s);
         }
-
+        s.form.getTitleComponent().setPreferredH( s.titlebar.getPrefferedH() );
         s.loadData();
         s.customize();
         s.form.refreshTheme();

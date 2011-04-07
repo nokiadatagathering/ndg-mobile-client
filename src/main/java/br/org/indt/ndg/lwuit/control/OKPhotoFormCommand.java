@@ -5,7 +5,7 @@
 
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Camera;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
@@ -32,7 +32,7 @@ public class OKPhotoFormCommand extends CommandControl{
 
     protected void doAction(Object parameter) {
         Camera.getInstance().stopCamera();
-        NDGCameraManager.getInstance().updateInterviewForm();
+        AppMIDlet.getInstance().getCurrentCameraManager().updateInterviewForm();
     }
 
 }

@@ -39,7 +39,7 @@ import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManagerListener;
+import br.org.indt.ndg.lwuit.ui.camera.CameraManagerListener;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
@@ -77,6 +77,7 @@ public class InterviewForm extends Screen implements ActionListener {
     private boolean answerChanged = false;
 
     protected void loadData() {
+        answerChanged = false;
         vContainers = new Vector();
         title1 = SurveysControl.getInstance().getSurveyTitle();
         title2 = Resources.NEW_INTERVIEW;
@@ -832,9 +833,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
    }
 
-    class ImageFieldUI extends ContainerUI implements ActionListener, NDGCameraManagerListener {
-        private static final int FOUR_ACTIONS_CONTEXT_MENU = 4;//TakePhotoCommand,OpenFileBrowserCommand,ShowPhotoCommand,RemovePhotoCommand
-        private static final int TWO_ACTIONS_CONTEXT_MENU = 2;//TakePhotoCommand,OpenFileBrowserCommand
+    class ImageFieldUI extends ContainerUI implements ActionListener, CameraManagerListener {
 
         private Container mImageContainer;
 
@@ -857,6 +856,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void registerQuestion(){
+            AppMIDlet.getInstance().setCurrentCameraManager(NDGCameraManager.getInstance());
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
             ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
@@ -946,9 +946,9 @@ abstract class ContainerUI extends Container implements FocusListener {
                 int index = mImageContainer.getComponentIndex((Button)cmd.getSource());
 
                 if( index  < ((ImageAnswer)mAnswer).getImages().size() ){
-                    new ImageQuestionContextMenu(0, FOUR_ACTIONS_CONTEXT_MENU).show();
+                    new ImageQuestionContextMenu(0, ImageQuestionContextMenu.FOUR_ACTIONS_CONTEXT_MENU).show();
                 } else {
-                    new ImageQuestionContextMenu(0, TWO_ACTIONS_CONTEXT_MENU).show();
+                    new ImageQuestionContextMenu(0, ImageQuestionContextMenu.TWO_ACTIONS_CONTEXT_MENU).show();
                 }
             }
         }

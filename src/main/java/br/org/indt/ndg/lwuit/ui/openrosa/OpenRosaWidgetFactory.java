@@ -1,14 +1,26 @@
 package br.org.indt.ndg.lwuit.ui.openrosa;
 
+import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
+import br.org.indt.ndg.lwuit.control.RemovePhotoCommand;
+import br.org.indt.ndg.lwuit.control.ShowPhotoCommand;
+import br.org.indt.ndg.lwuit.control.TakePhotoCommand;
 import br.org.indt.ndg.lwuit.extended.CheckBox;
 import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
+import br.org.indt.ndg.lwuit.extended.Form;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
+import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.lwuit.ui.ImageQuestionContextMenu;
+import br.org.indt.ndg.lwuit.ui.Screen;
+import br.org.indt.ndg.lwuit.ui.camera.CameraManagerListener;
+import br.org.indt.ndg.lwuit.ui.camera.OpenRosaCameraManager;
 import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.dom.XFormsElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
@@ -17,13 +29,18 @@ import com.nokia.xfolite.xml.dom.Node;
 import com.nokia.xfolite.xml.dom.WidgetFactory;
 import com.nokia.xfolite.xml.xpath.NodeSet;
 import com.nokia.xfolite.xml.xpath.XPathNSResolver;
+import com.sun.lwuit.Button;
 import com.sun.lwuit.ButtonGroup;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.plaf.Border;
 import java.util.Calendar;
 import java.util.Date;
@@ -93,7 +110,7 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
         } else if ("upload" == tagName) {
             String mediatype = el.getAttribute("mediatype");
             if(mediatype!=null && mediatype.indexOf("image") > -1) {
-                //addPhotoUI(binding, cont);
+                comp = addPhotoUI(binding);
             }
         } else if ("submit" == tagName) {
         } else if ("select1" == tagName) {
@@ -136,6 +153,10 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
 
     public String lookupNamespaceURI(String prefix) {
         return "";
+    }
+
+    private Component addPhotoUI(BoundElement bindElem){
+        return new XfoilPhotoFieldUi(bindElem);
     }
 
     private Component addInput(BoundElement bindElem) {
@@ -267,6 +288,118 @@ abstract class ContainerUI extends Container implements FocusListener {
         } else {
             return "";
         }
+    }
+}
+
+class XfoilPhotoFieldUi extends ContainerUI implements  ActionListener, CameraManagerListener {
+
+    private Container mImageContainer;
+    private Button imageButton;
+
+    public XfoilPhotoFieldUi(BoundElement element){
+        super(element);
+        OpenRosaCameraManager.getInstance().reset();
+        AppMIDlet.getInstance().setCurrentCameraManager(OpenRosaCameraManager.getInstance());
+
+        addQuestionName();
+        addPhotoContainer();
+    }
+
+    public void focusGained(Component cmpnt) {
+        rebuildOptionMenu();
+    }
+
+    public void focusLost(Component cmpnt) {
+        removePhotoCommands();
+        super.focusLost(cmpnt);
+    }
+
+    private void rebuildOptionMenu(){
+        removePhotoCommands();
+        addPhotoCommands();
+    }
+
+    private void addPhotoCommands(){
+        if ( OpenRosaCameraManager.getInstance().getImageArray() != null ) {
+            getComponentForm().addCommand(RemovePhotoCommand.getInstance().getCommand());
+            getComponentForm().addCommand(ShowPhotoCommand.getInstance().getCommand());
+        }
+        getComponentForm().addCommand(OpenFileBrowserCommand.getInstance().getCommand());
+        getComponentForm().addCommand(TakePhotoCommand.getInstance().getCommand());
+    }
+
+    private void removePhotoCommands(){
+        getComponentForm().removeCommand(OpenFileBrowserCommand.getInstance().getCommand());
+        getComponentForm().removeCommand(TakePhotoCommand.getInstance().getCommand());
+        getComponentForm().removeCommand(ShowPhotoCommand.getInstance().getCommand());
+        getComponentForm().removeCommand(RemovePhotoCommand.getInstance().getCommand());
+    }
+
+
+
+    public void commitValue() {
+        element.setStringValue(OpenRosaCameraManager.getInstance().getImageStringValue());
+    }
+
+    public void setEnabled(boolean enabled) {
+    }
+
+    protected boolean validate() {
+        return true;
+    }
+
+    private void addPhotoContainer(){
+        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        mImageContainer = new Container (new FlowLayout());
+
+        Image thumbnail = null;
+        if(element.getStringValue() != null && !element.getStringValue().equals("")){
+            byte[] byteArray = Base64Coder.decode(element.getStringValue());
+            OpenRosaCameraManager.getInstance().setImageArray(byteArray);
+        }
+
+        imageButton = new Button();
+        imageButton.setIcon(thumbnail);
+        imageButton.addActionListener(this);
+        imageButton.setAlignment(Component.LEFT);
+        imageButton.setFocusable(true);
+        imageButton.addFocusListener(this);
+        mImageContainer.addComponent(imageButton);
+
+        updateImageButton();
+
+        addComponent(mImageContainer);
+    }
+
+    private void updateImageButton(){
+        Image thumbnail = null;
+        byte[] image = OpenRosaCameraManager.getInstance().getImageArray();
+        if(image != null){
+            Image img = Image.createImage(image, 0, image.length);
+            thumbnail = img.scaled(ImageData.THUMBNAIL_SIZE, ImageData.THUMBNAIL_SIZE);
+//            thumbnail = Camera.createThumbnail(img);
+        }else{
+            thumbnail = Screen.getRes().getImage("camera-icon");
+        }
+
+        imageButton.setIcon(thumbnail);
+    }
+
+    public void actionPerformed(ActionEvent cmd) {
+        if ( cmd.getSource() instanceof Button ) {
+            OpenRosaCameraManager.getInstance().sendPostProcessData(this);
+            if(OpenRosaCameraManager.getInstance().getImageArray() == null){
+                new ImageQuestionContextMenu(0, ImageQuestionContextMenu.TWO_ACTIONS_CONTEXT_MENU).show();
+            }else{
+                new ImageQuestionContextMenu(0, ImageQuestionContextMenu.FOUR_ACTIONS_CONTEXT_MENU).show();
+            }
+        }
+    }
+
+    public void update() {
+        updateImageButton();
+        rebuildOptionMenu();
+        getComponentForm().showBack();
     }
 }
 

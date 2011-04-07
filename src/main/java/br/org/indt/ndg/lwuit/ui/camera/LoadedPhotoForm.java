@@ -4,6 +4,7 @@ import br.org.indt.ndg.lwuit.control.BackPreviewLoadedFile;
 import br.org.indt.ndg.lwuit.control.OKPhotoFormCommand;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.Screen;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
@@ -23,7 +24,7 @@ public class LoadedPhotoForm extends Screen implements ActionListener {
     protected void customize() {
         form.removeAll();
         form.removeAllCommands();
-        byte[] imageData = NDGCameraManager.getInstance().getCurrentImageData().getData();
+        byte[] imageData = AppMIDlet.getInstance().getCurrentCameraManager().getCurrentImageData();
         Image image = null;
         try {
             image = Image.createImage(imageData, 0, imageData.length);

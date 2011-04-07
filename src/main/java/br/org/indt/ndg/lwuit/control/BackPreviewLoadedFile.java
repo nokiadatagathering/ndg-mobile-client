@@ -6,9 +6,7 @@
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.FileBrowserView;
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.multimedia.Camera;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 

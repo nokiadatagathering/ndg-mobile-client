@@ -173,6 +173,7 @@ public class ResultPreviewView extends Screen implements ActionListener {
             if( aQuestion instanceof ChoiceQuestion ){
                 ChoiceQuestion cquestion = (ChoiceQuestion) aQuestion;
                 String choiceAnswer = " ";
+                Container choiceContainer = new Container( new BoxLayout((BoxLayout.Y_AXIS)));
                 int nIndex;
                 if( !cquestion.isExclusive() ) {
                     Vector vChoicesAnswer = (Vector) ((ChoiceAnswer)aAnswer).getSelectedIndexes();
@@ -184,13 +185,10 @@ public class ResultPreviewView extends Screen implements ActionListener {
                         if ( other != null && other.length()>0 ) {
                             choiceAnswer+= "="+other;
                         }
-                        choiceAnswer += "\n";
-                        if((k+1)<vsize) {
-                            choiceAnswer+= " ";
-                        }
+                        choiceContainer.addComponent( UIUtils.createTextArea(choiceAnswer, answerFont, NDGStyleToolbox.getInstance().answerPreviewColor ) );
+                        choiceAnswer = " ";
                     }
-                    componentAnswer = UIUtils.createTextArea(choiceAnswer, answerFont);
-
+                    componentAnswer = choiceContainer;
                 } else {
                     try {
                         nIndex = Integer.parseInt( (String)((Vector)((ChoiceAnswer)aAnswer).getSelectedIndexes()).elementAt( 0 ) );

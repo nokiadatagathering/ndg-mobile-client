@@ -1,11 +1,9 @@
 package br.org.indt.ndg.mobile;
 
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
-import br.org.indt.ndg.lwuit.control.SurveysControl;
-import br.org.indt.ndg.lwuit.model.ImageData;
-import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.OpenRosaInterviewForm;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
+import br.org.indt.ndg.lwuit.ui.RegisterIMEI;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import java.io.IOException;
 import javax.microedition.midlet.MIDlet;
@@ -15,14 +13,13 @@ import br.org.indt.ndg.mobile.settings.Settings;
 import br.org.indt.ndg.mobile.settings.LocationHandler;
 import br.org.indt.ndg.mobile.xmlhandle.Conversor;
 import br.org.indt.ndg.mobile.logging.Logger;
-import br.org.indt.ndg.mobile.settings.IMEIHandler;
-import br.org.indt.ndg.lwuit.ui.RegisterIMEI;
 import br.org.indt.ndg.lwuit.ui.SplashScreen;
+import br.org.indt.ndg.lwuit.ui.camera.ICameraManager;
 import br.org.indt.ndg.lwuit.ui.style.StyleConst;
+import br.org.indt.ndg.mobile.settings.IMEIHandler;
 import br.org.indt.ndg.mobile.submit.SubmitServer;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
-import com.sun.lwuit.animations.CommonTransitions;
 import com.sun.lwuit.impl.midp.VKBImplementationFactory;
 import com.sun.lwuit.plaf.UIManager;
 import java.io.DataOutputStream;
@@ -49,6 +46,8 @@ public class AppMIDlet extends MIDlet {
     private SubmitServer submitServer;
 
     private long timeTracker = 0;
+
+    private ICameraManager currentCameraManager;
 
     private String imei = "9999";
 
@@ -358,5 +357,13 @@ public class AppMIDlet extends MIDlet {
 
     public boolean isCurrentDirXForm(){
         return isXformDir(AppMIDlet.getInstance().getFileSystem().getSurveyDirName());
+    }
+
+    public void setCurrentCameraManager(ICameraManager manager){
+        currentCameraManager = manager;
+    }
+
+    public ICameraManager getCurrentCameraManager(){
+        return currentCameraManager;
     }
 }

@@ -8,6 +8,9 @@ import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
 public class ImageQuestionContextMenu extends ContextMenu{
+    public static final int FOUR_ACTIONS_CONTEXT_MENU = 4;//TakePhotoCommand,OpenFileBrowserCommand,ShowPhotoCommand,RemovePhotoCommand
+    public static final int TWO_ACTIONS_CONTEXT_MENU = 2;//TakePhotoCommand,OpenFileBrowserCommand
+
 
     public ImageQuestionContextMenu(int index, int size){
         super(index, size);

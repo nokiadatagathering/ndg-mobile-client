@@ -148,7 +148,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             msg.setGrowByContent(false);
             msg.setRows(1);
             msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );
-            msg.setPreferredH( msg.getSelectedStyle().getFont().getHeight() );
+            msg.setPreferredH( msg.getSelectedStyle().getFont().getHeight() + 3 );
         }
         // WARN: the following line is important!
         // Setting it to false caused hard to track OutOfMemoryException

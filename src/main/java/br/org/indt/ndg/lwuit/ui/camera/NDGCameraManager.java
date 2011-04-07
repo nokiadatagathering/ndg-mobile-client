@@ -15,14 +15,14 @@ import javax.microedition.location.Coordinates;
  *
  * @author amartini
  */
-public class NDGCameraManager {
+public class NDGCameraManager implements ICameraManager {
     private static NDGCameraManager instance = new NDGCameraManager();
 
     private ImageAnswer currentImageAnswer;
     private Container imageContainer;
     private Component thumbnailButton;
     private int imageIndex;
-    private NDGCameraManagerListener listener;
+    private CameraManagerListener listener;
 
     private NDGCameraManager(){
     }
@@ -31,7 +31,7 @@ public class NDGCameraManager {
         return instance;
     }
 
-    public void sendPostProcessData( NDGCameraManagerListener ndgListener,
+    public void sendPostProcessData( CameraManagerListener ndgListener,
                                      Component button,
                                      ImageAnswer aAnswer,
                                      Container container ) {
@@ -42,9 +42,10 @@ public class NDGCameraManager {
         listener = ndgListener;
     }
 
-    public ImageData getCurrentImageData(){
+    public byte[] getCurrentImageData(){
         if(imageIndex < currentImageAnswer.getImages().size()){
-            return (ImageData)currentImageAnswer.getImages().elementAt(imageIndex);
+            ImageData img = (ImageData)currentImageAnswer.getImages().elementAt(imageIndex);
+            return img.getData();
         }
         else
             return null;
@@ -88,7 +89,7 @@ public class NDGCameraManager {
         }
     }
 
-    public void deletePhoto( ) {
+    public void deletePhoto() {
         ((ImageData)currentImageAnswer.getImages().elementAt(imageIndex)).delete();
         currentImageAnswer.getImages().removeElementAt(imageIndex);
         imageContainer.removeComponent(thumbnailButton);

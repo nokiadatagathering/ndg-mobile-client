@@ -1,9 +1,9 @@
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelPickPhotoFormCommand;
-import br.org.indt.ndg.lwuit.ui.camera.NDGCameraManager;
 import br.org.indt.ndg.lwuit.ui.camera.LoadedPhotoForm;
 import br.org.indt.ndg.lwuit.ui.renderers.FileBrowserCellRenderer;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -153,7 +153,7 @@ public class FileBrowserView extends Screen implements ActionListener {
                 fileRead = new byte[(int) connection.fileSize()];
                 input.read(fileRead);
                 input.close();
-                NDGCameraManager.getInstance().updatePhotoForm(fileRead);
+                AppMIDlet.getInstance().getCurrentCameraManager().updatePhotoForm(fileRead);
                 Screen.show(LoadedPhotoForm.class, true);
                 }
             } else {
