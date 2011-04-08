@@ -33,6 +33,8 @@ public class TitleBar implements Painter {
     }
 
     public int getPrefferedH() {
+        if( title1.length() == 0 && title2.length() == 0 )
+            return 0;
         int fontsHight = 3*textPadding + NDGStyleToolbox.fontSmall.getHeight() + NDGStyleToolbox.fontMedium.getHeight();
         int logoHight = 2*textPadding + logoHeight;
         return fontsHight < logoHight ? logoHight : fontsHight;

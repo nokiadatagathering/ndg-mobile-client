@@ -22,6 +22,7 @@ public class LoadedPhotoForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
+        setTitle( "","" );
         form.removeAll();
         form.removeAllCommands();
         byte[] imageData = AppMIDlet.getInstance().getCurrentCameraManager().getCurrentImageData();

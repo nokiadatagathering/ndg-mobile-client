@@ -4,9 +4,7 @@ import br.org.indt.ndg.lwuit.control.OKPhotoFormCommand;
 import br.org.indt.ndg.lwuit.control.TakePictureAgainCommand;
 import br.org.indt.ndg.lwuit.ui.*;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
-import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
@@ -23,6 +21,7 @@ public class PhotoForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
+        setTitle( "", "" );
         form.removeAll();
         form.removeAllCommands();
 

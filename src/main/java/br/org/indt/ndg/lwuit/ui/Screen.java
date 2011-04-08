@@ -2,7 +2,6 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.extended.Form;
 import br.org.indt.ndg.lwuit.control.Event;
-import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
@@ -14,22 +13,20 @@ import java.util.Hashtable;
  */
 public abstract class Screen {
 
-    private static Resources res;
-
-    protected Form form;
-    private TitleBar titlebar;
-
-    static Hashtable screens = new Hashtable();
-
-    Hashtable events = new Hashtable();
-
     protected static final Integer ON_SHOW = new Integer(1);
     protected static final Integer ON_CREATE = new Integer(2);
+
+    private static Hashtable screens = new Hashtable();
+    private static Resources res;
+
+    private Hashtable events = new Hashtable();
+    private TitleBar titlebar;
+
+    protected Form form;
 
     protected Screen() {
         createScreen();
     }
-
 
     public static final void show(Class c, boolean onShow) {
 
@@ -54,15 +51,14 @@ public abstract class Screen {
             }
             screens.put(c, s);
         }
-        s.form.getTitleComponent().setPreferredH( s.titlebar.getPrefferedH() );
+
         s.loadData();
         s.customize();
-        s.form.refreshTheme();
-        s.form.getTitleStyle().setBgPainter(s.titlebar);
+        s.form.getTitleComponent().setPreferredH( s.titlebar.getPrefferedH() );
 
         if (WaitingScreen.isShowed())
             WaitingScreen.dispose();
-        
+
         s.show();
         if (onShow)
             s.onShow();
@@ -73,7 +69,6 @@ public abstract class Screen {
     protected final void setTitle(String title1, String title2) {
         titlebar.setTitle1(title1);
         titlebar.setTitle2(title2);
-        form.setTitle(" ");
     }
 
     private final void show() {
@@ -82,9 +77,12 @@ public abstract class Screen {
     }
 
     protected final void createScreen() {
-        form = new Form();
-        form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         titlebar = new TitleBar( " ", " " );
+        form = new Form();
+        form.setTitle(" ");
+        form.getTitleComponent().setPreferredH(0);
+        form.getTitleStyle().setBgPainter(titlebar);
+        form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         MenuCellRenderer mlcr = new MenuCellRenderer();
         form.setMenuCellRenderer(mlcr);
         form.getMenuStyle().setFont( UIManager.getInstance().getComponentStyle("Command").getFont());
@@ -98,7 +96,7 @@ public abstract class Screen {
     public static void setRes(Resources resources) {
         res = resources;
     }
-    
+
     public static Resources getRes() {
         return res;
     }

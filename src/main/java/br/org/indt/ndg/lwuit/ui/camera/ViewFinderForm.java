@@ -1,7 +1,7 @@
 package br.org.indt.ndg.lwuit.ui.camera;
 import br.org.indt.ndg.lwuit.control.BackPhotoFormCommand;
 import br.org.indt.ndg.lwuit.control.CapturePhotoCommand;
-import br.org.indt.ndg.lwuit.ui.*;
+import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Camera;
 import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
@@ -26,6 +26,7 @@ public class ViewFinderForm extends Screen implements ActionListener {
     }
 
     protected void customize() {
+        setTitle( "", "");
         form.setLayout(new BorderLayout());
 
         MediaComponent comp = Camera.getInstance().getViewFinderLWUIT();
