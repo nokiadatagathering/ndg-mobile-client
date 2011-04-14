@@ -80,8 +80,15 @@ public class SettingsHandler extends DefaultHandler {
             } catch ( Exception ex ){
                 structure.setStyleId(0);
             }
+        }else if(qName.equals("dateFormat")){
+            String config = attributes.getValue(attributes.getIndex("id"));
+            try {
+                int configInt = Integer.parseInt(config);
+                structure.setDateFormatId(configInt);
+            } catch ( Exception ex ){
+                structure.setStyleId(0);
+            }
         }
-
         tagStack.push(qName);
     }
 

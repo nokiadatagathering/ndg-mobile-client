@@ -21,15 +21,19 @@ public class MenuCellRenderer extends Label implements ListCellRenderer, Painter
     public MenuCellRenderer() {
         bgPainter = new BGPainter();
         if(com.sun.lwuit.Display.getInstance().isTouchScreenDevice()) {
-            getStyle().setPadding(10, 10, 0, 0);
-            getSelectedStyle().setPadding(10, 10, 0, 0);
+            getStyle().setPadding( 10, 10,
+                                   getStyle().getPadding( Component.LEFT),
+                                   getStyle().getPadding( Component.RIGHT) );
+            getSelectedStyle().setPadding( 10, 10,
+                                           getSelectedStyle().getPadding(Component.LEFT),
+                                           getSelectedStyle().getPadding(Component.RIGHT) );
         }
     }
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
         if (value instanceof Command) {
             Command cmd = (Command)value;
-            setText(" " + cmd.getCommandName());
+            setText(cmd.getCommandName());
             setIcon(cmd.getIcon());
         }
         if (isSelected) {

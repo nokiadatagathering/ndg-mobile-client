@@ -256,11 +256,23 @@ abstract class ContainerUI extends Container implements FocusListener {
         String constraint = element.getConstraintString();
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
         if (constraint != null) {
+
+            String lowConstraint = "";
+            String highConstraint = "";
+            if(element.getDataType().getBaseTypeID() == DataTypeBase.XML_SCHEMAS_DATE){
+                lowConstraint = OpenRosaConstraintHelper.getInstance().getDateLowConstraint(constraint);
+                highConstraint = OpenRosaConstraintHelper.getInstance().getDateHighConstraint(constraint);
+            }else{
+                lowConstraint = OpenRosaConstraintHelper.getInstance().getLowConstraint(constraint);
+                highConstraint = OpenRosaConstraintHelper.getInstance().getHighConstraint(constraint);
+            }
+
             GeneralAlert.getInstance().show(
-                    Resources.CMD_SAVE,
-                    "Valid input " + "from: " + OpenRosaConstraintHelper.getInstance().getLowConstraint(constraint) +
-                    " to: " + OpenRosaConstraintHelper.getInstance().getHighConstraint(constraint),
-                    GeneralAlert.WARNING); // TODO localization
+                                        Resources.CMD_SAVE,
+                                        "Valid input " + "from: " + lowConstraint +
+                                        " to: " + highConstraint,
+                                        GeneralAlert.WARNING); // TODO localization
+
         } else {
             GeneralAlert.getInstance().show(
                     Resources.CMD_SAVE,
@@ -278,6 +290,10 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     public void focusLost(Component cmpnt) {
+        if(!cmpnt.getComponentForm().isVisible()){
+            return;
+        }
+
         if (!validate()) {
             showBadInputError();
             cmpnt.requestFocus();
@@ -516,12 +532,12 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
-        commitValue(dfDate.getText());
+        commitValue(OpenRosaUtils.getStringFromDate(dfDate.getDate()));
     }
 
     protected boolean validate() {
         boolean retVal = OpenRosaConstraintHelper.getInstance().
-                validateConstraint(dfDate.getText(), element);
+                validateDate(element.getConstraintString(), dfDate.getDate());
 
         if(!retVal){
             long date = Calendar.getInstance().getTime().getTime();
@@ -532,8 +548,11 @@ class XfoilDateFieldUI extends ContainerUI {
 
     public void setEnabled(boolean enabled) {
     }
+
     public boolean isChanged(){
-        if(dfDate.getText().equals(element.getStringValue())){
+
+        String dateStr = OpenRosaUtils.getStringFromDate(dfDate.getDate());
+        if(dateStr.equals(element.getStringValue())){
             return false;
         }else{
             return true;
@@ -541,18 +560,25 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     private void addDateQuestion(BoundElement bindElem) {
+        Date date = null;
         String value = bindElem.getStringValue().trim();
-        if (value == null || value == "") {
-            long date = Calendar.getInstance().getTime().getTime();
-            dfDate = new DateField(DateField.MMDDYYYY, '/');
-            dfDate.setDate(new Date(date));
-        } else{
-            dfDate = new DateField(value, DateField.MMDDYYYY, '/');
+
+        if (value != null || value != "") {
+            date = OpenRosaUtils.getDateFromString(value);
+       }
+
+        if(date == null){
+            date = Calendar.getInstance().getTime();
         }
+
+        dfDate = new DateField(AppMIDlet.getInstance().getSettings().getStructure().getDateFormatId(), '/');
+        dfDate.setDate(date);
         dfDate.setEditable(true);
         dfDate.addFocusListener(this);
+
         addComponent(dfDate);
     }
+
 }
 
 //class XfoilTimeFieldUI extends ContainerUI {

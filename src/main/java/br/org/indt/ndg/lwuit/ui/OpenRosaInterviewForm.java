@@ -81,7 +81,6 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
             }else{
                 OpenRosaBackCommand.getInstance().execute(null);
             }
-            OpenRosaBackCommand.getInstance().execute(null);
         } else if (cmd == OpenRosaInterviewSaveCommand.getInstance().getCommand()) {
             if(widgetFactory.isFormChanged()){
                 saveInterview();

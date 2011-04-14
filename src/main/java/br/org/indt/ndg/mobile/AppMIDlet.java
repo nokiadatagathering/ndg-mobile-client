@@ -28,6 +28,8 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
+import javax.microedition.media.Manager;
+import javax.microedition.media.Player;
 
 public class AppMIDlet extends MIDlet {
 
@@ -218,7 +220,7 @@ public class AppMIDlet extends MIDlet {
     public void initLWUIT() {
         // This is the charset used to all fonts in NDG.res LWUIT Resource File
         // When creating a new font in a resource file, this charset must be used
-        // ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:!@/\*()[]{}|#$%^&<>?'"+- _`~¡¿¤§=£¥€ÀÁÂÃÇÈÉÊÌÍÑÒÓÔÕÙÚÜàáâãçèéêìíñòóôõ÷ùúü
+        // jABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz0123456789.,;:!@/\*()[]{}|#$%^&<>?'"+- _`~¡¿¤§=£¥€ÀÁÂÃÄĄÅÇĆÈÉÊĘÌÍŁÑŃŚŠÒÓÔÕÖÙÚÜŻŹŽàáâãäąåçćèéêęìíłñńśšòóôõöùúüżźž÷
         Hashtable i18n = new Hashtable();
         //com.sun.lwuit.Display.init(this);//moved to app start to speed up resource loading
         i18n.put("menu", Resources.NEWUI_OPTIONS);
@@ -229,6 +231,9 @@ public class AppMIDlet extends MIDlet {
         try {
             com.sun.lwuit.util.Resources res = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/NDG.res");
             Screen.setRes(res);
+            if( !isS40() ) {
+                Screen.setFontRes( com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/fonts.res") );
+            }
             NDGLookAndFeel ndgLF = new NDGLookAndFeel();
             // checkbox
             ndgLF.setCheckBoxImages(res.getImage("checked"), res.getImage("unchecked"));
@@ -365,5 +370,18 @@ public class AppMIDlet extends MIDlet {
 
     public ICameraManager getCurrentCameraManager(){
         return currentCameraManager;
+    }
+
+    private boolean isS40() {
+        boolean s40 = false;
+        try {
+            Player player = Manager.createPlayer("capture://image");
+            player.deallocate();
+            player.close();
+            s40 = true;
+        } catch( Exception ex ) {
+            s40 = false;
+        }
+        return s40;
     }
 }

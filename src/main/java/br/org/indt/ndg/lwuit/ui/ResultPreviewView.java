@@ -209,7 +209,7 @@ public class ResultPreviewView extends Screen implements ActionListener {
                     }
                 }
             } else if ( aQuestion instanceof DateQuestion ) {
-                DateField dfDate = new DateField(DateField.DDMMYYYY);
+                DateField dfDate = new DateField(AppMIDlet.getInstance().getSettings().getStructure().getDateFormatId());
                 dfDate.setDate( new Date( ((DateAnswer)aAnswer).getDate() ) );
                 componentAnswer = UIUtils.createTextArea( dfDate.getText(), answerFont );
             }

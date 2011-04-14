@@ -16,6 +16,9 @@ public class Resources {
     public static final String LOCATION_OUT_OF_DATE = "Gps location is out of date. Save with old location?";
     public static final String LOCATION_OUT_OF_DATE_WARN = "Added geotagging info is out of date";
     public static final String NEWUI_NOKIA_DATA_GATHERING = "Nokia Data Gathering";
+    public static final String DATE_FORMAT = "Date format";
+    public static final String AVAILABLE_DATE_FORMAT = "Available date format";
+
     //public static final String NEWUI_TITLE_SURVEY_LIST = "List of Surveys";
     //public static final String NEWUI_TITLE_CATEGORIES = "Categories";
     //public static final String NEWUI_TITLE_RESULTS = "Results";
@@ -234,6 +237,8 @@ public class Resources {
     public static final String XFORM = "xform";
     public static String NDG_STANDARD_NAME = "NDG Protocol";
     public static String OPENROSA_STANDARD_NAME = "OpenRosa Protocol";
+    public static final String DDMMYYYY = "DD/MM/YYYY";
+    public static final String MMDDYYYY = "MM/DD/YYYY";
     /** Messages */
     public static final String MSG_SERVER_CANT_WRITE_RESULTS = Local.getText(Local.QTJ_MSG_SERVER_CANT_WRITE_RESULTS);
     //public static final String CONT_WITHOUT_SAVE = Local.getText(Local.CONT_WITHOUT_SAVE);

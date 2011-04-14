@@ -18,6 +18,7 @@ public abstract class Screen {
 
     private static Hashtable screens = new Hashtable();
     private static Resources res;
+    private static Resources fontRes;
 
     private Hashtable events = new Hashtable();
     private TitleBar titlebar;
@@ -92,6 +93,14 @@ public abstract class Screen {
     protected abstract void loadData();
 
     protected abstract void customize();
+
+    public static void setFontRes(Resources resources) {
+        fontRes = resources;
+    }
+
+    public static Resources getFontRes() {
+        return fontRes;
+    }
 
     public static void setRes(Resources resources) {
         res = resources;

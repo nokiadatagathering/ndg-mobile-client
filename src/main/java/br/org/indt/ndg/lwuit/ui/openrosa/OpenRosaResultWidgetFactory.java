@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui.openrosa;
 
 import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
@@ -13,6 +14,8 @@ import com.sun.lwuit.Font;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.layouts.BoxLayout;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 
 /**
@@ -92,6 +95,12 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
             questionValue = "Unsuportted type";//TODO Localize
         } else{
             questionValue = element.getStringValue();
+        }
+
+        if(element.getDataType().getBaseTypeID() == DataTypeBase.XML_SCHEMAS_DATE){
+//            questionValue = toUserFormat(questionValue);
+            Date date = OpenRosaUtils.getDateFromString(questionValue);
+            questionValue = OpenRosaUtils.getUserFormatDate(date);
         }
 
         addQuestionComponent(questionLabel, questionValue);

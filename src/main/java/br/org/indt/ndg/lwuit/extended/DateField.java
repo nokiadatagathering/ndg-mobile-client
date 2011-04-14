@@ -31,9 +31,6 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
 
     private String[] dateFields = new String[3];
 
-    public DateField() {
-        this(new Date(), MMDDYYYY, '/');
-    }
 
     public DateField(int dateFormat) {
         this(new Date(), dateFormat, '/');
@@ -58,21 +55,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         }
     }
 
-    public DateField(String date, int dateFormat, char aSeparator) {
-        super();
-        separator = aSeparator;
-        setInputMode("123");
-        addDataChangeListener(this);
-        addFocusListener(this);
-        this.dateFormat = dateFormat;
-        setDateAsString(date);
-        setUseSoftkeys(false);
-        if(Display.getInstance().isTouchScreenDevice()) {
-            VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
-            onScreenKeyboard.setInputModeOrder(new String[]{VirtualKeyboard.NUMBERS_MODE, VirtualKeyboard.QWERTY_MODE});
-            VirtualKeyboard.bindVirtualKeyboard(this, onScreenKeyboard);
-        }
-    }
+
 
     public void setDate(Date date) {
         this.date = date;
@@ -413,26 +396,7 @@ public class DateField extends TextField implements DataChangedListener, FocusLi
         dateFields[2] = fieldThree;
     }
 
-    private void setDateAsString(String dateString) {
-        try {
-        String fieldOne = "", fieldTwo = "", fieldThree = "";
-        int firstSeparatorIndex = dateString.indexOf(separator);
-        int secondSeparatorIndex = dateString.indexOf(separator, firstSeparatorIndex + 1);
 
-        fieldOne = dateString.substring(0, firstSeparatorIndex);
-        if (secondSeparatorIndex >= 0 && (firstSeparatorIndex + 1 < dateString.length())) {
-            fieldTwo = dateString.substring(firstSeparatorIndex + 1, secondSeparatorIndex);
-            fieldThree = dateString.substring(secondSeparatorIndex + 1, dateString.length());
-        }
-        dateFields[0] = fieldOne;
-        dateFields[1] = fieldTwo;
-        dateFields[2] = fieldThree;
-        setText(dateString);
-        buildDate();
-        } catch (Exception ex) {
-            // TODO
-        }
-    }
 
     public void focusGained(Component cmp) {
         keyPressed(Display.GAME_FIRE);

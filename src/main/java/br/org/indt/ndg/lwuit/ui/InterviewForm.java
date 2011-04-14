@@ -458,7 +458,8 @@ abstract class ContainerUI extends Container implements FocusListener {
             mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
 
             addComponent(mQuestionTextArea);
-            mDateTextField = new DateField(DateField.DDMMYYYY);
+
+            mDateTextField = new DateField(AppMIDlet.getInstance().getSettings().getStructure().getDateFormatId());
             long datelong = ((DateAnswer)mAnswer).getDate();
             mDateTextField.setDate(new Date(datelong));
             mDateTextField.setEditable(true);

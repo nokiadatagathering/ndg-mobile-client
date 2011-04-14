@@ -209,6 +209,8 @@ public abstract class ContextMenu {
             longestDesc = description.length() < longestDesc.length() ? longestDesc : description;
         }
         MenuCellRenderer rendererItem = (MenuCellRenderer)optionsList.getRenderer();
+        int selectedWidth = NDGStyleToolbox.getInstance().menuStyle.selectedFont.stringWidth( longestDesc );
+        int unselectedWidth = NDGStyleToolbox.getInstance().menuStyle.unselectedFont.stringWidth( longestDesc );
         return optionsList.getStyle().getMargin( Component.LEFT )
                                + optionsList.getStyle().getMargin( Component.RIGHT )
                                + optionsList.getStyle().getPadding( Component.LEFT )
@@ -217,13 +219,13 @@ public abstract class ContextMenu {
                                + menuDialog.getStyle().getMargin( Component.RIGHT )
                                + menuDialog.getStyle().getPadding( Component.LEFT )
                                + menuDialog.getStyle().getPadding( Component.RIGHT )
-                               + NDGStyleToolbox.getInstance().menuStyle.selectedFont.stringWidth( longestDesc )
+                               + selectedWidth < unselectedWidth ? unselectedWidth : selectedWidth
                                + rendererItem.getStyle().getMargin( Component.LEFT )
                                + rendererItem.getStyle().getMargin( Component.RIGHT )
                                + rendererItem.getStyle().getPadding( Component.LEFT )
                                + rendererItem.getStyle().getPadding( Component.RIGHT )
                                + 2 * optionsList.getBorderGap()
                                + optionsList.getSideGap()
-                               + 3; // magic number, could not find all height influencing factors
+                               + 5; // magic number, could not find all height influencing factors
     }
 }

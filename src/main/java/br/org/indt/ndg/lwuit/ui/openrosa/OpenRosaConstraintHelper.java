@@ -21,15 +21,12 @@ public class OpenRosaConstraintHelper {
     }
 
     public boolean validateConstraint(String input, BoundElement element) {
-
         boolean result = false;
         String constraint = element.getConstraintString();
         try {
             int typeId = element.getDataType().getBaseTypeID();
             switch (typeId) {
-                case DataTypeBase.XML_SCHEMAS_DATE:
-                    result = validateDate(constraint, input);
-                    break;
+
                 case DataTypeBase.XML_SCHEMAS_STRING:
                     result = validateString(constraint, input);
                     break;
@@ -81,16 +78,15 @@ public class OpenRosaConstraintHelper {
         return result;
     }
 
-    private boolean validateDate(String constraint, String input) {
+    public boolean validateDate(String constraint, Date input) {
         //. > 03/09/2011 and . < 03/17/2011
         boolean result = false;
-        Date aDate = createDate(input);
         if (constraint != null) {
             String min = getLowConstraint(constraint);
             String max = getHighConstraint(constraint);
             Date low = createDate(min);
             Date high = createDate(max);
-            if (aDate.getTime() > low.getTime() && aDate.getTime() < high.getTime()) {
+            if (input.getTime() > low.getTime() && input.getTime() < high.getTime()) {
                 result = true;
             }
         }
@@ -148,4 +144,15 @@ public class OpenRosaConstraintHelper {
         return min;
     }
 
+    public String getDateLowConstraint(String constraint){
+        String constrStr = getLowConstraint(constraint);
+        Date low = createDate(constrStr);
+        return OpenRosaUtils.getUserFormatDate(low);
+    }
+
+    public String getDateHighConstraint(String constraint){
+        String constrStr = getHighConstraint(constraint);
+        Date highDate = createDate(constrStr);
+        return OpenRosaUtils.getUserFormatDate(highDate);
+    }
 }

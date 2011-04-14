@@ -46,9 +46,9 @@ public class NDGStyleToolbox {
     static public Font fontMedium;
     static public Font fontSmall;
 
-    static public int smallSize;
-    static public int mediumSize;
-    static public int largeSize;
+    static private int smallSize;
+    static private int mediumSize;
+    static private int largeSize;
 
     private NDGStyleToolbox() {
         smallSize = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL ).getHeight();
@@ -69,9 +69,9 @@ public class NDGStyleToolbox {
     }
 
     public final void initFonts() {
-        fontMedium = getFont(FONTSANS, mediumSize);
-        fontSmall = getFont(FONTSANS, smallSize);
-        fontMediumBold = getFont(FONTSANSBOLD, mediumSize);
+        fontMedium = getFont( FONTSANS, Font.SIZE_MEDIUM );
+        fontSmall = getFont( FONTSANS, Font.SIZE_SMALL );
+        fontMediumBold = getFont( FONTSANSBOLD, Font.SIZE_MEDIUM );
         listStyle.updateFonts();
         menuStyle.updateFonts();
         dialogTitleStyle.updateFonts();
@@ -147,37 +147,64 @@ public class NDGStyleToolbox {
         }
     }
 
-    static public Font getFont( String aBaseName, int size ) {
+    public static Font getFont( String aBaseName, int sizeEnum ) {
+        int size = size2Height( sizeEnum );
         Font font = null;
-        for( int i = size; i <= MAX_DEFINED_FONT_SIZE; i++) {
-            font = Screen.getRes().getFont( aBaseName + i );
-            if( font != null ){
-                return font;
+
+        if( Screen.getFontRes() != null ) {
+            for( int i = size; i <= MAX_DEFINED_FONT_SIZE; i++) {
+                font = Screen.getFontRes().getFont( aBaseName + i );
+                if( font != null ){
+                    return font;
+                }
             }
-        }
-        for( int i = size; i >= MIN_DEFINED_FONT_SIZE ; i--) {
-            font = Screen.getRes().getFont( aBaseName + i );
-            if( font != null ){
-                return font;
+            for( int i = size; i >= MIN_DEFINED_FONT_SIZE ; i--) {
+                font = Screen.getFontRes().getFont( aBaseName + i );
+                if( font != null ){
+                    return font;
+                }
             }
         }
         if( font == null ) {
-            font = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM );
+            font = Font.createSystemFont( Font.FACE_SYSTEM, getStyle( aBaseName ), sizeEnum );
         }
         return font;
+    }
+
+    private static int size2Height( int sizeEnum ) {
+        switch( sizeEnum ) {
+            case Font.SIZE_SMALL:
+                return smallSize;
+            case Font.SIZE_MEDIUM:
+                return mediumSize;
+            case Font.SIZE_LARGE:
+                return largeSize;
+            default:
+                return mediumSize;
+        }
+    }
+
+    private static int getStyle( String aFontName ) {
+        if ( aFontName.equals( FONTSANS) ) {
+            return Font.STYLE_PLAIN;
+        } else if ( aFontName.equals( FONTSANSBOLD ) ) {
+            return Font.STYLE_BOLD;
+        } else {
+            return Font.STYLE_PLAIN;
+        }
     }
 
     private void applayFontSetting() {
         Font newFont = null;
         switch( fontSizeSetting ) {
             case SMALL:
-                newFont = getFont( FONTSANS, smallSize );
+                newFont = getFont( FONTSANS, Font.SIZE_SMALL );
                 break;
             case MEDIUM:
-                newFont = getFont( FONTSANS, mediumSize );
+                newFont = getFont( FONTSANS, Font.SIZE_MEDIUM );
                 break;
             case LARGE:
-                newFont = getFont( FONTSANS, largeSize );
+                newFont = getFont( FONTSANS, Font.SIZE_LARGE );
                 break;
             case DEFAULT:
             default:

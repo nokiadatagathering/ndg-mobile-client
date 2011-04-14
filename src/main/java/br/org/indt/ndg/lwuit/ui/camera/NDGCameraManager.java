@@ -62,7 +62,10 @@ public class NDGCameraManager implements ICameraManager {
         } catch (IllegalArgumentException ex) {
         }
 
-        if (!isFromFile && AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
+        if (!isFromFile &&
+             AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() &&
+             AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
+
             Coordinates location = AppMIDlet.getInstance().getCoordinates();
 
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);

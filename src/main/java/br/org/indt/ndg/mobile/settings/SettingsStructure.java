@@ -28,6 +28,7 @@ public class SettingsStructure {
     private static final int DEFAULT_PHOTO_RESULUTION_ID = 0;
     private static final int DEFAULT_STYLE_ID = 0;
     private static final boolean DEFAULT_LOG_SUPPORT = false;
+    private static final int DEFAULT_DATE_FORMAT_ID = 0;
 
     private String server_normal_url;
     private String server_compress_url;
@@ -47,6 +48,8 @@ public class SettingsStructure {
     private int selectedStyle = DEFAULT_STYLE_ID;
 
     private boolean logSupport = DEFAULT_LOG_SUPPORT;
+    private int dateFormatId = DEFAULT_DATE_FORMAT_ID;
+
     private String language;
     private String appVersion;
 
@@ -85,6 +88,7 @@ public class SettingsStructure {
         setStyleId(DEFAULT_STYLE_ID);
         setLogSupport(DEFAULT_LOG_SUPPORT);
         setServerCompression(DEFAULT_USE_COMPRESSION);
+        setDateFormatId(DEFAULT_DATE_FORMAT_ID);
         setServerUrl_Compress(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
         setServerUrl_Normal(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
         setServerUrl_ResultsOpenRosa(defaultServerUrl + defaultServelts[0] + defaultServelts[5]);
@@ -111,6 +115,7 @@ public class SettingsStructure {
         writeLogSettings(_out);
         writeServerSettings(_out);
         writeVersionSettings(_out);
+        writeDateFormatSettings(_out);
 
         _out.println("</settings>");
     }
@@ -163,6 +168,12 @@ public class SettingsStructure {
         output.println( "\"/>" );
     }
 
+    void writeDateFormatSettings(PrintStream output){
+        output.print("<dateFormat id=\"");
+        output.print( String.valueOf(dateFormatId) );
+        output.println( "\"/>" );
+    }
+
     void setLogSupport(boolean _logSupport) {
         logSupport = _logSupport;
     }
@@ -207,6 +218,19 @@ public class SettingsStructure {
 
     public void setServerUrl_ResultsOpenRosa(String _url) {
         server_results_openrosa_url = _url;
+    }
+
+    public String getDateFormatString(){
+        //TODO format to string;
+       return "0";
+    }
+
+    public int getDateFormatId(){
+        return dateFormatId;
+    }
+
+    public void setDateFormatId(int _id){
+        dateFormatId = _id;
     }
 
     public String getServerUrl( int surveyFormat ) {

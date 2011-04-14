@@ -2,15 +2,13 @@ package br.org.indt.ndg.lwuit.ui.camera;
 
 import br.org.indt.ndg.lwuit.control.OKPhotoFormCommand;
 import br.org.indt.ndg.lwuit.control.TakePictureAgainCommand;
-import br.org.indt.ndg.lwuit.ui.*;
+import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import br.org.indt.ndg.mobile.logging.Logger;
-import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
-import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
