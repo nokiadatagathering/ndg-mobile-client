@@ -30,33 +30,32 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 public class DownloadNewSurveys implements Runnable{
-    
+
     private static DownloadNewSurveys dns;
-    private String urlList; 
-    private String urlDownload;
-    private String urlAck;
-    private XFormSurvey[] m_surveysToDownload = null; // used only for XForms
-    //private StatusScreen ss;
-    private Boolean operationCanceled = Boolean.FALSE;
-    String[] acceptableTypes = {"text/xml", "application/xml"};
-    private byte currentStep = '0';
+    /** buffer length to download */
+    private static final int MAX_DL_SIZE = 1024;
+
     private final byte STEP1 = '1';
     private final byte STEP2 = '2';
     private final Hashtable m_surveysDirFiles = new Hashtable();
-    
+
+    private String urlAck;
+    private XFormSurvey[] m_surveysToDownload = null; // used only for XForms
+    private Boolean operationCanceled = Boolean.FALSE;
+    private String[] acceptableTypes = {"text/xml", "application/xml"};
+    private byte currentStep = '0';
+
     private HttpConnection httpConnection;
 
     private InputStream httpInputStream;
     private Thread thread = null;
 
     private String serverStatus = Resources.CONNECTING;
-    /** buffer length to download */
-    private static final int MAX_DL_SIZE = 1024;
-    
+
     private DownloadNewSurveys() {
         updateRequestUrls();
     }
-    
+
     public static DownloadNewSurveys getInstance() {
         if (dns == null) {
             dns = new DownloadNewSurveys();
@@ -69,23 +68,8 @@ public class DownloadNewSurveys implements Runnable{
         return serverStatus;
     }
 
-    /**
-     * @return true = NDG protocol, false = OpenRosa protocol
-     */
-    private boolean isNdgProtocol() {
-        int protocolId = AppMIDlet.getInstance().getSettings().getStructure().getProtocolId();
-        return (protocolId == Utils.NDG_FORMAT);
-    }
-
     private void updateRequestUrls() {
         String urlBase = AppMIDlet.getInstance().getSettings().getStructure().getReceiveSurveyURL();
-        if ( isNdgProtocol() ) {
-            urlList = urlBase + "?do=list&imei=" + AppMIDlet.getInstance().getIMEI();
-            urlDownload = urlBase + "?do=download&imei=" + AppMIDlet.getInstance().getIMEI();
-        } else {
-            urlList = urlBase + "?deviceID=" + AppMIDlet.getInstance().getIMEI();
-            urlDownload = urlBase + "?do=download&deviceID=" + AppMIDlet.getInstance().getIMEI();
-        }
         urlAck = urlBase + "?do=ack&imei=" + AppMIDlet.getInstance().getIMEI();
     }
 
@@ -98,7 +82,7 @@ public class DownloadNewSurveys implements Runnable{
         thread = new Thread(this);
         thread.start();
     }
-    
+
     public void download() {
         setOperationAsNotCanceled();
         AppMIDlet.getInstance().setDisplayable(StatusScreenDownload.class);
@@ -114,21 +98,32 @@ public class DownloadNewSurveys implements Runnable{
             if (currentStep == STEP1) {
                 showListNewSurveys();
             } else if (currentStep == STEP2) {
-                SurveyDownloader downloader = null;
-                if ( isNdgProtocol() ) {
-                    downloader = new NDGSurveyDownloader();
-                } else {
-                    downloader = new XFormsSurveyDownloader(m_surveysToDownload);
+                int openRosaSurveys = 0;
+                if ( m_surveysToDownload != null ) {
+                    openRosaSurveys = m_surveysToDownload.length;
                 }
-                downloader.downloadSurveys();
+                String[] surveys = SurveysControl.getInstance().getAvailableSurveysToDownload();
+
+                if( surveys != null ) {
+                    if ( (surveys.length - openRosaSurveys) > 0 ) {//NDG surveys ready to be downloaded
+                        SurveyDownloader downloaderNDG = new NDGSurveyDownloader( AppMIDlet.getInstance().getSettings().getStructure().getReceiveSurveyURL()
+                                                                        + "?do=download&imei="
+                                                                        + AppMIDlet.getInstance().getIMEI());
+                        downloaderNDG.downloadSurveys();
+                    }
+                }
+                if ( m_surveysToDownload!= null && m_surveysToDownload.length > 0 ) {
+                    SurveyDownloader downloaderOpenRosa = new XFormsSurveyDownloader(m_surveysToDownload);
+                    downloaderOpenRosa.downloadSurveys();
+                }
+                AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
             }
-        }
-        catch (Exception e)
-        {
+        } catch( Exception e ) {
+            Logger.getInstance().logException( "Exception while downloading surveys" );
             AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
         }
     }
-    
+
     private void sendAck() {
         boolean ackOK = true;
         try {
@@ -141,7 +136,7 @@ public class DownloadNewSurveys implements Runnable{
         } catch (IOException ex) {
             ackOK = false;
         }
-        
+
         if (!ackOK) {
             removeInvalidSurveys();
             cancelOperation();
@@ -150,7 +145,7 @@ public class DownloadNewSurveys implements Runnable{
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
         }
     }
-    
+
     private void removeInvalidSurveys() {
         Enumeration e = m_surveysDirFiles.keys();
         while (e.hasMoreElements()) {
@@ -172,12 +167,15 @@ public class DownloadNewSurveys implements Runnable{
             }
         }
     }
-    
+
     private void showListNewSurveys() throws Exception {
         String filename = Resources.ROOT_DIR + Resources.NEW_SURVEYS_LIST;
         FileConnection fconn = null;
         DataOutputStream out = null;
         DataInputStream dis = null;
+        String[] surveysTitlesNDG = null;
+        String[] surveysTitlesOpenRosa = null;
+
         try {
             fconn = (FileConnection) Connector.open(filename);
             if(!fconn.exists()) fconn.create();
@@ -186,44 +184,26 @@ public class DownloadNewSurveys implements Runnable{
                 fconn.create();
             }
             out = fconn.openDataOutputStream();
-            downloadResource(urlList, acceptableTypes, out);
+            String ndgList = AppMIDlet.getInstance().getSettings().getStructure().getReceiveSurveyURL()
+                            +"?do=list&imei=" + AppMIDlet.getInstance().getIMEI();
+
+            downloadResource( ndgList , acceptableTypes, out);
             out.flush();
             out.close();
             if (!isOperationCanceled()) {
                  // Parse the surveys list
                 dis = fconn.openDataInputStream();
-                String[] surveysTitles = null;
-
-                if (isNdgProtocol()) { // NDG Protocol
-                    Logger.getInstance().emul("Download survey list: ", "NDG");
-                    NDGSurveysListHandler ndgSurveyListHandler = new NDGSurveysListHandler();
-                    surveysTitles = ndgSurveyListHandler.parse(dis);
-                } else { // XForms protocol
-                    Logger.getInstance().emul("Download survey list: ", "XForms");
-                    XFormsSurveysListHandler xFormsSurveyListHandler = new XFormsSurveysListHandler();
-                    surveysTitles = xFormsSurveyListHandler.parse(dis);
-                    m_surveysToDownload = xFormsSurveyListHandler.getSurveysToDownload();
-                }
-
-                SurveysControl.getInstance().setAvaiableSurveyToDownload(surveysTitles);
-                if( surveysTitles.length > 0 ) {
-                    AppMIDlet.getInstance().setDisplayable(CheckNewSurveyList.class);
-                } else {
-                    GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-                    GeneralAlert.getInstance().show(Resources.DOWNLOAD_SURVEYS, Resources.THERE_ARE_NO_NEW_SURVEYS, GeneralAlert.INFO);
-                    AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
-                }
+                NDGSurveysListHandler ndgSurveyListHandler = new NDGSurveysListHandler();
+                surveysTitlesNDG = ndgSurveyListHandler.parse(dis);
             }
         } catch (SAXException ex) {
             Logger.getInstance().log("ex: " + ex.getMessage() + "::"+ex.getClass().getName());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + ex.getMessage() , GeneralAlert.ERROR );
-            throw ex;
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + "NDG Survey" , GeneralAlert.ERROR );//TODO localize
         } catch (ParserConfigurationException ex) {
             Logger.getInstance().log("ex2: " + ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + ex.getMessage() , GeneralAlert.ERROR );
-            throw ex;
         } catch (ConnectionNotFoundException ex) {
             Logger.getInstance().log(ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
@@ -233,12 +213,10 @@ public class DownloadNewSurveys implements Runnable{
             Logger.getInstance().log(ex.getMessage());
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + ex.getMessage() , GeneralAlert.ERROR );
-            throw ex;
         }  catch (SecurityException ex) {
             cancelOperation();
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
             GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
-            throw ex;
         } finally {
             try {
                 boolean canceled = false;
@@ -262,6 +240,95 @@ public class DownloadNewSurveys implements Runnable{
                 // ignore
             }
         }
+        try {
+            fconn = (FileConnection) Connector.open(filename);
+            if(!fconn.exists()) fconn.create();
+            else {
+                fconn.delete();
+                fconn.create();
+            }
+            out = fconn.openDataOutputStream();
+            String openRosaList = AppMIDlet.getInstance().getSettings().getStructure().getReceiveSurveyURL()
+                                + "?deviceID=" + AppMIDlet.getInstance().getIMEI();
+
+            downloadResource( openRosaList , acceptableTypes, out);
+            out.flush();
+            out.close();
+            if (!isOperationCanceled()) {
+                 // Parse the surveys list
+                dis = fconn.openDataInputStream();
+
+                XFormsSurveysListHandler xFormsSurveyListHandler = new XFormsSurveysListHandler();
+                surveysTitlesOpenRosa = xFormsSurveyListHandler.parse(dis);
+                m_surveysToDownload = xFormsSurveyListHandler.getSurveysToDownload();
+            }
+        } catch (SAXException ex) {
+            Logger.getInstance().log("ex: " + ex.getMessage() + "::"+ex.getClass().getName());
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + "OpenRosa Survey" , GeneralAlert.ERROR );//TODO localize
+        } catch (ParserConfigurationException ex) {
+            Logger.getInstance().log("ex2: " + ex.getMessage());
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + ex.getMessage() , GeneralAlert.ERROR );
+        } catch (ConnectionNotFoundException ex) {
+            Logger.getInstance().log(ex.getMessage());
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ex.getMessage().trim(), GeneralAlert.ERROR );
+            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
+        } catch(IOException ex) {
+            Logger.getInstance().log(ex.getMessage());
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + ex.getMessage() , GeneralAlert.ERROR );
+        }  catch (SecurityException ex) {
+            cancelOperation();
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
+        } finally {
+            try {
+                boolean canceled = false;
+                synchronized (operationCanceled) {
+                    if (operationCanceled == Boolean.FALSE)
+                        canceled = true;
+                }
+                if (canceled) {
+                    fconn.delete();
+                }
+                if (out != null) {
+                    out.close();
+                }
+                if (dis != null) {
+                    dis.close();
+                }
+                if (fconn != null) {
+                    fconn.close();
+                }
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        Vector titles = new Vector();
+        if( surveysTitlesNDG != null ) {
+            for ( int i=0; i< surveysTitlesNDG.length; i++ ) {
+                titles.addElement(surveysTitlesNDG[i]);
+            }
+        }
+        if( surveysTitlesOpenRosa != null ) {
+            for ( int j=0; j< surveysTitlesOpenRosa.length; j++ ) {
+                titles.addElement(surveysTitlesOpenRosa[j]);
+            }
+        }
+
+        String[] surveysTitles = new String[titles.size()];
+        titles.copyInto(surveysTitles);
+
+        SurveysControl.getInstance().setAvaiableSurveyToDownload(surveysTitles);
+        if( surveysTitles.length > 0 ) {
+            AppMIDlet.getInstance().setDisplayable(CheckNewSurveyList.class);
+        } else {
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().show(Resources.DOWNLOAD_SURVEYS, Resources.THERE_ARE_NO_NEW_SURVEYS, GeneralAlert.INFO);
+            AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
+        }
     }
 
     public void cancelOperation() {
@@ -269,7 +336,6 @@ public class DownloadNewSurveys implements Runnable{
             operationCanceled = Boolean.TRUE;
         }
     }
-    
 
    public void cancelAndKillOperation() {
         synchronized (operationCanceled) {
@@ -344,7 +410,7 @@ public class DownloadNewSurveys implements Runnable{
                     AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                 }
 
-                // if the server is currently unable to handle the request due 
+                // if the server is currently unable to handle the request due
                 // to a temporary overloading or maintenance of the server then
                 // retry after a interval.
                 if (responseCode != HttpConnection.HTTP_UNAVAILABLE) {
@@ -384,7 +450,7 @@ public class DownloadNewSurveys implements Runnable{
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                 return;
             }
-            
+
             if (responseCode != HttpConnection.HTTP_OK) {
                 cancelOperation();
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
@@ -422,7 +488,7 @@ public class DownloadNewSurveys implements Runnable{
                 //try { conn.close(); } catch (Exception e) {}
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
             }
-          
+
         } catch (IOException ioe) {
                 cancelOperation();
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
@@ -449,7 +515,7 @@ public class DownloadNewSurveys implements Runnable{
             }
         }
     }
-    
+
     private boolean isOperationCanceled() {
         boolean result = false;
         synchronized (operationCanceled) {
@@ -459,13 +525,13 @@ public class DownloadNewSurveys implements Runnable{
         }
         return result;
     }
-    
+
     private void setOperationAsNotCanceled() {
         synchronized(operationCanceled) {
             operationCanceled = Boolean.FALSE;
         }
     }
-    
+
    /**
      * Make the parse of mime-types from content-type field
      * The media-type everything for the ';' that marks the parameters.
@@ -500,9 +566,9 @@ public class DownloadNewSurveys implements Runnable{
         byte[] buffer = new byte[MAX_DL_SIZE];
         int bytesRead;
         int totalBytesWritten = 0;
-        
+
         if ((int) httpConnection.getLength() <= 0) {
-     
+
             cancelOperation();
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EDOWNLOAD_FAILED_INVALID_DATA, GeneralAlert.ERROR );
@@ -550,8 +616,6 @@ public class DownloadNewSurveys implements Runnable{
         }
         return;
     }
-
-
 
 
     private abstract class SurveyDownloader {
@@ -757,7 +821,7 @@ public class DownloadNewSurveys implements Runnable{
             try {
                 for (;;) {
                     if (isOperationCanceled()) {
-                        break;
+                        return;
                     }
                     bytesRead = in.read(buffer);
 
@@ -775,8 +839,8 @@ public class DownloadNewSurveys implements Runnable{
                     m_allBytesRead = (totalBytes <= (totalBytesRead ) ? true : false);
                     String sBuffer = new String(buffer, 0, bytesRead);
                     m_unprocessedBuffer.append(sBuffer);
-                    parseAndSaveSurveys();
                 }
+                parseAndSaveSurveys();
             } catch (IOException ioe) {
                 cancelOperation();
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
@@ -823,32 +887,32 @@ public class DownloadNewSurveys implements Runnable{
                 if (!isOperationCanceled()) {
                     AppMIDlet.getInstance().setFileSystem(new FileSystem(Resources.ROOT_DIR));
                     AppMIDlet.getInstance().setSurveyList(new SurveyList());
-                    AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                     // Send Alert about now downloaded surveys
                     if (!m_notDownloadedSurveys.equals("")) {
                         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
                         GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.SURVEY_NOT_DOWNLOADED + m_notDownloadedSurveys, GeneralAlert.ALARM);
-                        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
                     }
                 }
             } else {
                 cancelOperation();
                 removeInvalidSurveys();
-                AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.SurveyList.class);
             }
         }
-
     }
 
     private class NDGSurveyDownloader extends SurveyDownloader {
+        private static final String mSurveyStartTag = "<survey";
+        private String mUrlDownload;
 
-        public NDGSurveyDownloader() {
+
+        public NDGSurveyDownloader( String aUrlDownload ) {
             super( new NDGSurveyHandler(), Resources.NDG_SURVEY_DIR_PREFIX, Resources.XML_TAG_END_SURVEY);
+            mUrlDownload = aUrlDownload;
         }
 
         public void downloadSurveys() {
             cleanupBeforeSurveyDownload();
-            downloadSurvey(urlDownload);
+            downloadSurvey(mUrlDownload);
             finalizeSurveyDownload();
         }
 
@@ -861,21 +925,36 @@ public class DownloadNewSurveys implements Runnable{
         }
 
         protected void parseAndSaveSurveys() throws IOException, SecurityException {
-            while (true) {
-                String ssb = m_unprocessedBuffer.toString();
-                int i = ssb.indexOf(m_surveyEndTag);
-                if (i == -1) {
-                    break;
-                }
-                if  (i > 0) {
-                    String surveyCompleted = ssb.substring(0, i + m_surveyEndTag.length());
-                    String rest = ssb.substring(i + m_surveyEndTag.length(), ssb.length());
+            String ssb = m_unprocessedBuffer.toString();
+            int startIndex = ssb.indexOf( mSurveyStartTag );
+            int endIndex = ssb.indexOf( m_surveyEndTag );
+
+            if ( startIndex < 0 || endIndex < 0 || endIndex < startIndex ) {
+                GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                GeneralAlert.getInstance().show( "Survey", "Corrupted survey", GeneralAlert.ERROR );//TODO localize
+                return;
+            }
+
+            do {
+                if  ( endIndex > 0 ) {
+                    String surveyCompleted = ssb.substring(0, endIndex + m_surveyEndTag.length());
+                    String rest = ssb.substring(endIndex + m_surveyEndTag.length(), ssb.length());
                     m_unprocessedBuffer.delete(0, m_unprocessedBuffer.length());
                     m_unprocessedBuffer.append(rest);
                     byte[] out = surveyCompleted.getBytes("UTF-8");
                     saveSurvey(out);
+                    ssb = m_unprocessedBuffer.toString();
                 }
-            }
+                startIndex = ssb.indexOf( mSurveyStartTag );
+                endIndex = ssb.indexOf( m_surveyEndTag );
+                if( startIndex < 0 ) {
+                    break;//end of survey(s)
+                } else if ( startIndex >= 0 && endIndex < 0 ) {
+                    GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+                    GeneralAlert.getInstance().show( "Survey", "At least one survey is corrupted", GeneralAlert.ERROR );//TODO localize
+                    break;
+                }
+            } while (true);
         }
     }
 

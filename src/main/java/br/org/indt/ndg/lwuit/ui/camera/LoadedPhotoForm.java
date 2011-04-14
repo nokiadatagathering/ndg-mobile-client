@@ -2,57 +2,60 @@ package br.org.indt.ndg.lwuit.ui.camera;
 
 import br.org.indt.ndg.lwuit.control.BackPreviewLoadedFile;
 import br.org.indt.ndg.lwuit.control.OKPhotoFormCommand;
-import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import com.sun.lwuit.Button;
+import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
+import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Command;
-import com.sun.lwuit.Container;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
+import com.sun.lwuit.Label;
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 
 
 public class LoadedPhotoForm extends Screen implements ActionListener {
 
-    private Container container;
-
     protected void loadData() {
     }
 
     protected void customize() {
-        setTitle( "","" );
+        setTitle( "", "" );
         form.removeAll();
         form.removeAllCommands();
-        byte[] imageData = AppMIDlet.getInstance().getCurrentCameraManager().getCurrentImageData();
+
+        form.addCommand(OKPhotoFormCommand.getInstance().getCommand());
+        form.addCommand(BackPreviewLoadedFile.getInstance().getCommand());
+
         Image image = null;
+        Component preview = null;
         try {
-            image = Image.createImage(imageData, 0, imageData.length);
-        } catch (RuntimeException ex) {
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_IMAGES, GeneralAlert.ERROR);
-            image = Screen.getRes().getImage("camera-icon");
-
+            try {
+                byte[] imageData = AppMIDlet.getInstance().getCurrentCameraManager().getCurrentImageData();
+                image = Image.createImage(imageData, 0, imageData.length);
+                preview = new Label( image.scaled(
+                        form.getPreferredSize().getWidth(),
+                        form.getPreferredSize().getHeight() - form.getSoftButton(0).getParent().getPreferredH()) );
+                ((Label)preview).setAlignment(Label.CENTER);
+            } catch ( OutOfMemoryError ex ) {
+                throw new OutOfMemoryErrorExtended("Failed to load image: " + ex.getMessage());
+            }
+        } catch ( OutOfMemoryErrorExtended ex ) {
+            Logger.getInstance().logException(ex.getMessage());
+            preview = new TextArea(Resources.EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES);
+            ((TextArea)preview).setAlignment(TextArea.CENTER);
         }
+        preview.getStyle().setMargin( 0, 0, 0, 0 );
+        preview.getStyle().setPadding( 0, 0, 0, 0 );
+        preview.setIsScrollVisible(false);
 
-        form.addCommand(BackPreviewLoadedFile.getInstance().getCommand());
-        form.addCommand(OKPhotoFormCommand.getInstance().getCommand());
-
-
-        Button imgButton = new Button(image.scaled(form.getPreferredSize().getWidth() - 15,
-                form.getPreferredSize().getHeight()-form.getSoftButton(0).getParent().getPreferredH() - 15));
-        // getting menu height does not work as expected, so additionally -15
-        imgButton.setIsScrollVisible(false);
-        container = new Container();
-        container.addComponent(imgButton);
-        container.setScrollable(false);
-        form.addCommand(OKPhotoFormCommand.getInstance().getCommand());
-        form.addCommand(BackPreviewLoadedFile.getInstance().getCommand());
-        form.addComponent(container);
+        form.setScrollable(false);
+        form.addComponent(preview);
         try {
             form.removeCommandListener(this);
-        } catch ( Exception ex ) {
+        } catch (Exception ex) {
             //nothing;
         }
         form.addCommandListener(this);
@@ -61,6 +64,7 @@ public class LoadedPhotoForm extends Screen implements ActionListener {
     public void actionPerformed(ActionEvent arg0) {
         Command cmd = arg0.getCommand();
         if(cmd == BackPreviewLoadedFile.getInstance().getCommand()){
+            AppMIDlet.getInstance().getCurrentCameraManager().deletePhoto();
             BackPreviewLoadedFile .getInstance().execute(null);
         }
         else if(cmd == OKPhotoFormCommand.getInstance().getCommand()){

@@ -1,7 +1,6 @@
 
 package br.org.indt.ndg.mobile.settings;
 
-import br.org.indt.ndg.mobile.Utils;
 import java.util.Stack;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -63,15 +62,6 @@ public class SettingsHandler extends DefaultHandler {
                 appVersion = "-1";
             }
             structure.setAppVersion(appVersion);
-        }
-        else if (qName.equals("protocolSettings")) {
-            String protocolIdAtr = attributes.getValue(attributes.getIndex("protocolId"));
-            try {
-                int protocolId = Integer.parseInt(protocolIdAtr);
-                structure.setProtocolId(protocolId);
-            } catch ( Exception ex ){
-                structure.setProtocolId(Utils.NDG_FORMAT);
-            }
         }
         else if (qName.equals("photoResolution")) {
             String config = attributes.getValue(attributes.getIndex("configId"));

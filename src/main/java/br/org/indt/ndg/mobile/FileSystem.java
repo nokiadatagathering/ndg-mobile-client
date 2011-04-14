@@ -31,10 +31,28 @@ public class FileSystem {
     private String root = null;
     private boolean error = false;
     private int resultListIndex;
+    // used to distinguish which result list should be used
+    public static final int USE_SENT_RESULTS = 1;
+    public static final int USE_NOT_SENT_RESULTS = 2;
+    private int mCurrentlyUsed = FileSystem.USE_SENT_RESULTS;
 
     private FileSystemSurveyStructure fsSurveyStructure;
     private FileSystemResultStructure fsResultStructure;
     private FileSystemResultStructure fsSentStructure;
+
+    // This is very poor solution, unfortunatelly only alternatives were major refactoring or code repetition
+    // before using the FileSystem it has to be pointed eiter sent or not sent results should be used
+    public void useResults( int resultsToUse ) {
+        if ( resultsToUse != FileSystem.USE_SENT_RESULTS &&
+             resultsToUse != FileSystem.USE_NOT_SENT_RESULTS ) {
+            throw new IllegalArgumentException("Unkown result list requested");
+        }
+        mCurrentlyUsed = resultsToUse;
+    }
+
+    public int resultsInUse() {
+        return mCurrentlyUsed;
+    }
 
     public void setResultListIndex(int _index)
     {
@@ -94,7 +112,11 @@ public class FileSystem {
     }
 
     public void setResultCurrentIndex(int _index) {
-        fsResultStructure.setCurrentIndex(_index);
+        if ( mCurrentlyUsed == FileSystem.USE_NOT_SENT_RESULTS) {
+            fsResultStructure.setCurrentIndex(_index);
+        } else {
+            fsSentStructure.setCurrentIndex(_index);
+        }
     }
 
     public Vector SurveyNames() {  //these are local mappings not real filenames
@@ -110,7 +132,13 @@ public class FileSystem {
     }
 
     public Vector getXmlResultFile() {
-        return fsResultStructure.getXmlResultFile();
+        Vector result = null;
+        if ( mCurrentlyUsed == FileSystem.USE_NOT_SENT_RESULTS) {
+            result = fsResultStructure.getXmlResultFile();
+        } else {
+            result = fsSentStructure.getXmlResultFile();
+        }
+        return result;
     }
 
     public Vector getXmlSentFile() {
@@ -123,12 +151,24 @@ public class FileSystem {
 
     //returns filename using current index of list
     public String getResultFilename() {
-        return fsResultStructure.getFilename();
+        String filename = null;
+        if ( mCurrentlyUsed == FileSystem.USE_NOT_SENT_RESULTS) {
+            filename = fsResultStructure.getFilename();
+        } else {
+            filename = fsSentStructure.getFilename();
+        }
+        return filename;
     }
 
     //returns filename given index
     public String getResultFilename(int _index) {
-        return fsResultStructure.getFilename(_index);
+        String filename = null;
+        if ( mCurrentlyUsed == FileSystem.USE_NOT_SENT_RESULTS) {
+            filename = fsResultStructure.getFilename(_index);
+        } else {
+            filename = fsSentStructure.getFilename(_index);
+        }
+        return filename;
     }
 
     public void loadSurveyInfo(String _dirName) {
@@ -380,6 +420,7 @@ public class FileSystem {
     }
 
     public void loadSentFiles() {
+        useResults(FileSystem.USE_SENT_RESULTS);
         fsSentStructure.reset();
         loadSentFiles("s_");
     }
@@ -402,6 +443,7 @@ public class FileSystem {
     }
 
     public void loadResultFiles() {
+        useResults(FileSystem.USE_NOT_SENT_RESULTS);
         fsResultStructure.reset();
 
         try {

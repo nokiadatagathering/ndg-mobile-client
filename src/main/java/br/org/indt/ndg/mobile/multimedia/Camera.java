@@ -24,7 +24,6 @@ public class Camera {
     private Player player = null;
     private boolean init = false;
     private MediaComponent mediaComp = null;
-    byte[] imageData = null;
 
     public static Camera getInstance(){
         return instance;
@@ -50,9 +49,9 @@ public class Camera {
             throw new IllegalArgumentException("Invalid width or height");
         if (!init)
             throw new IllegalStateException("Camera not initialized");
-
+        byte[] imageData = null;
         try {
-            imageData = vc.getSnapshot( GetEncoding() + "&width=" + width + "&height=" + height);
+            imageData = vc.getSnapshot( GetEncoding() + "&width=" + width + "&height=" + height );
         } catch (MediaException ex) {
             Logger.getInstance().logException(ex.getMessage());
         }
@@ -81,7 +80,6 @@ public class Camera {
     private void deinitializeCamera() {
         if (init) {
             init = false;
-            imageData = null;
             mediaComp.stop();
             player.deallocate(); // calls stop on player explicitly
             // FIX for N8 issue with landscapoe blocking, makes player unusable

@@ -1,16 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.ui.camera;
 
-import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
-import com.nokia.xfolite.xforms.dom.BoundElement;
-import com.sun.lwuit.Button;
-import com.sun.lwuit.Component;
-import com.sun.lwuit.Image;
 
 /**
  *
@@ -70,5 +60,9 @@ public class OpenRosaCameraManager implements ICameraManager{
 
     public void setImageArray(byte[] image){
         imageArray = image;
+    }
+
+    public void setIsFromFile(boolean bVal) {
+        //not needed
     }
 }

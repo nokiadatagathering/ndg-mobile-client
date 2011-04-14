@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 import java.util.Date;
@@ -37,6 +38,7 @@ public class NewResultCommand extends CommandControl {
             try {
                 try { Thread.sleep(200); } catch(Exception e){}
                 AppMIDlet.getInstance().getFileStores().resetQuestions();
+                AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_NOT_SENT_RESULTS);
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(false);
                 AppMIDlet.getInstance().getFileStores().resetResultStructure();
 

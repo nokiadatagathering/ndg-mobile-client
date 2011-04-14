@@ -3,6 +3,8 @@ import br.org.indt.ndg.lwuit.control.BackPhotoFormCommand;
 import br.org.indt.ndg.lwuit.control.CapturePhotoCommand;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
+import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.multimedia.Camera;
 import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
 import com.sun.lwuit.Container;
@@ -46,19 +48,36 @@ public class ViewFinderForm extends Screen implements ActionListener {
         form.addComponent(BorderLayout.CENTER, container);
     }
 
-    private void capturePicture(){
+    private void capturePicture() throws OutOfMemoryErrorExtended {
         PhotoResolution resolution = AppMIDlet.getInstance().getSettings().getStructure().getPhotoResolution();
-        byte[]  picture = Camera.getInstance().takePicture(resolution.getWidth(), resolution.getHeight());
-        AppMIDlet.getInstance().getCurrentCameraManager().updatePhotoForm(picture);
-        Camera.getInstance().stopCamera();
+        byte[] picture = null;
+        try {
+            picture = Camera.getInstance().takePicture(resolution.getWidth(), resolution.getHeight());
+            AppMIDlet.getInstance().getCurrentCameraManager().setIsFromFile(false);
+            AppMIDlet.getInstance().getCurrentCameraManager().updatePhotoForm(picture);
+        } catch (OutOfMemoryError ex) {
+            throw new OutOfMemoryErrorExtended("Failed to create raw image data");
+        } finally {
+            stopCamera();
+        }
     }
 
     public void capturePictureAndShowPhoto() {
         if ( enableTakingPicture ) {
             enableTakingPicture = false;
-            capturePicture();
-            Screen.show(PhotoForm.class, true);
+            try {
+                capturePicture();
+            } catch ( OutOfMemoryErrorExtended ex) {
+                // this is extremly memory consuming operation so it will often fail on S40
+                Logger.getInstance().log(ex.getMessage());
+            } finally {
+                Screen.show(PhotoForm.class, true);
+            }
         }
+    }
+
+    public void stopCamera() {
+        Camera.getInstance().stopCamera();
     }
 
     public void actionPerformed(ActionEvent evt) {

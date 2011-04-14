@@ -5,6 +5,7 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.lwuit.ui.OpenRosaResultPreviewView;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
@@ -21,10 +22,11 @@ public class ViewResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
-        if (parameter != null) {
-            int selectedIndex = ((Integer)parameter).intValue();
-            AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
+        if (parameter == null || !(parameter instanceof Integer)) {
+            throw new IllegalArgumentException("Parameter has to be a valid result index");
         }
+        int selectedIndex = ((Integer)parameter).intValue();
+        AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
         
         WaitingScreen.show(Resources.CMD_VIEW);
         

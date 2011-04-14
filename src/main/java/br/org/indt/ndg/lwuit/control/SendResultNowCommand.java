@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.StatusScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.submit.SubmitServer;
 import br.org.indt.ndg.mobile.submit.SubmitResultRunnable;
 import com.nokia.mid.appl.cmd.Local;
@@ -41,6 +37,7 @@ public class SendResultNowCommand extends CommandControl{
 
     protected void doAction(Object parameter) {
         boolean[] listFlags = (boolean[]) parameter;
+        AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_NOT_SENT_RESULTS);
         
         int size = listFlags.length;
         selectedFiles.removeAllElements();

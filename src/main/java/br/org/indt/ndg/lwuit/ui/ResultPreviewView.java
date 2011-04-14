@@ -26,6 +26,9 @@ import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileStores;
+import br.org.indt.ndg.mobile.FileSystem;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Font;
@@ -73,9 +76,12 @@ public class ResultPreviewView extends Screen implements ActionListener {
         form.setCyclicFocus(false);
 
         form.addCommand(BackResultViewCommand.getInstance().getCommand());
-        form.addCommand(SendResultCommand.getInstance().getCommand());
-        form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
-        form.addCommand(OpenResultCommand.getInstance().getCommand());
+        if ( !(AppMIDlet.getInstance().getFileSystem().resultsInUse() == FileSystem.USE_SENT_RESULTS) ) {
+            // Open option not available if view opened in SentResults mode
+            form.addCommand(SendResultCommand.getInstance().getCommand());
+            form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
+            form.addCommand(OpenResultCommand.getInstance().getCommand());
+        }
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {
@@ -160,13 +166,11 @@ public class ResultPreviewView extends Screen implements ActionListener {
             {
                 ImageData image = ((ImageData)images.elementAt(imgIndex));
                 Component imgComponenet = null;
-                if (image != null && image.getThumbnail() != null) {
+                if (image != null) {
                     imgComponenet = new Label(image.getThumbnail());
-                } else { // empty label for null images (should not happen)
-                    imgComponenet = new Label(Screen.getRes().getImage("camera-icon"));
-                }
-                imgComponenet.setSize(new Dimension(ImageData.THUMBNAIL_SIZE,ImageData.THUMBNAIL_SIZE));
-                imgContainer.addComponent(imgComponenet);
+                    imgComponenet.setSize(new Dimension(ImageData.THUMBNAIL_SIZE,ImageData.THUMBNAIL_SIZE));
+                    imgContainer.addComponent(imgComponenet);
+                } // ignoring null images
             }
             componentAnswer = imgContainer;
         } else {

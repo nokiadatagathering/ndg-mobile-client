@@ -118,6 +118,7 @@ public class SurveysControl {
     public void deleteResults(boolean[] selectedFlags) {
         Vector filenamesToDelete = new Vector();
         FileSystem fs = AppMIDlet.getInstance().getFileSystem();
+        fs.useResults(FileSystem.USE_NOT_SENT_RESULTS);
 
         // checkSelectedFiles
         for (int i = 0; i < selectedFlags.length; i++) {

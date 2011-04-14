@@ -18,6 +18,7 @@ import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.model.Result;
 import br.org.indt.ndg.lwuit.ui.renderers.ResultListCellRenderer;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.List;
@@ -46,10 +47,9 @@ public class ResultList extends Screen implements ActionListener {
 
 
     protected void loadData() {
+        AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_NOT_SENT_RESULTS);
         title1 = surveysControl.getSurveyTitle();
-
         results = AppMIDlet.getInstance().getResultList().getList();
-
         if ( results.size()<=0 || !results.elementAt(0).equals( newResultItem ) ) {
             results.insertElementAt( newResultItem, 0 );
         }
@@ -120,12 +120,12 @@ public class ResultList extends Screen implements ActionListener {
                 BackResultViewCommand.getInstance().setReturnScreen(this);
                 ViewResultCommand.getInstance().execute(new Integer(getSelectedResult()));
         } else if (cmd == SendResultNowCommand.getInstance().getCommand()) {
-                if(underlyingModel.getQtSelecteds()==0){
+                if(underlyingModel.getCheckedCount()==0){
                     underlyingModel.setChecked(list.getSelectedIndex());
                 }
                 SendResultNowCommand.getInstance().execute(underlyingModel.getSelectedFlags());
         } else if (cmd == DeleteResultNowCommand.getInstance().getCommand()) {
-                if(underlyingModel.getQtSelecteds()==0){
+                if(underlyingModel.getCheckedCount()==0){
                     underlyingModel.setChecked(list.getSelectedIndex());
                 }
                 DeleteResultNowCommand.getInstance().execute(underlyingModel.getSelectedFlags());
@@ -154,7 +154,7 @@ public class ResultList extends Screen implements ActionListener {
     }
 
     private void setCommands(){
-        if(underlyingModel.getQtSelecteds()>1){
+        if(underlyingModel.getCheckedCount()>1){
             if(!checked){
                 form.removeCommand(ViewResultCommand.getInstance().getCommand());
                 form.removeCommand(OpenResultCommand.getInstance().getCommand());

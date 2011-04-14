@@ -7,12 +7,13 @@ import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Image;
 
 public class Resources {
-    /** Internationalized Resources */
 
+    /** Internationalized Resources */
     //****************************************************************************
     // TO BE INTERNATIONALIZED
+    public static final String SAVE_SURVEY_QUESTION = "Do You want to save the survey?";
     public static final String ADD_LOCATION_FAILURE = "Cannot access gps. Location info will not be added to result.";
-    public static final String LOCATION_OUT_OF_DATE =  "Gps location is out of date. Save with old location?";
+    public static final String LOCATION_OUT_OF_DATE = "Gps location is out of date. Save with old location?";
     public static final String LOCATION_OUT_OF_DATE_WARN = "Added geotagging info is out of date";
     public static final String NEWUI_NOKIA_DATA_GATHERING = "Nokia Data Gathering";
     //public static final String NEWUI_TITLE_SURVEY_LIST = "List of Surveys";
@@ -32,7 +33,6 @@ public class Resources {
     public static final String NEWUI_DELETE_CURRENT_RESULT = Local.getText(Local.QTJ_CMD_DELETE);
     public static final String NEW_IU_OK = Local.getText(Local.QTJ_CMD_OK);
     //****************************************************************************
-
     public static final String DELETE_SURVEY = Local.getText(Local.QTJ_CMD_DELETE_SURVEY);
     public static final String CHECK_NEW_SURVEYS = Local.getText(Local.QTJ_CHECK_NEW_SURVEYS);
     public static final String DOWNLOAD = Local.getText(Local.QTJ_CMD_DOWNLOAD);
@@ -40,13 +40,11 @@ public class Resources {
     public static final String GPS = Local.getText(Local.QTJ_GPS);
     public static final String SERVER = Local.getText(Local.QTJ_SERVER);
     public static final String DISPLAY = Local.getText(Local.QTJ_DISPLAY);
-    public static final String RANGE_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_RANGE_TITLE);   
+    public static final String RANGE_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_RANGE_TITLE);
     //public static final String NO_SURVEY_IN_SERVER = Local.getText(Local.QTJ_NO_SURVEY_IN_SERVER);
-
     public static final String CMD_DELETE = Local.getText(Local.QTJ_CMD_DELETE);
     public static final String CMD_SAVE = Local.getText(Local.QTJ_CMD_SAVE);
     public static final String CMD_VIEW = Local.getText(Local.QTJ_CMD_VIEW);
-
     public static final String QUESTION_LIST_TITLE = Local.getText(Local.QTJ_QUESTION_LIST_TITLE);
     public static final String RESULTS_LIST_TITLE = Local.getText(Local.QTJ_RESULTS_LIST_TITLE);
     public static final String SUBMIT_LIST_TITLE = Local.getText(Local.QTJ_SUBMIT_LIST_TITLE);
@@ -55,7 +53,6 @@ public class Resources {
     public static final String SURVEY_LIST_TITLE = Local.getText(Local.QTJ_SURVEY_LIST_TITLE);
     public static final String QUESTIONS = Local.getText(Local.QTJ_QUESTIONS);
     public static final String QUESTION = Local.getText(Local.QTJ_QUESTION);
-
     public static final String RANGE = Local.getText(Local.QTJ_RANGE);
     public static final String LARGE = Local.getText(Local.QTJ_LARGE);
     public static final String MEDIUM = Local.getText(Local.QTJ_MEDIUM);
@@ -66,10 +63,8 @@ public class Resources {
     public static final String OFF = Local.getText(Local.QTJ_OFF);
     public static final String ON = Local.getText(Local.QTJ_ON);
     public static final String OK = Local.getText(Local.QTJ_CMD_OK);
-    
     public static final String SUBMIT_SERVER = Local.getText(Local.QTJ_SUBMIT_SERVER);
     public static final String SUBMIT_FILE = Local.getText(Local.QTJ_SUBMIT_FILE);
-
     //these strings are for custom widgets bool1 & bool2
     public static final String YES = Local.getText(Local.QTJ_YES);
     public static final String NO = Local.getText(Local.QTJ_NO);
@@ -77,13 +72,10 @@ public class Resources {
     public static final String SOMETIMES = Local.getText(Local.QTJ_SOMETIMES);
     public static final String NEVER = Local.getText(Local.QTJ_NEVER);
     public static final String EXIT = Local.getText(Local.QTJ_CMD_EXIT);
-    
     public static final String MALE = Local.getText(Local.QTJ_MALE);
     public static final String FEMALE = Local.getText(Local.QTJ_FEMALE);
-
     public static final String APPNAME = Local.getText(Local.QTJ_APPNAME);
     public static final String CATEGORY = Local.getText(Local.QTJ_CATEGORY);
-
     public static final String LOADING_SURVEYS = Local.getText(Local.QTJ_LOADING_SURVEY);
     public static final String PROCESSING = Local.getText(Local.QTJ_PROCESSING);
     public static final String WAIT = Local.getText(Local.QTJ_WAIT);
@@ -92,7 +84,6 @@ public class Resources {
     public static final String DOWNLOAD_SURVEYS = Local.getText(Local.QTJ_DOWNLOAD_NEW_SURVEYS);
     public static final String CONNECTING = Local.getText(Local.QTJ_CONNECTING);
     public static final String DOWNLOADING_NEW_SURVEYS = Local.getText(Local.QTJ_DOWNLOADING_NEW_SURVEYS);
-    
     public static final String DELETE_CONFIRMATION = Local.getText(Local.QTJ_DELETE_CONFIRMATION);
     public static final String DELETE_RESULTS_CONFIRMATION = Local.getText(Local.QTJ_DELETE_RESULTS_CONFIRMATION);
     public static final String DELETE_RESULT_CONFIRMATION = Local.getText(Local.QTJ_DELETE_RESULT_CONFIRMATION);
@@ -166,7 +157,6 @@ public class Resources {
     public static final String FAILED_REASON = Local.getText(Local.QTJ_FAILED);
     public static final String NO_DNS = Local.getText(Local.QTJ_NDG_NO_DNS);
     public static final String NO_LOCATION = Local.getText(Local.QTJ_NDG_NO_LOCATION);
-
     public static final String IMEI_ALREADY_EXISTS = Local.getText(Local.QTJ_IMEI_ALREADY_EXISTS);
     public static final String MSISDN_NOT_FOUND = Local.getText(Local.QTJ_MSISDN_NOT_FOUND);
     public static final String REGISTRATION_FAILURE = Local.getText(Local.QTJ_REGISTRATION_FAILURE);
@@ -177,69 +167,59 @@ public class Resources {
     public static final String CATEGORYVIEW_CONFIGURATION = Local.getText(Local.QTJ_CATEGORYVIEW_CONFIGURATION);
     public static final String CATEGORYVIEW = Local.getText(Local.QTJ_CATEGORYVIEW);
     public static final String NOTPROPERINTEGER = Local.getText(Local.QTJ_NOTPROPERINTEGER);
-    public static final String NOTPROPERDECIMAL= Local.getText(Local.QTJ_NOTPROPRDECIMAL);
+    public static final String NOTPROPERDECIMAL = Local.getText(Local.QTJ_NOTPROPRDECIMAL);
     public static final String RESTORE_DEFAULT = Local.getText(Local.QTJ_RESTORE_DEFAULT);
     public static final String RELOAD = Local.getText(Local.QTJ_RELOAD);
     public static final String UI_SETTINGS = Local.getText(Local.QTJ_UI_SETTINGS);
     public static final String APPLY = Local.getText(Local.QTJ_APPLY);
     public static final String LOADING_STYLE = Local.getText(Local.QTJ_LOADING_STYLE);
     public static final String LOADING_STYLE_ERROR = Local.getText(Local.QTJ_LOADING_STYLE_ERROR);
-    public static final String UI_CUSTOMIZE = Local.getText( Local.QTJ_UI_CUSTOMIZE );
-    public static final String SELECTED = Local.getText( Local.QTJ_SELECTED);
-    public static final String UNSELECTED = Local.getText( Local.QTJ_UNSELECTED);
-    public static final String PREVIEW = Local.getText( Local.QTJ_PREVIEW );
-    public static final String ELEMENT = Local.getText( Local.QTJ_ELEMENT );
-    public static final String OBJECT = Local.getText( Local.QTJ_OBJECT );
-    public static final String LIST = Local.getText( Local.QTJ_LIST );
-    public static final String MENU = Local.getText( Local.QTJ_MENU );
-    public static final String DIALOG_TITLE = Local.getText( Local.QTJ_DIALOG_TITLE );
-    public static final String BG_SELECTED = Local.getText( Local.QTJ_BG_SELECTED );
-    public static final String BG_UNSELECTED = Local.getText( Local.QTJ_BG_UNSELECTED );
-    public static final String FONT_SELECTED = Local.getText( Local.QTJ_FONT_SELECTED );
-    public static final String FONT_UNSELECTED = Local.getText( Local.QTJ_FONT_UNSELECTED );
-    public static final String ACCESS_DENIED = Local.getText( Local.QTJ_ACCESS_DENIED );
-    public static final String LOAD_FROM_FILE = Local.getText( Local.QTJ_LOAD_FROM_FILE );
-    public static final String MEMORY_OUT = Local.getText( Local.QTJ_MEMORY_OUT );
-    public static final String DEFAULT_PHOTO_DIR = Local.getText( Local.QTJ_DEFAULT_PHOTO_DIR );
-
-    public static final String CAPTURE_PHOTO = Local.getText( Local.QTJ_CAPTURE_PHOTO );
-    public static final String DELETE_PHOTO = Local.getText( Local.QTJ_DELETE_PHOTO );
-    public static final String PHOTO_RESOLUTION = Local.getText( Local.QTJ_PHOTO_RESOLUTION );
-    public static final String SHOW_PHOTO = Local.getText( Local.QTJ_SHOW_PHOTO );
-    public static final String TAKE_PHOTO = Local.getText( Local.QTJ_TAKE_PHOTO );
-
-    public static final String JUST_SAVE = Local.getText( Local.QTJ_JUST_SAVE );
-    public static final String UI_PREFERENCES = Local.getText( Local.QTJ_UI_PREFERENCES );
-    public static final String GEO_TAGGING_CONF = Local.getText( Local.QTJ_GEO_TAGGING_CONF );
-    public static final String MAX_IMG_NO = Local.getText( Local.QTJ_MAX_IMG_NO );
-    public static final String RESOLUTIONS = Local.getText( Local.QTJ_RESOLUTIONS );
-
-    public static final String DEFAULT = Local.getText( Local.QTJ_DEFAULT );
-    public static final String HIGH_CONTRAST = Local.getText( Local.QTJ_HIGH_CONTRAST );
-    public static final String CUSTOM = Local.getText( Local.QTJ_CUSTOM );
-    public static final String STYLES = Local.getText( Local.QTJ_STYLES );
-
-    public static final String TIME_FORMAT_ERROR = Local.getText( Local.QTJ_TIME_FORMAT_ERROR );
-    public static final String DATE_FORMAT_ERROR = Local.getText( Local.QTJ_DATE_FORMAT_ERROR );
-    public static final String DISCARD_CHANGES = Local.getText( Local.QTJ_DISCARD_CHANGES );
-    public static final String APPLICATION_SETTINGS = Local.getText( Local.QTJ_APPLICATION_SETTINGS );
-    public static final String PROTOCOL_SETTINGS = Local.getText( Local.QTJ_PROTOCOL_SETTINGS );
-
+    public static final String UI_CUSTOMIZE = Local.getText(Local.QTJ_UI_CUSTOMIZE);
+    public static final String SELECTED = Local.getText(Local.QTJ_SELECTED);
+    public static final String UNSELECTED = Local.getText(Local.QTJ_UNSELECTED);
+    public static final String PREVIEW = Local.getText(Local.QTJ_PREVIEW);
+    public static final String ELEMENT = Local.getText(Local.QTJ_ELEMENT);
+    public static final String OBJECT = Local.getText(Local.QTJ_OBJECT);
+    public static final String LIST = Local.getText(Local.QTJ_LIST);
+    public static final String MENU = Local.getText(Local.QTJ_MENU);
+    public static final String DIALOG_TITLE = Local.getText(Local.QTJ_DIALOG_TITLE);
+    public static final String BG_SELECTED = Local.getText(Local.QTJ_BG_SELECTED);
+    public static final String BG_UNSELECTED = Local.getText(Local.QTJ_BG_UNSELECTED);
+    public static final String FONT_SELECTED = Local.getText(Local.QTJ_FONT_SELECTED);
+    public static final String FONT_UNSELECTED = Local.getText(Local.QTJ_FONT_UNSELECTED);
+    public static final String ACCESS_DENIED = Local.getText(Local.QTJ_ACCESS_DENIED);
+    public static final String LOAD_FROM_FILE = Local.getText(Local.QTJ_LOAD_FROM_FILE);
+    public static final String MEMORY_OUT = Local.getText(Local.QTJ_MEMORY_OUT);
+    public static final String DEFAULT_PHOTO_DIR = Local.getText(Local.QTJ_DEFAULT_PHOTO_DIR);
+    public static final String CAPTURE_PHOTO = Local.getText(Local.QTJ_CAPTURE_PHOTO);
+    public static final String DELETE_PHOTO = Local.getText(Local.QTJ_DELETE_PHOTO);
+    public static final String PHOTO_RESOLUTION = Local.getText(Local.QTJ_PHOTO_RESOLUTION);
+    public static final String SHOW_PHOTO = Local.getText(Local.QTJ_SHOW_PHOTO);
+    public static final String TAKE_PHOTO = Local.getText(Local.QTJ_TAKE_PHOTO);
+    public static final String JUST_SAVE = Local.getText(Local.QTJ_JUST_SAVE);
+    public static final String UI_PREFERENCES = Local.getText(Local.QTJ_UI_PREFERENCES);
+    public static final String GEO_TAGGING_CONF = Local.getText(Local.QTJ_GEO_TAGGING_CONF);
+    public static final String MAX_IMG_NO = Local.getText(Local.QTJ_MAX_IMG_NO);
+    public static final String RESOLUTIONS = Local.getText(Local.QTJ_RESOLUTIONS);
+    public static final String DEFAULT = Local.getText(Local.QTJ_DEFAULT);
+    public static final String HIGH_CONTRAST = Local.getText(Local.QTJ_HIGH_CONTRAST);
+    public static final String CUSTOM = Local.getText(Local.QTJ_CUSTOM);
+    public static final String STYLES = Local.getText(Local.QTJ_STYLES);
+    public static final String TIME_FORMAT_ERROR = Local.getText(Local.QTJ_TIME_FORMAT_ERROR);
+    public static final String DATE_FORMAT_ERROR = Local.getText(Local.QTJ_DATE_FORMAT_ERROR);
+    public static final String DISCARD_CHANGES = Local.getText(Local.QTJ_DISCARD_CHANGES);
+    public static final String APPLICATION_SETTINGS = Local.getText(Local.QTJ_APPLICATION_SETTINGS);
+    public static final String PROTOCOL_SETTINGS = Local.getText(Local.QTJ_PROTOCOL_SETTINGS);
     public static final int NOENTRY = -99999;
-
     /** General */
     //
-
     //deploy wtk
     public static String ROOT_DIR_PHONE;
     public static String ROOT_DIR_CARD;
     public static String ROOT_DIR;
-
     //public static final String URL_SERVLET_RESULTS = "http://200.141.73.235:8180/mobisus/PostResults";
     //public static final String URL_SERVLET_RESULTS = "http://localhost:8080/mobisus/PostResults";
-
     //public static final String ENCODE_TYPE = "UTF-8";
-
     public static final String SETTINGS_FILE = "settings.xml";
     public static final String STYLE_FILE = "style.xml";
     public static final String SURVEY_NAME = "survey.xml";
@@ -252,16 +232,13 @@ public class Resources {
     public static final String XFORMS_SURVEY_DIR_PREFIX = "xforms";
     public static final String NDG_PROPERTIES_FILE = "ndg.properties";
     public static final String XFORM = "xform";
-
     public static String NDG_STANDARD_NAME = "NDG Protocol";
     public static String OPENROSA_STANDARD_NAME = "OpenRosa Protocol";
-
     /** Messages */
     public static final String MSG_SERVER_CANT_WRITE_RESULTS = Local.getText(Local.QTJ_MSG_SERVER_CANT_WRITE_RESULTS);
     //public static final String CONT_WITHOUT_SAVE = Local.getText(Local.CONT_WITHOUT_SAVE);
     public static final String SAVE_MODIFICATIONS = Local.getText(Local.QTJ_SAVE_MODIFICATIONS);
     public static final String NOT_VISITED = Local.getText(Local.QTJ_NOT_VISITED);
-    
     /*Error Messages*/
     public static final String ELOAD_SURVEY = Local.getText(Local.QTJ_ELOAD_SURVEY);
     public static final String ELOAD_SURVEYS = Local.getText(Local.QTJ_ELOAD_SURVEYS);
@@ -289,9 +266,10 @@ public class Resources {
     public static final String EDOWNLOAD_ACK_ERROR = Local.getText(Local.QTJ_EDOWNLOAD_ACK_ERROR);
     public static final String EINVALID_SURVEYS = Local.getText(Local.QTJ_EINVALID_SURVEYS);
     public static final String EINVALID_XML_FILE = Local.getText(Local.QTJ_EINVALID_XML_FILE);
-
+    public static final String EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = "Due to limited resources of the device "
+            + "it was not possible to show the picture preview. "
+            + "However picture might still be readable on server side."; // TODO localization
     private boolean error = false;
-
     public static Image check;
     public static Image question;
     public static Image logo;
@@ -303,8 +281,8 @@ public class Resources {
             logo = Image.createImage("/resources/images/logo02_48x48.png");
         } catch (IOException ex) {
             error = true;
-            GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
-            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_IMAGES, GeneralAlert.ERROR );
+            GeneralAlert.getInstance().addCommand(ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ELOAD_IMAGES, GeneralAlert.ERROR);
         }
     }
 

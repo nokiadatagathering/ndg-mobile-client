@@ -34,6 +34,7 @@ public class DeleteSentResultCommand extends CommandControl{
         boolean[] listFlags = model.getSelectedFlags();
 
         FileSystem fs = AppMIDlet.getInstance().getFileSystem();
+        fs.useResults(FileSystem.USE_SENT_RESULTS);
         Vector xmlResultFile = fs.getXmlSentFile();
         Vector selectedFiles = new Vector();
         

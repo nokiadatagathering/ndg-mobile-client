@@ -153,6 +153,7 @@ public class FileBrowserView extends Screen implements ActionListener {
                 fileRead = new byte[(int) connection.fileSize()];
                 input.read(fileRead);
                 input.close();
+                AppMIDlet.getInstance().getCurrentCameraManager().setIsFromFile(true);
                 AppMIDlet.getInstance().getCurrentCameraManager().updatePhotoForm(fileRead);
                 Screen.show(LoadedPhotoForm.class, true);
                 }

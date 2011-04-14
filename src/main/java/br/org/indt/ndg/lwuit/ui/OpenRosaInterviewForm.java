@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.control.OpenRosaInterviewSaveCommand;
 import br.org.indt.ndg.lwuit.control.BackCategoriesListCommand;
 import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
+import br.org.indt.ndg.lwuit.control.OpenRosaBackCommand;
 import br.org.indt.ndg.lwuit.control.RemovePhotoCommand;
 import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.ShowPhotoCommand;
@@ -50,7 +51,7 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
         form.setScrollAnimationSpeed(500);
         form.setFocusScrolling(true);
 
-        form.addCommand(BackCategoriesListCommand.getInstance().getCommand());
+        form.addCommand(OpenRosaBackCommand.getInstance().getCommand());
         form.addCommand(OpenRosaInterviewSaveCommand.getInstance().getCommand());
 
         try {
@@ -71,12 +72,19 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
 
     public void actionPerformed(ActionEvent ae) {
         Object cmd = ae.getSource();
-        if (cmd == BackCategoriesListCommand.getInstance().getCommand()) {
-            BackCategoriesListCommand.getInstance().execute(this);
+        if (cmd == OpenRosaBackCommand.getInstance().getCommand()) {
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
+            if(widgetFactory.isFormChanged() && GeneralAlert.RESULT_YES ==  GeneralAlert.getInstance().show( Resources.CMD_SAVE,
+                                             Resources.SAVE_SURVEY_QUESTION,
+                                             GeneralAlert.CONFIRMATION)){
+                saveInterview();
+            }else{
+                OpenRosaBackCommand.getInstance().execute(null);
+            }
+            OpenRosaBackCommand.getInstance().execute(null);
         } else if (cmd == OpenRosaInterviewSaveCommand.getInstance().getCommand()) {
-            if (widgetFactory.commitValues()) {
-                OpenRosaInterviewSaveCommand.getInstance().setObserver(this);
-                OpenRosaInterviewSaveCommand.getInstance().execute(getXFormsDocument());
+            if(widgetFactory.isFormChanged()){
+                saveInterview();
             }
         } else if( cmd == OpenFileBrowserCommand.getInstance().getCommand() ) {
             OpenFileBrowserCommand.getInstance().execute(null);
@@ -86,6 +94,13 @@ public class OpenRosaInterviewForm extends OpenRosaScreen implements UserInterfa
             ShowPhotoCommand.getInstance().execute(null);
         } else if ( cmd == RemovePhotoCommand.getInstance().getCommand() ) {
             RemovePhotoCommand.getInstance().execute(null);
+        }
+    }
+
+    private void saveInterview(){
+        if (widgetFactory.commitValues()) {
+            OpenRosaInterviewSaveCommand.getInstance().setObserver(this);
+            OpenRosaInterviewSaveCommand.getInstance().execute(getXFormsDocument());
         }
     }
 

@@ -3,6 +3,8 @@ package br.org.indt.ndg.lwuit.model;
 import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
+import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Image;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +64,7 @@ public class ImageData {
         myLocation = location;
     }
 
-    public String saveResult() {
+    public String saveResult() throws OutOfMemoryErrorExtended {
         String outPath = null;
         FileConnection fileout = null;
         try {
@@ -99,7 +101,7 @@ public class ImageData {
         return outPath + uniqueId;
     }
 
-    public byte[] getData() {
+    public byte[] getData() throws OutOfMemoryErrorExtended {
         return readData();
     }
 
@@ -112,8 +114,12 @@ public class ImageData {
     }
 
     public Image getThumbnail() {
-        if(thumbnail==null) {
-            createThumbnail(readData());
+        if ( thumbnail == null ) {
+            try {
+                createThumbnail( readData() );
+            } catch (OutOfMemoryErrorExtended ex) {
+                Logger.getInstance().logException(ex.getMessage());
+            }
         }
         return thumbnail;
     }
@@ -169,7 +175,7 @@ public class ImageData {
         }
     }
 
-    private byte[] readData() {
+    private byte[] readData() throws OutOfMemoryErrorExtended {
         byte[] result = null;
         FileConnection file = null;
         InputStream input = null;
@@ -184,38 +190,41 @@ public class ImageData {
                 result = new byte[(int) file.fileSize()];
                 input.read(result);
                 input.close();
-
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (OutOfMemoryError ex) {
+            throw new OutOfMemoryErrorExtended("Failed to read image from file");
         } finally {
             if ( input != null ) {
                 try {
                     input.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                } catch (IOException ex) {}
             }
             if ( file != null ) {
                 try {
                     file.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                } catch (IOException ex) {}
             }
         }
-
         return result;
     }
 
    private void createThumbnail(byte[] rawData){
         Image picture = null;
+        thumbnail = null;
         try {
-            picture = Image.createImage(rawData, 0, rawData.length);
-        } catch ( Exception e){ // in case of corrupt data
-            picture = Screen.getRes().getImage("camera-icon-imagetaken");
+            try {
+                picture = Image.createImage(rawData, 0, rawData.length);
+            } catch ( Exception e){ // in case of corrupt data
+                // TODO icon resource should be already scaled in file so we could avoid scaling here
+                picture = Screen.getRes().getImage("camera-icon-imagetaken");
+            }
+            thumbnail = picture.scaled(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+        } catch ( OutOfMemoryError ex ) {
+           Logger.getInstance().logException("OutOfMemoryError: Failed to create thumbnail: " + ex.getMessage());
+           thumbnail = Image.createImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
         }
-        thumbnail = picture.scaled(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
     }
 
     public void delete() {

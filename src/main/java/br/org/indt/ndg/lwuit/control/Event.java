@@ -14,10 +14,13 @@ public abstract class Event {
     public void execute(Object parameter) {
         if (!inProcess){
             inProcess = true;
-            doBefore();
-            doAction(parameter);
-            doAfter();
-            inProcess = false;
+            try {
+                doBefore();
+                doAction(parameter);
+                doAfter();
+            } finally { // to avoid blocking on unexpected exceptions
+                inProcess = false;
+            }
         }
     };
 

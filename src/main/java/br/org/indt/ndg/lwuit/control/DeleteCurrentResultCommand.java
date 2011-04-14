@@ -25,7 +25,8 @@ public class DeleteCurrentResultCommand extends CommandControl {
         if( resultCmdIndex == GeneralAlert.RESULT_YES )
         {
             FileSystem fs = AppMIDlet.getInstance().getFileSystem();
-            String resultFilename = AppMIDlet.getInstance().getFileSystem().getResultFilename();
+            fs.useResults(FileSystem.USE_NOT_SENT_RESULTS);
+            String resultFilename = fs.getResultFilename();
             fs.deleteFile(resultFilename);
             fs.deleteDir( "b_" + resultFilename );
             AppMIDlet.getInstance().setResultList(new ResultList());

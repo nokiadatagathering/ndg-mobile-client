@@ -16,7 +16,7 @@ public abstract class SurveysListHandler extends DefaultHandler {
 
     final protected Vector m_surveysTitles = new Vector();
     protected boolean newFile = true;
-    
+
     public String[] parse(DataInputStream dis) throws SAXException, IOException, ParserConfigurationException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         newFile = true;
@@ -24,8 +24,12 @@ public abstract class SurveysListHandler extends DefaultHandler {
         factory.newSAXParser().parse(dis, this);
         String[] result = new String[m_surveysTitles.size()];
         for (int i = 0; i < m_surveysTitles.size(); i++) {
-            result[i] = (String)m_surveysTitles.elementAt(i);
+            result[i] = titlePrefix() + (String)m_surveysTitles.elementAt(i);
         }
         return result;
+    }
+
+    protected String titlePrefix() {
+        return "[NDG]";
     }
 }

@@ -7,6 +7,7 @@ import br.org.indt.ndg.lwuit.control.SendResultCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.ui.openrosa.OpenRosaResultWidgetFactory;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.UserInterface;
 import com.nokia.xfolite.xml.dom.WidgetFactory;
@@ -23,7 +24,7 @@ public class OpenRosaResultPreviewView extends OpenRosaScreen implements UserInt
     private Container rootContainer;
 
     private String title1;
-    private String title2;
+    private String title2 = Resources.RESULTS_LIST_TITLE;
 
     public WidgetFactory createWidgetFactory() {
         return new OpenRosaResultWidgetFactory(rootContainer);
@@ -31,7 +32,6 @@ public class OpenRosaResultPreviewView extends OpenRosaScreen implements UserInt
 
     protected void loadData() {
         title1 = SurveysControl.getInstance().getSurveyTitle();
-        title2 = Resources.RESULTS_LIST_TITLE;
         rootContainer = new Container();
     }
 
@@ -42,9 +42,12 @@ public class OpenRosaResultPreviewView extends OpenRosaScreen implements UserInt
         form.setCyclicFocus(false);
 
         form.addCommand(BackResultViewCommand.getInstance().getCommand());
-        form.addCommand(SendResultCommand.getInstance().getCommand());
-        form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
-        form.addCommand(OpenResultCommand.getInstance().getCommand());
+        if ( !(AppMIDlet.getInstance().getFileSystem().resultsInUse() == FileSystem.USE_SENT_RESULTS) ) {
+            // Open option not available if view opened in SentResults mode
+            form.addCommand(SendResultCommand.getInstance().getCommand());
+            form.addCommand(DeleteCurrentResultCommand.getInstance().getCommand());
+            form.addCommand(OpenResultCommand.getInstance().getCommand());
+        }
 
         form.setSmoothScrolling(true);
         try {

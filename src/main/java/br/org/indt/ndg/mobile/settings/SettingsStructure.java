@@ -25,7 +25,6 @@ public class SettingsStructure {
     private static final int DEFAULT_IS_REGISTERED = 0;
     private static final boolean DEFAULT_GPS = true;
     private static final boolean DEFAULT_GEO_TAGGING = true;
-    private static final int DEFAULT_PROTOCOL_ID = Utils.NDG_FORMAT;
     private static final int DEFAULT_PHOTO_RESULUTION_ID = 0;
     private static final int DEFAULT_STYLE_ID = 0;
     private static final boolean DEFAULT_LOG_SUPPORT = false;
@@ -37,14 +36,13 @@ public class SettingsStructure {
     private String update_check_url;
     private String register_imei_url;
     private boolean compress_state = DEFAULT_USE_COMPRESSION;
-    
+
     private int splash_time = DEFAULT_SPLASH_TIME;
     private int isRegistered_flag = DEFAULT_IS_REGISTERED;
-    
+
     private boolean gps_configured = DEFAULT_GPS;
     private boolean geoTagging_configured = DEFAULT_GEO_TAGGING;
 
-    private int selectedProtocolId = DEFAULT_PROTOCOL_ID;
     private int selectedResolution = DEFAULT_PHOTO_RESULUTION_ID;
     private int selectedStyle = DEFAULT_STYLE_ID;
 
@@ -71,7 +69,7 @@ public class SettingsStructure {
         language = defaultAppLanguage;
         appVersion = AppMIDlet.getInstance().getAppVersion();
     }
-    
+
     public void createDefaultSettings(PrintStream _out) {
         String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
         String defaultAppLanguage = AppMIDlet.getInstance().getDefaultAppLanguage();
@@ -83,7 +81,6 @@ public class SettingsStructure {
         setSplashTime(DEFAULT_SPLASH_TIME);
         setGpsConfigured(DEFAULT_GPS);
         setGeoTaggingConfigured(DEFAULT_GEO_TAGGING);
-        setProtocolId(Utils.NDG_FORMAT);
         setPhotoResolutionId(DEFAULT_PHOTO_RESULUTION_ID);
         setStyleId(DEFAULT_STYLE_ID);
         setLogSupport(DEFAULT_LOG_SUPPORT);
@@ -109,7 +106,6 @@ public class SettingsStructure {
 
         writeGpsSettings(_out);
         writeGeoTaggingSettings(_out);
-        writeProtocolSettings(_out);
         writePhotoResolutionSettings(_out);
         writeStyleSettings(_out);
         writeLogSettings(_out);
@@ -123,7 +119,7 @@ public class SettingsStructure {
         _out.print("<server compression=\"");
         if (compress_state) _out.println("on\">");
         else _out.println("off\">");
-        
+
         _out.println("<url_compress>" + server_compress_url + "</url_compress>");
         _out.println("<url_normal>" + server_normal_url + "</url_normal>");
         _out.println("<url_results_openrosa>" + server_results_openrosa_url + "</url_results_openrosa>");
@@ -133,7 +129,7 @@ public class SettingsStructure {
 
         _out.println("</server>");
     }
-    
+
     public void writeGpsSettings(PrintStream _out) {
         _out.print("<gps configured=\"");
         if (gps_configured) _out.println("yes\"/>");
@@ -150,17 +146,11 @@ public class SettingsStructure {
         String strLogSupport = logSupport ? "yes" : "no";
         _out.println("<log active=\"" + strLogSupport + "\"" + "/>");
     }
-    
+
     void writeVersionSettings(PrintStream _out) {
         _out.println("<version application=\"" + appVersion + "\"/>");
     }
 
-    void writeProtocolSettings(PrintStream _out) {
-        _out.print("<protocolSettings protocolId=\"");
-        _out.print( String.valueOf(selectedProtocolId) );
-        _out.println( "\"/>" );
-    }
-    
     void writePhotoResolutionSettings(PrintStream output) {
         output.print("<photoResolution configId=\"");
         output.print( String.valueOf(selectedResolution) );
@@ -172,28 +162,28 @@ public class SettingsStructure {
         output.print( String.valueOf(selectedStyle) );
         output.println( "\"/>" );
     }
-    
+
     void setLogSupport(boolean _logSupport) {
         logSupport = _logSupport;
     }
     public boolean getLogSupport(){
         return logSupport;
     }
-    
+
     void setLanguage(String _lang) {
         language = _lang;
     }
     public String getLanguage() {
         return language;
     }
-    
+
     void setAppVersion(String _ver) {
         appVersion = _ver;
     }
     public String getAppVersion() {
         return appVersion;
     }
-    
+
     void setUpdateCheckURL(String _url) {
         update_check_url = _url;
     }
@@ -207,16 +197,18 @@ public class SettingsStructure {
     public boolean getServerCompression() {
         return compress_state;
     }
-    
+
     public void setServerUrl_Compress(String _url) {
         server_compress_url = _url;
     }
     public void setServerUrl_Normal(String _url) {
         server_normal_url = _url;
     }
+
     public void setServerUrl_ResultsOpenRosa(String _url) {
         server_results_openrosa_url = _url;
     }
+
     public String getServerUrl( int surveyFormat ) {
         String result = null;
         switch (surveyFormat) {
@@ -234,9 +226,11 @@ public class SettingsStructure {
         }
         return result;
     }
+
     public void setReceiveSurveyURL(String url){
         receive_survey_url = url;
     }
+
     public String getReceiveSurveyURL(){
         return receive_survey_url;
     }
@@ -248,7 +242,7 @@ public class SettingsStructure {
     public void setRegisterIMEIUrl(String url) {
         this.register_imei_url = url;
     }
-    
+
     public void setRegisteredFlag(int _flag) {
         isRegistered_flag = _flag;
     }
@@ -259,10 +253,11 @@ public class SettingsStructure {
     public void setSplashTime(int _time) {
         splash_time = _time;
     }
+
     public int getSplashTime() {
         return splash_time;
     }
-    
+
     public void setGpsConfigured(boolean _state) {
         gps_configured = _state;
     }
@@ -275,13 +270,6 @@ public class SettingsStructure {
     }
     public boolean getGeoTaggingConfigured() {
         return geoTagging_configured;
-    }
-
-    public void setProtocolId(int _selProtoId ) {
-        selectedProtocolId = _selProtoId;
-    }
-    public int getProtocolId() {
-        return selectedProtocolId;
     }
 
     public void setPhotoResolutionId(int _resConf ) {
@@ -305,5 +293,4 @@ public class SettingsStructure {
     public String[] getResolutionList() {
         return PhotoSettings.getInstance().getResolutionList();
     }
-
 }

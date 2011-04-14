@@ -7,7 +7,6 @@ import br.org.indt.ndg.lwuit.control.TakePhotoCommand;
 import br.org.indt.ndg.lwuit.extended.CheckBox;
 import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
-import br.org.indt.ndg.lwuit.extended.Form;
 import br.org.indt.ndg.lwuit.extended.NumericField;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.model.ImageData;
@@ -85,6 +84,15 @@ public class OpenRosaWidgetFactory implements WidgetFactory, XPathNSResolver {
             }
         }
         return result;
+    }
+
+    public boolean isFormChanged(){
+        for (int i = 0; i < createdContainers.size(); i++) {
+            if (((ContainerUI) createdContainers.elementAt(i)).isChanged()){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void elementParsed(Element el) {
@@ -206,8 +214,10 @@ abstract class ContainerUI extends Container implements FocusListener {
     protected BoundElement element;
 
     protected void commitValue(String input) {
-            element.setStringValue(input);
+        element.setStringValue(input);
     }
+
+    public abstract boolean isChanged();
 
     public abstract void commitValue();
 
@@ -295,6 +305,7 @@ class XfoilPhotoFieldUi extends ContainerUI implements  ActionListener, CameraMa
 
     private Container mImageContainer;
     private Button imageButton;
+    private boolean isChanged = false;
 
     public XfoilPhotoFieldUi(BoundElement element){
         super(element);
@@ -335,10 +346,13 @@ class XfoilPhotoFieldUi extends ContainerUI implements  ActionListener, CameraMa
         getComponentForm().removeCommand(RemovePhotoCommand.getInstance().getCommand());
     }
 
-
+    public boolean isChanged(){
+        return isChanged;
+    }
 
     public void commitValue() {
-        element.setStringValue(OpenRosaCameraManager.getInstance().getImageStringValue());
+//        element.setStringValue(OpenRosaCameraManager.getInstance().getImageStringValue());
+        commitValue(OpenRosaCameraManager.getInstance().getImageStringValue());
     }
 
     public void setEnabled(boolean enabled) {
@@ -397,6 +411,7 @@ class XfoilPhotoFieldUi extends ContainerUI implements  ActionListener, CameraMa
     }
 
     public void update() {
+        isChanged = true;
         updateImageButton();
         rebuildOptionMenu();
         getComponentForm().showBack();
@@ -424,6 +439,14 @@ class XfoilDescriptiveFieldUI extends ContainerUI {
 
     public void setEnabled(boolean enabled) {
         //     throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isChanged(){
+        if(tfDesc.getText().equals(element.getStringValue())){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     private void addDescriptionQuestion(BoundElement bindElem) {
@@ -463,6 +486,13 @@ class XfoilNumericFieldUI extends ContainerUI {
     public void setEnabled(boolean enabled) {
      //   throw new UnsupportedOperationException("Not supported yet.");
     }
+    public boolean isChanged(){
+        if(nfNumber.getText().equals(element.getStringValue())){
+            return false;
+        }else{
+            return true;
+        }
+    }
 
     private void addNumericQuestion(BoundElement bindElem) {
         String value = bindElem.getStringValue().trim();
@@ -501,6 +531,13 @@ class XfoilDateFieldUI extends ContainerUI {
     }
 
     public void setEnabled(boolean enabled) {
+    }
+    public boolean isChanged(){
+        if(dfDate.getText().equals(element.getStringValue())){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     private void addDateQuestion(BoundElement bindElem) {
@@ -563,6 +600,10 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
+        commitValue(getSelectedString());
+    }
+
+    private String getSelectedString(){
         String values = "";
         for (int i = 0; i < cbs.size(); i++) {
             CheckBox cb = (CheckBox)cbs.elementAt(i);
@@ -570,7 +611,7 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
                 values = values.concat(cb.getText() + " ");
             }
         }
-        element.setStringValue(values);
+        return values;
     }
 
     protected boolean validate() {
@@ -580,6 +621,14 @@ class XfoilMultipleChoiceFieldUI extends ContainerUI {
 
     public void setEnabled(boolean enabled) {
         //   throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isChanged(){
+        if(getSelectedString().equals(element.getStringValue())){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     private void addSelectQuestion(BoundElement bindElem) {
@@ -635,12 +684,24 @@ class XfoilExclusiveChoiceFieldUI extends ContainerUI {
     }
 
     public void commitValue() {
+        commitValue(getSelectedString());
+    }
+
+    private String getSelectedString(){
         for (int i = 0; i < groupButton.getButtonCount(); i++) {
             RadioButton rb = (RadioButton) groupButton.getRadioButton(i);
             if (rb.isSelected()) {
-                element.setStringValue(rb.getText());
-                break;
+                return rb.getText();
             }
+        }
+        return "";
+    }
+
+    public boolean isChanged(){
+        if(getSelectedString().equals(element.getStringValue())){
+            return false;
+        }else{
+            return true;
         }
     }
 
@@ -716,6 +777,10 @@ class XfoilMockComponent extends ContainerUI {
 
     protected boolean validate() {
         return true;
+    }
+
+    public boolean isChanged(){
+        return false;
     }
 
     public void setEnabled(boolean enabled) {

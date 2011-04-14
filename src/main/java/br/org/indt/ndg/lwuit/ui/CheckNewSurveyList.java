@@ -30,7 +30,7 @@ public class CheckNewSurveyList extends Screen implements ActionListener {
         TextArea item = new TextArea(5,20);
         item.getSelectedStyle().setBgColor( NDGStyleToolbox.getInstance().listStyle.bgUnselectedColor );
         item.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
-        item.getStyle().setFont( NDGStyleToolbox.fontSmall );
+        item.getSelectedStyle().setFont( NDGStyleToolbox.fontSmall );
         item.setEditable(false);
         item.setFocusable(true);
         item.setText(strSurveys);
@@ -58,5 +58,4 @@ public class CheckNewSurveyList extends Screen implements ActionListener {
             CancelCheckSurveyListCommand.getInstance().execute(null);
         }
     }
-
 }

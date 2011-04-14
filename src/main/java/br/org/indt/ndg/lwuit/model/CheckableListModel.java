@@ -65,9 +65,9 @@ public class CheckableListModel extends DefaultListModel {
         }
     }
 
-    public int getQtSelecteds() {
+    public int getCheckedCount() {
         int selectionCount = 0;
-        for (int index = 0; index < getSize()-1; index++) {
+        for (int index = 0; index < getSize(); index++) {
             CheckableItem item = (CheckableItem) this.getItemAt(index);
             if (item.isChecked())
                 selectionCount++;

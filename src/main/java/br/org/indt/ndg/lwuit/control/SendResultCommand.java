@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.StatusScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.submit.SubmitResultRunnable;
 import br.org.indt.ndg.mobile.submit.SubmitServer;
@@ -25,6 +21,7 @@ public class SendResultCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
+        AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_NOT_SENT_RESULTS);
         SubmitResultRunnable srr = new SubmitResultRunnable(AppMIDlet.getInstance().getFileSystem().getResultFilename());
         AppMIDlet.getInstance().setSubmitServer( new SubmitServer() );
         srr.setSubmitServer( AppMIDlet.getInstance().getSubmitServer() );

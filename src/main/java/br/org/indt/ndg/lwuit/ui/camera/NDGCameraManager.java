@@ -5,6 +5,7 @@ import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
@@ -23,6 +24,8 @@ public class NDGCameraManager implements ICameraManager {
     private Component thumbnailButton;
     private int imageIndex;
     private CameraManagerListener listener;
+    private boolean isFromFile = false;
+
 
     private NDGCameraManager(){
     }
@@ -42,13 +45,13 @@ public class NDGCameraManager implements ICameraManager {
         listener = ndgListener;
     }
 
-    public byte[] getCurrentImageData(){
-        if(imageIndex < currentImageAnswer.getImages().size()){
-            ImageData img = (ImageData)currentImageAnswer.getImages().elementAt(imageIndex);
-            return img.getData();
+    public byte[] getCurrentImageData() throws OutOfMemoryErrorExtended {
+        byte[] data = null;
+        if ( imageIndex < currentImageAnswer.getImages().size() ){
+            ImageData img = (ImageData) currentImageAnswer.getImages().elementAt(imageIndex);
+            data = img.getData();
         }
-        else
-            return null;
+        return data;
     }
 
     public void updateInterviewForm() {
@@ -59,7 +62,7 @@ public class NDGCameraManager implements ICameraManager {
         } catch (IllegalArgumentException ex) {
         }
 
-        if ( AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
+        if (!isFromFile && AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() ) {
             Coordinates location = AppMIDlet.getInstance().getCoordinates();
 
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -80,7 +83,6 @@ public class NDGCameraManager implements ICameraManager {
 
     public void updatePhotoForm(byte[] picture) {
         ImageData imageData = new ImageData(picture);
-
         if ( imageIndex >= currentImageAnswer.getImages().size() ) {
             currentImageAnswer.getImages().addElement(imageData);
         } else {
@@ -93,5 +95,9 @@ public class NDGCameraManager implements ICameraManager {
         ((ImageData)currentImageAnswer.getImages().elementAt(imageIndex)).delete();
         currentImageAnswer.getImages().removeElementAt(imageIndex);
         imageContainer.removeComponent(thumbnailButton);
+    }
+
+    public void setIsFromFile(boolean bVal) {
+        isFromFile = bVal;
     }
 }

@@ -1,6 +1,5 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.AppSettingsViewCommand;
 import br.org.indt.ndg.lwuit.control.ResolutionSelectionViewCommand;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.CheckNewSurveysCommand;
@@ -46,7 +45,7 @@ public class SurveyList extends Screen implements ActionListener{
 
         if (list != null)
             form.removeComponent(list);
-        
+
         resetAllCommands();
 
         try{
@@ -95,8 +94,6 @@ public class SurveyList extends Screen implements ActionListener{
                 UpdateCommand.getInstance().execute(null);
             } else if (cmd == DeleteSurveyCommand.getInstance().getCommand()) {
                 DeleteSurveyCommand.getInstance().execute(new Integer( list.getSelectedIndex() - 1 ));
-            } else if (cmd == AppSettingsViewCommand.getInstance().getCommand()) {
-                AppSettingsViewCommand.getInstance().execute(null);
             } else if (cmd == TestConnectionCommand.getInstance().getCommand()) {
                 TestConnectionCommand.getInstance().execute(null);
             } else if ( cmd == ResolutionSelectionViewCommand.getInstance().getCommand() ){
@@ -116,7 +113,6 @@ public class SurveyList extends Screen implements ActionListener{
         form.addCommand(TestConnectionCommand.getInstance().getCommand());
         form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
         form.addCommand(DeleteSurveyCommand.getInstance().getCommand());
-        form.addCommand(AppSettingsViewCommand.getInstance().getCommand());
         form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
         form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
         form.addCommand(GPSCommand.getInstance().getCommand());

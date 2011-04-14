@@ -8,6 +8,7 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.ResultList;
 import br.org.indt.ndg.mobile.SurveyList;
@@ -37,6 +38,7 @@ public class OpenSurveyCommand extends CommandControl {
     protected void doAction(Object parameter) {
         int selectedIndex = ((Integer)parameter).intValue();
 
+        AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_NOT_SENT_RESULTS);
         AppMIDlet.getInstance().getFileSystem().setSurveyCurrentIndex(selectedIndex);
         AppMIDlet.getInstance().getFileSystem().setResultCurrentIndex(selectedIndex);
 

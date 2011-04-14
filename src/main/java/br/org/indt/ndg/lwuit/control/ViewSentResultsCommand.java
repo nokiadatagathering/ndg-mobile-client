@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
 import br.org.indt.ndg.lwuit.ui.SentResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
@@ -25,6 +21,8 @@ public class ViewSentResultsCommand extends CommandControl {
     }
 
     protected void doAction(Object parameter) {
+        AppMIDlet.getInstance().getFileSystem().useResults(FileSystem.USE_SENT_RESULTS);
+
         WaitingScreen.show(Resources.CMD_VIEW);
         ViewSentResultsRunnable vrr = new ViewSentResultsRunnable();
         Thread t = new Thread(vrr);  //create new thread to compensate for waitingform
