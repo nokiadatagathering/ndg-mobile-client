@@ -993,7 +993,7 @@ public class DownloadNewSurveys implements Runnable{
 
         protected void parseAndSaveSurveys() throws IOException, SecurityException {
             if (m_allBytesRead) {
-                byte[] out = m_unprocessedBuffer.toString().getBytes("UTF-8");
+                byte[] out = m_unprocessedBuffer.toString().getBytes();
                 saveSurvey(out);
             }
         }
