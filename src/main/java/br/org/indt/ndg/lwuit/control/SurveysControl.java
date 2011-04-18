@@ -26,6 +26,8 @@ public class SurveysControl {
     private int mSelectedSubCategory = 0;
     private String[] avaiableSurveyList;
 
+    private boolean isSurveyChanged = false;
+
     public static SurveysControl getInstance() {
         if (instance == null) {
             instance = new SurveysControl();
@@ -183,5 +185,13 @@ public class SurveysControl {
         for (int i = categoriesAnswerContainer.getSubcategoriesCount() - 1; i >= aCategory.getQuantity(); i--) {
             categoriesAnswerContainer.remove(i);
         }
+    }
+
+    public boolean isSurveyChanged(){
+        return isSurveyChanged;
+    }
+
+    public void setSurveyChanged(boolean bVal){
+        isSurveyChanged = bVal;
     }
 }

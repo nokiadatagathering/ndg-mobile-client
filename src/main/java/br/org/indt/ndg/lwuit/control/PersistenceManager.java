@@ -23,6 +23,7 @@ import com.nokia.xfolite.xforms.submission.XFormsXMLSerializer;
 import com.nokia.xfolite.xml.dom.Document;
 import com.nokia.xfolite.xml.dom.Element;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Date;
@@ -49,7 +50,7 @@ public class PersistenceManager {
     private String resultId;
     private ResultStructure mAnswers = null;
     private XFormsDocument xFormDoc = null;
-
+    private boolean encryption = false;
     private static String ORX_NAMESPACE = "http://openrosa.org/xforms/metadata";
     private static String INSTANCE_NAME = "orx:instanceID";
     private static String META_NAME = "orx:meta";
@@ -102,7 +103,47 @@ public class PersistenceManager {
         t.start();
     }
 
+    private void encode(String surveyFilepath, String surveyFilename) throws IOException {
+        FileConnection inputFile = null;
+        InputStream in = null;
+        FileConnection outputFile = null;
+        OutputStream out = null;
+        try {
+            inputFile = (FileConnection) Connector.open(surveyFilepath);
+            in = inputFile.openInputStream();
+        } catch (IOException ex) {
+        }
+        try {
+            String encrypedFilename = "e_" + surveyFilename;
+            String encryptedSurveyFilepath = surveyFilepath + encrypedFilename;
+            outputFile = (FileConnection) Connector.open( encryptedSurveyFilepath );
+            if (outputFile.exists()) {
+                outputFile.delete();
+            }
+            outputFile.create();
+            out = outputFile.openOutputStream();
+        } catch (IOException ex) {
+        }
+        AES encrypter = new AES();
+        try {
+            encrypter.encrypt(in, out);
+        } catch (Exception e) {
+            GeneralAlert.getInstance().addCommand(ExitCommand.getInstance());
+            GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.WRONG_KEY, GeneralAlert.ERROR);
+        }
+        in.close();
+        out.close();
+        inputFile.delete();
+        inputFile.close();
+        outputFile.rename(surveyFilename);
+        outputFile.close();
+    }
+
     private void saveSurvey( int surveyType ) {
+        if( AppMIDlet.getInstance().getSettings() != null
+          && AppMIDlet.getInstance().getSettings().getStructure().isEncryptionConfigured() ) {
+            encryption = AppMIDlet.getInstance().getSettings().getStructure().getEncryption();
+        }
         String surveyId = null;
         switch (surveyType) {
             case Utils.NDG_FORMAT:
@@ -159,6 +200,9 @@ public class PersistenceManager {
         // Save result file without binaries
         boolean includeBinaries = false;
         writeNdgResult(surveyFilepath, includeBinaries);
+        if( encryption ) {
+            encode(surveyFilepath, surveyFilename);
+        }
         if ( hasBinaryData() ) {
             // Save result file with binaries
             includeBinaries = true;
@@ -178,6 +222,9 @@ public class PersistenceManager {
             }
             String surveyFilePathWithBinaries = surveyDirnameWithBinaries + "/" + surveyFilenameWithBinaries;
             writeNdgResult(surveyFilePathWithBinaries, includeBinaries);
+            if( encryption ) {
+                encode( surveyFilePathWithBinaries, surveyFilenameWithBinaries );
+            }
         }
     }
 
@@ -199,9 +246,12 @@ public class PersistenceManager {
             OutputStream stream = fCon.openOutputStream();
             serilizer.serialize(stream, instanceDocument.getDocumentElement(), null);
             stream.close();
-            fCon.close();
 
-            AppMIDlet.getInstance().setDisplayable(ResultList.class);
+            if( encryption ) {
+                encode(surveyFilepath, surveyFilename);
+            }
+
+            fCon.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -495,5 +545,4 @@ public class PersistenceManager {
             PersistenceManager.getInstance().resultsSaved();
         }
     }
-
 }

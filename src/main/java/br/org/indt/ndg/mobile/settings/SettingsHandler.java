@@ -30,6 +30,14 @@ public class SettingsHandler extends DefaultHandler {
             else {
                 structure.setRegisteredFlag(0);
             }
+
+            String isShowEncriptionScreenFlag = attributes.getValue(attributes.getIndex("showEncryptionScreen"));
+            if ( isShowEncriptionScreenFlag!= null ) {
+                structure.setEncryptionConfigured(Integer.parseInt(isShowEncriptionScreenFlag));
+            }
+            else {
+                structure.setEncryptionConfigured(0);
+            }
         }
         else if (qName.equals("server")) {
             if (attributes.getValue(attributes.getIndex("compression")).equals("on"))
@@ -48,6 +56,12 @@ public class SettingsHandler extends DefaultHandler {
                 structure.setGeoTaggingConfigured(true);
             else
                 structure.setGeoTaggingConfigured(false);
+        }
+        else if (qName.equals("encryption")) {
+            if (attributes.getValue(attributes.getIndex("enabled")).equals("yes"))
+                structure.setEncryption(true);
+            else
+                structure.setEncryption(false);
         }
         else if(qName.equals("log")){
             String logSupport = attributes.getValue(attributes.getIndex("active"));

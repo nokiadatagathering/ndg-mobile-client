@@ -1,5 +1,6 @@
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import java.io.PrintStream;
 
@@ -28,7 +29,9 @@ public class SettingsStructure {
     private static final int DEFAULT_PHOTO_RESULUTION_ID = 0;
     private static final int DEFAULT_STYLE_ID = 0;
     private static final boolean DEFAULT_LOG_SUPPORT = false;
-    private static final int DEFAULT_DATE_FORMAT_ID = 0;
+    private static final int DEFAULT_DATE_FORMAT_ID = DateField.DDMMYYYY;
+    private static final boolean DEFAULT_ENCRYPTION = false;
+    private static final int DEFAULT_ENCRIPTION_CONFIGURED = 0;
 
     private String server_normal_url;
     private String server_compress_url;
@@ -49,6 +52,9 @@ public class SettingsStructure {
 
     private boolean logSupport = DEFAULT_LOG_SUPPORT;
     private int dateFormatId = DEFAULT_DATE_FORMAT_ID;
+
+    private int encryptionConfigured = DEFAULT_ENCRIPTION_CONFIGURED;
+    private boolean encryption = DEFAULT_ENCRYPTION;
 
     private String language;
     private String appVersion;
@@ -89,6 +95,8 @@ public class SettingsStructure {
         setLogSupport(DEFAULT_LOG_SUPPORT);
         setServerCompression(DEFAULT_USE_COMPRESSION);
         setDateFormatId(DEFAULT_DATE_FORMAT_ID);
+        setEncryptionConfigured(DEFAULT_ENCRIPTION_CONFIGURED);
+        setEncryption(DEFAULT_ENCRYPTION);
         setServerUrl_Compress(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
         setServerUrl_Normal(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
         setServerUrl_ResultsOpenRosa(defaultServerUrl + defaultServelts[0] + defaultServelts[5]);
@@ -106,7 +114,8 @@ public class SettingsStructure {
         _out.print("<settings");
         _out.print(" registered=\"" + getRegisteredFlag() + "\"");
         _out.print(" splash=\"" + getSplashTime() + "\"");
-        _out.println(" language=\"" + getLanguage() + "\">");
+        _out.print(" language=\"" + getLanguage() + "\"");
+        _out.println(" showEncryptionScreen=\""+ (isEncryptionConfigured() ? "1" : "0") + "\">");
 
         writeGpsSettings(_out);
         writeGeoTaggingSettings(_out);
@@ -116,6 +125,7 @@ public class SettingsStructure {
         writeServerSettings(_out);
         writeVersionSettings(_out);
         writeDateFormatSettings(_out);
+        writeEncryption(_out);
 
         _out.println("</settings>");
     }
@@ -172,6 +182,12 @@ public class SettingsStructure {
         output.print("<dateFormat id=\"");
         output.print( String.valueOf(dateFormatId) );
         output.println( "\"/>" );
+    }
+
+    public void writeEncryption(PrintStream _out) {
+        _out.print("<encryption enabled=\"");
+        if (encryption) _out.println("yes\"/>");
+        else _out.println("no\"/>");
     }
 
     void setLogSupport(boolean _logSupport) {
@@ -270,6 +286,7 @@ public class SettingsStructure {
     public void setRegisteredFlag(int _flag) {
         isRegistered_flag = _flag;
     }
+
     public int getRegisteredFlag() {
         return isRegistered_flag;
     }
@@ -316,5 +333,21 @@ public class SettingsStructure {
 
     public String[] getResolutionList() {
         return PhotoSettings.getInstance().getResolutionList();
+    }
+
+    public boolean isEncryptionConfigured() {
+        return encryptionConfigured== 1 ? true : false;
+    }
+
+    public void setEncryptionConfigured(int encryption) {
+        encryptionConfigured = encryption;
+    }
+
+    public boolean getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(boolean encrypt) {
+        encryption = encrypt;
     }
 }

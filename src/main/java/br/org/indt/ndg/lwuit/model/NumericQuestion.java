@@ -11,10 +11,9 @@ public abstract class NumericQuestion extends NDGQuestion {
         mLength = length;
     }
 
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        NumericAnswer numericAnswer = (NumericAnswer)aAnswer;
-        if ( passLowConstraint( numericAnswer ) )
-            if ( passHighConstraint( numericAnswer ) )
+    public boolean passConstraints( String input ) {
+        if ( passLowConstraint( input ) )
+            if ( passHighConstraint( input ) )
                 return true;
             else
                 return false;
@@ -26,6 +25,6 @@ public abstract class NumericQuestion extends NDGQuestion {
     abstract public void setLowConstraint( String _low );
     abstract public String getType();
 
-    abstract protected boolean passLowConstraint( NumericAnswer aAnswer );
-    abstract protected boolean passHighConstraint( NumericAnswer aAnswer );
+    abstract protected boolean passLowConstraint( String aAnswer );
+    abstract protected boolean passHighConstraint( String aAnswer );
 }

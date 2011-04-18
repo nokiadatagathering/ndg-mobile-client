@@ -40,7 +40,6 @@ public class CategoryList extends Screen implements ActionListener, SaveResultsO
 
     protected void customize() {
         setTitle(title1, title2);
-
         form.removeAllCommands();
         if (list != null)
             form.removeComponent(list);

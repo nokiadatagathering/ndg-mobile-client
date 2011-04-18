@@ -1,7 +1,7 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.ui.openrosa.OpenRosaWidgetFactory;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.UserInterface;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
 import com.nokia.xfolite.xforms.submission.MultipartFormDataSerializer;
@@ -40,7 +40,16 @@ public abstract class OpenRosaScreen extends Screen implements UserInterface{
             fc.close();
         } catch (IOException ex) {
             ex.printStackTrace();
+            loadError();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            loadError();
         }
+    }
+
+    private void loadError(){
+        GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+        GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.OR_FORM_LOADING_FAILURE, GeneralAlert.ERROR);
     }
 
     public void createXFormsDocument(){

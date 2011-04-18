@@ -59,8 +59,4 @@ public class DescriptiveQuestion extends NDGQuestion {
     public NDGAnswer getAnswerModel() {
         return new DescriptiveAnswer();
     }
-
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        return true;
-    }
 }

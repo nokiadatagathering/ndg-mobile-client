@@ -208,18 +208,17 @@ public class InterviewForm extends Screen implements ActionListener {
 
     public boolean validateAllAnswersAndResetModifiedFlag() {
         boolean result = validateAllAnswers();
-        if (result)
+        if (result){
+            commitAllAnswers();
             setModifiedInterview(false);
+        }
         return result;
     }
 
     private boolean validateAllAnswers() {
-        commitAllAnswers();
         for ( int i = 0; i< vContainers.size(); i++)
         {
-            NDGQuestion question = ((ContainerUI)vContainers.elementAt(i)).getQuestion();
-            NDGAnswer answer = ((ContainerUI)vContainers.elementAt(i)).getAnswer();
-            if ( !question.passConstraints( answer ) )
+            if(!((ContainerUI)vContainers.elementAt(i)).validate())
             {
                 ((ContainerUI)vContainers.elementAt(i)).requestFocus();
                 return false;
@@ -284,6 +283,8 @@ abstract class ContainerUI extends Container implements FocusListener {
 
     public abstract void commitValue();
     public abstract void setEnabled(boolean enabled);
+    public abstract boolean validate();
+
 
     public void handleMoreDetails( Object cmd )
     {
@@ -316,8 +317,11 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     public void focusLost(Component cmpnt) {
-        commitValue();	//TODO ensure it can be removed
-        if (!mQuestion.passConstraints(mAnswer)) {
+        if(!cmpnt.getComponentForm().isVisible()){
+            return;
+        }
+
+        if ( !validate()) {
             cmpnt.requestFocus();
             return;
         }
@@ -343,7 +347,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             addComponent(mQuestionTextArea);
 
             mDescriptionTextField = new DescriptiveField(((DescriptiveQuestion) mQuestion).getLength());
-            mDescriptionTextField.setText((String)mAnswer.getValue()/*(String) question.getAnswer().getValue()*/);
+            mDescriptionTextField.setText((String)mAnswer.getValue());
             mDescriptionTextField.setInputMode("Abc");
             mDescriptionTextField.setEditable(true);
             mDescriptionTextField.setFocusable(true);
@@ -405,6 +409,10 @@ abstract class ContainerUI extends Container implements FocusListener {
             mQuestionTextArea.setEnabled(enabled);
             mDescriptionTextField.setEnabled(enabled);
         }
+
+        public boolean validate() {
+            return true;
+        }
      }
     ///////////////////////////// Numeric Question /////////////////////////////
     class NumericFieldUI extends ContainerUI{
@@ -442,6 +450,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
             mNumberTextField.setEnabled(enabled);
+        }
+
+        public boolean validate() {
+            return ((NumericQuestion)mQuestion).passConstraints(mNumberTextField.getText());
         }
     }
 
@@ -484,6 +496,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEditable(enabled);
             mDateTextField.setEnabled(enabled);
+        }
+
+        public boolean validate() {
+            return ((DateQuestion)mQuestion).passConstraints(mDateTextField.getDate().getTime());
         }
     }
 
@@ -621,6 +637,10 @@ abstract class ContainerUI extends Container implements FocusListener {
                 form.removeGameKeyListener(Display.GAME_RIGHT, mSelectionListener);
                 form.removeGameKeyListener(Display.GAME_LEFT, mSelectionListener);
             }
+        }
+
+        public boolean validate(){
+            return true;
         }
 
     }
@@ -832,6 +852,10 @@ abstract class ContainerUI extends Container implements FocusListener {
                choiceCheckbox.setOtherText(SurveysControl.getInstance().getItemOtherText());
             }
         }
+
+        public boolean validate() {
+            return true;
+        }
    }
 
     class ImageFieldUI extends ContainerUI implements ActionListener, CameraManagerListener {
@@ -957,6 +981,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
         }
+
+        public boolean validate() {
+            return true;
+        }
     }
 
     class TimeFieldUI extends ContainerUI {
@@ -998,6 +1026,10 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
             mTimeTextField.setEnabled(enabled);
+        }
+
+        public boolean validate() {
+            return true;
         }
     }
 
@@ -1100,6 +1132,10 @@ abstract class ContainerUI extends Container implements FocusListener {
                      }
                 }
             }
+        }
+
+        public boolean validate() {
+            return true;
         }
      }
 

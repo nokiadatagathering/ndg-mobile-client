@@ -1,5 +1,7 @@
 package br.org.indt.ndg.mobile.submit;
 
+import br.org.indt.ndg.lwuit.control.AES;
+import br.org.indt.ndg.lwuit.control.ExitCommand;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -135,7 +137,24 @@ public class SubmitServer {
                 Logger.getInstance().emul("Sending file without binary data", "");
             }
 
+            boolean encryption = false;
+            if(AppMIDlet.getInstance().getSettings() != null) {
+                if( AppMIDlet.getInstance().getSettings().getStructure().isEncryptionConfigured() )
+                    encryption = AppMIDlet.getInstance().getSettings().getStructure().getEncryption();
+            }
+
             inputStream = fc.openDataInputStream();
+
+            if( encryption ) {
+                AES encrypter = new AES();
+                try {
+                    inputStream = new DataInputStream( encrypter.decryptInputStreamToInputStream( inputStream ) );
+                } catch (Exception e) {
+                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.WRONG_KEY, GeneralAlert.ERROR );
+                }
+            }
+
             outputStream = new ByteArrayOutputStream();
 
             int data = inputStream.read();

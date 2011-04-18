@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.settings.LocationHandler;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
@@ -58,7 +59,8 @@ public class TitleBar implements Painter {
         g.drawString( title1, textOffsetHorizontal, spacingVertical );
         g.setFont( NDGStyleToolbox.fontMedium );
         g.drawString( title2, textOffsetHorizontal, spacingVertical +  NDGStyleToolbox.fontSmall.getHeight() + spacingVertical );
-        if (AppMIDlet.getInstance().getLocationHandler().locationObtained()) {
+        LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
+        if ( locationHandler != null && locationHandler.locationObtained() ) {
             g.drawImage(imageGPS, textPadding, 22);
         }
     }

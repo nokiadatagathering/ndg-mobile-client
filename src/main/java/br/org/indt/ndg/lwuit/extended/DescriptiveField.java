@@ -10,9 +10,9 @@ import com.sun.lwuit.events.DataChangedListener;
  * @author mluz
  */
 public class DescriptiveField extends TextField implements DataChangedListener {
-    
+
     private int length;
-    
+
     public DescriptiveField(int length) {
         super();
         this.length = length;
@@ -34,7 +34,6 @@ public class DescriptiveField extends TextField implements DataChangedListener {
         checkLength();
     }
 
- 
     protected Command installCommands(Command clear, Command t9) {
         Form f = getComponentForm();
         Command[] originalCommands = new Command[f.getCommandCount()];
@@ -55,5 +54,5 @@ public class DescriptiveField extends TextField implements DataChangedListener {
         if(isInitialized()) {
             super.removeCommands(clear, t9, originalClear);
         }
-    }   
+    }
 }

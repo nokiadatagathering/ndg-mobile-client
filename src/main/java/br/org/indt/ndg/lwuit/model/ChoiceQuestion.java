@@ -99,8 +99,4 @@ public class ChoiceQuestion extends NDGQuestion {
         anwser.setSelectedIndex( vDefault );
         return anwser;
     }
-
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        return true;
-    }
 }

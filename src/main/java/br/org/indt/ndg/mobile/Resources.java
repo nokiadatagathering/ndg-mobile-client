@@ -18,6 +18,7 @@ public class Resources {
     public static final String NEWUI_NOKIA_DATA_GATHERING = "Nokia Data Gathering";
     public static final String DATE_FORMAT = "Date format";
     public static final String AVAILABLE_DATE_FORMAT = "Available date format";
+    public static final String OR_FORM_LOADING_FAILURE = "Can not open open rosa interview form";
 
     //public static final String NEWUI_TITLE_SURVEY_LIST = "List of Surveys";
     //public static final String NEWUI_TITLE_CATEGORIES = "Categories";
@@ -213,6 +214,16 @@ public class Resources {
     public static final String DISCARD_CHANGES = Local.getText(Local.QTJ_DISCARD_CHANGES);
     public static final String APPLICATION_SETTINGS = Local.getText(Local.QTJ_APPLICATION_SETTINGS);
     public static final String PROTOCOL_SETTINGS = Local.getText(Local.QTJ_PROTOCOL_SETTINGS);
+    public static final String ENCRYPTION = Local.getText(Local.QTJ_ENCRYPTION);
+    public static final String ENCRYPTION_ENABLE = Local.getText(Local.QTJ_ENCRYPTION_ENABLE);
+    public static final String ENCRYPTION_WITH_PASSWORD = Local.getText(Local.QTJ_ENCRYPTION_WITH_PASSWORD);
+    public static final String ENCRYPTION_PASSWORD = Local.getText(Local.QTJ_ENCRYPTION_PASSWORD);
+    public static final String DECRYPTION_FAILED = Local.getText(Local.QTJ_DECRYPTION_FAILED);
+    public static final String DECOMPRESSION_FAILED = Local.getText(Local.QTJ_DECOMPRESSION_FAILED);
+    public static final String DECRYPTION_DISABLED = Local.getText(Local.QTJ_DECRYPTION_DISABLED);
+    public static final String EMPTY_KEY = Local.getText(Local.QTJ_EMPTY_KEY);
+    public static final String WRONG_KEY = Local.getText(Local.QTJ_WRONG_KEY);
+
     public static final int NOENTRY = -99999;
     /** General */
     //

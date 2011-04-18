@@ -25,9 +25,8 @@ public class DecimalQuestion extends NumericQuestion {
         }
     }
 
-     protected boolean passLowConstraint( NumericAnswer aAnswer ) {
+     protected boolean passLowConstraint( String strValue ) {
         boolean result = true;
-        String strValue = (String)aAnswer.getValue();
         if ( strValue.equals("") ) result = true;
         else {
             try
@@ -50,9 +49,8 @@ public class DecimalQuestion extends NumericQuestion {
         return result;
     }
 
-    protected boolean passHighConstraint( NumericAnswer aAnswer ) {
+    protected boolean passHighConstraint( String strValue ) {
         boolean result = true;
-        String strValue = (String)aAnswer.getValue();
         if ( strValue.equals("") ) result = true;
         else {
             try

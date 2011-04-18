@@ -14,7 +14,6 @@ import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.Survey;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
-import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.structures.FileSystemSurveyStructure;

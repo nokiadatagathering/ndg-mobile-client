@@ -83,10 +83,9 @@ public class TimeQuestion extends NDGQuestion {
         return convention;
     }
 
-    private boolean passLowConstraint( TimeAnswer aAnswer ) {
+    private boolean passLowConstraint( long value ) {
        if (low == Resources.NOENTRY) return true;
        else {
-           long value = aAnswer.getTime();
            if (value >= low) return true;
            else {
                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -96,10 +95,9 @@ public class TimeQuestion extends NDGQuestion {
        }
     }
 
-    private boolean passHighConstraint( TimeAnswer aAnswer ) {
+    private boolean passHighConstraint( long value ) {
         if (high == Resources.NOENTRY) return true;
         else {
-            long value = aAnswer.getTime();
             if (value <= high) return true;
             else {
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -109,8 +107,7 @@ public class TimeQuestion extends NDGQuestion {
         }
     }
 
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        TimeAnswer aTimeAnswer = (TimeAnswer)aAnswer;
+    public boolean passConstraints( long aTimeAnswer ) {
         if ( passLowConstraint( aTimeAnswer ) )
             if ( passHighConstraint( aTimeAnswer ) ) return true;
             else return false;

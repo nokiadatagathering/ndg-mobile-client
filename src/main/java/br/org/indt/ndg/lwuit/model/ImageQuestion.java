@@ -16,10 +16,6 @@ public class ImageQuestion extends NDGQuestion{
         this.maxCount = maxImages;
     }
 
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        return true;
-    }
-
     public NDGAnswer getAnswerModel() {
         return new ImageAnswer();
     }

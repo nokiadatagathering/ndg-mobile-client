@@ -113,7 +113,7 @@ public class RegisterIMEI extends Screen implements ActionListener {
                         im.registerIMEI();
                         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
                         GeneralAlert.getInstance().show(Resources.REGISTRATION_DONE, regStatus2Message(resp), GeneralAlert.INFO);
-                        AppMIDlet.getInstance().continueAppLoading();
+                        AppMIDlet.getInstance().showEncryptionScreen();
                     }
                 } else {
                     exitApp(NetworkErrCode.codeToString(String.valueOf(responseCode)));

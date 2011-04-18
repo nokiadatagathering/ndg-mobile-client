@@ -281,6 +281,16 @@ public class Local {
     public final static short QTJ_APPLICATION_SETTINGS = 232;
     public final static short QTJ_PROTOCOL_SETTINGS = 233;
 
+    public final static short QTJ_ENCRYPTION = 234;
+    public final static short QTJ_ENCRYPTION_ENABLE = 235;
+    public final static short QTJ_ENCRYPTION_WITH_PASSWORD = 236;
+    public final static short QTJ_ENCRYPTION_PASSWORD = 237;
+    public final static short QTJ_DECRYPTION_FAILED = 238;
+    public final static short QTJ_DECOMPRESSION_FAILED = 239;
+    public final static short QTJ_DECRYPTION_DISABLED = 240;
+    public final static short QTJ_EMPTY_KEY = 241;
+    public final static short QTJ_WRONG_KEY = 242;
+
 
     public static String phoneLang = System.getProperty("microedition.locale");
 

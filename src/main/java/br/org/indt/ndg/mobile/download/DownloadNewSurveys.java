@@ -9,7 +9,6 @@ import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SurveyList;
-import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import java.io.ByteArrayInputStream;
@@ -51,6 +50,7 @@ public class DownloadNewSurveys implements Runnable{
     private Thread thread = null;
 
     private String serverStatus = Resources.CONNECTING;
+    private ErrorsHandler mErrorsHandler = new ErrorsHandler();
 
     private DownloadNewSurveys() {
         updateRequestUrls();
@@ -178,11 +178,10 @@ public class DownloadNewSurveys implements Runnable{
 
         try {
             fconn = (FileConnection) Connector.open(filename);
-            if(!fconn.exists()) fconn.create();
-            else {
+            if ( fconn.exists()) {
                 fconn.delete();
-                fconn.create();
             }
+            fconn.create();
             out = fconn.openDataOutputStream();
             String ndgList = AppMIDlet.getInstance().getSettings().getStructure().getReceiveSurveyURL()
                             +"?do=list&imei=" + AppMIDlet.getInstance().getIMEI();
@@ -193,30 +192,25 @@ public class DownloadNewSurveys implements Runnable{
             if (!isOperationCanceled()) {
                  // Parse the surveys list
                 dis = fconn.openDataInputStream();
+                dis.available();
                 NDGSurveysListHandler ndgSurveyListHandler = new NDGSurveysListHandler();
                 surveysTitlesNDG = ndgSurveyListHandler.parse(dis);
             }
         } catch (SAXException ex) {
-            Logger.getInstance().log("ex: " + ex.getMessage() + "::"+ex.getClass().getName());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + "NDG Survey" , GeneralAlert.ERROR );//TODO localize
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyParserError();
         } catch (ParserConfigurationException ex) {
-            Logger.getInstance().log("ex2: " + ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + ex.getMessage() , GeneralAlert.ERROR );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyParserConfigurationError( ex.getMessage() );
         } catch (ConnectionNotFoundException ex) {
-            Logger.getInstance().log(ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ex.getMessage().trim(), GeneralAlert.ERROR );
-            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyDownloadConnectionError(ex.getMessage().trim());
         } catch(IOException ex) {
-            Logger.getInstance().log(ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + ex.getMessage() , GeneralAlert.ERROR );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyInputOutpuError( ex.getMessage() );
         }  catch (SecurityException ex) {
-            cancelOperation();
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyDownloadSecurityError();
         } finally {
             try {
                 boolean canceled = false;
@@ -263,26 +257,20 @@ public class DownloadNewSurveys implements Runnable{
                 m_surveysToDownload = xFormsSurveyListHandler.getSurveysToDownload();
             }
         } catch (SAXException ex) {
-            Logger.getInstance().log("ex: " + ex.getMessage() + "::"+ex.getClass().getName());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX + "OpenRosa Survey" , GeneralAlert.ERROR );//TODO localize
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyParserError();
         } catch (ParserConfigurationException ex) {
-            Logger.getInstance().log("ex2: " + ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + ex.getMessage() , GeneralAlert.ERROR );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyParserConfigurationError( ex.getMessage() );
         } catch (ConnectionNotFoundException ex) {
-            Logger.getInstance().log(ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, ex.getMessage().trim(), GeneralAlert.ERROR );
-            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyDownloadConnectionError(ex.getMessage().trim());
         } catch(IOException ex) {
-            Logger.getInstance().log(ex.getMessage());
-            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + ex.getMessage() , GeneralAlert.ERROR );
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyInputOutpuError( ex.getMessage() );
         }  catch (SecurityException ex) {
-            cancelOperation();
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
+            Logger.getInstance().log(ex.getClass().getName() + "::" + ex.getMessage());
+            mErrorsHandler.handleSurveyDownloadSecurityError();
         } finally {
             try {
                 boolean canceled = false;
@@ -941,7 +929,7 @@ public class DownloadNewSurveys implements Runnable{
                     String rest = ssb.substring(endIndex + m_surveyEndTag.length(), ssb.length());
                     m_unprocessedBuffer.delete(0, m_unprocessedBuffer.length());
                     m_unprocessedBuffer.append(rest);
-                    byte[] out = surveyCompleted.getBytes("UTF-8");
+                    byte[] out = surveyCompleted.getBytes();
                     saveSurvey(out);
                     ssb = m_unprocessedBuffer.toString();
                 }
@@ -996,6 +984,36 @@ public class DownloadNewSurveys implements Runnable{
                 byte[] out = m_unprocessedBuffer.toString().getBytes();
                 saveSurvey(out);
             }
+        }
+    }
+
+    private class ErrorsHandler {
+
+        public void handleSurveyParserError() {
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_SAX , GeneralAlert.ERROR );
+        }
+
+        private void handleSurveyParserConfigurationError( String message ) {
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.EPARSE_GENERAL + message , GeneralAlert.ERROR );
+        }
+
+        private void handleSurveyDownloadConnectionError(String message) {
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, message, GeneralAlert.ERROR );
+            AppMIDlet.getInstance().setDisplayable( br.org.indt.ndg.lwuit.ui.SurveyList.class );
+        }
+
+        private void handleSurveyInputOutpuError(String message) {
+            GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
+            GeneralAlert.getInstance().show(Resources.CHECK_NEW_SURVEYS, Resources.ERROR_TITLE + message , GeneralAlert.ERROR );
+        }
+
+        private void handleSurveyDownloadSecurityError() {
+            cancelOperation();
+            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+            GeneralAlert.getInstance().showCodedAlert(Resources.NETWORK_FAILURE, Resources.HTTP_UNAUTHORIZED, GeneralAlert.ERROR);
         }
     }
 }

@@ -20,7 +20,9 @@ public class BackCategoriesListCommand extends BackCommand implements SaveResult
     protected void doAction(Object parameter) {
         // ask whether result shall be discarded or saved to file
         GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
-        if (GeneralAlert.RESULT_YES ==  GeneralAlert.getInstance().show( Resources.CMD_SAVE,
+
+        if (SurveysControl.getInstance().isSurveyChanged() &&
+                GeneralAlert.RESULT_YES ==  GeneralAlert.getInstance().show( Resources.CMD_SAVE,
                                              Resources.SAVE_SURVEY_QUESTION, // TODO localization
                                              GeneralAlert.CONFIRMATION) ) {
             SaveResultCommand.getInstance().setObserver(this);

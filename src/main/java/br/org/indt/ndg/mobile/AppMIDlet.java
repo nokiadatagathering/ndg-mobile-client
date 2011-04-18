@@ -1,5 +1,6 @@
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.lwuit.ui.OpenRosaInterviewForm;
 import br.org.indt.ndg.lwuit.ui.NDGLookAndFeel;
@@ -52,6 +53,8 @@ public class AppMIDlet extends MIDlet {
     private ICameraManager currentCameraManager;
 
     private String imei = "9999";
+
+    private byte[] key = null;
 
     public AppMIDlet() throws Exception {
         instance = this;
@@ -174,6 +177,14 @@ public class AppMIDlet extends MIDlet {
 
     public String u2x(String _value) {
         return unicode.uni2xml(_value);
+    }
+
+    public void setKey(byte[] keyByte) {
+        key = keyByte;
+    }
+
+    public byte[] getKey() {
+        return key;
     }
 
     private void writeIMEIToFileSystem(){
@@ -313,7 +324,18 @@ public class AppMIDlet extends MIDlet {
         if(!im.isIMEIRegistered()){
             Screen.show(RegisterIMEI.class,true);
         } else {
-            continueAppLoading();
+            showEncryptionScreen();
+        }
+    }
+
+    public void showEncryptionScreen() {
+        if( !getSettings().getStructure().isEncryptionConfigured( ) )
+            setDisplayable( br.org.indt.ndg.lwuit.ui.EncryptionConfigScreen.class);
+        else {
+            if(getSettings().getStructure().getEncryption())
+                setDisplayable( br.org.indt.ndg.lwuit.ui.EncryptionKeyScreen.class);
+            else
+                continueAppLoading();
         }
     }
 
@@ -339,6 +361,7 @@ public class AppMIDlet extends MIDlet {
     public void showInterview() {
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         if(isNdgDir(dirName)){
+            SurveysControl.getInstance().setSurveyChanged(false);
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
         }else if(isXformDir(dirName)){
             AppMIDlet.getInstance().setDisplayable(OpenRosaInterviewForm.class);

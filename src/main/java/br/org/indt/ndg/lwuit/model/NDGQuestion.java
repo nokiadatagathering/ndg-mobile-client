@@ -114,6 +114,4 @@ public abstract class NDGQuestion implements DisplayableItem{
     }
 
     abstract public NDGAnswer getAnswerModel();
-
-    abstract public boolean passConstraints( NDGAnswer aAnswer );
 }

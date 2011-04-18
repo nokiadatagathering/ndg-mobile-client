@@ -25,6 +25,7 @@ public class AcceptQuestionListFormCommand extends BackCommand implements SaveRe
             } else {
                 AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
             }
+            SurveysControl.getInstance().setSurveyChanged(true);
         } else {
             // do nothing, user has to correct input
         }

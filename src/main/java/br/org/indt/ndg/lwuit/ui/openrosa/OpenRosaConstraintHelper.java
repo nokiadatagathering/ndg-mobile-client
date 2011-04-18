@@ -79,34 +79,22 @@ public class OpenRosaConstraintHelper {
     }
 
     public boolean validateDate(String constraint, Date input) {
-        //. > 03/09/2011 and . < 03/17/2011
+        //. > 2010-03-01 and . < 2012-03-24
         boolean result = false;
-        if (constraint != null) {
-            String min = getLowConstraint(constraint);
-            String max = getHighConstraint(constraint);
-            Date low = createDate(min);
-            Date high = createDate(max);
-            if (input.getTime() > low.getTime() && input.getTime() < high.getTime()) {
-                result = true;
+        try{
+            if (constraint != null) {
+                String min = getLowConstraint(constraint);
+                String max = getHighConstraint(constraint);
+                Date low = OpenRosaUtils.getDateFromString(min);
+                Date high = OpenRosaUtils.getDateFromString(max);
+                if (input.getTime() > low.getTime() && input.getTime() < high.getTime()) {
+                    result = true;
+                }
             }
+        }catch(Exception ex){
+            result = true;
         }
         return result;
-    }
-
-    private Date createDate(String date) {
-        char separator = '/';
-        String month = "", day = "", year = "";
-        int firstSeparatorIndex = date.indexOf(separator);
-        int secondSeparatorIndex = date.indexOf(separator, firstSeparatorIndex + 1);
-        month = date.substring(0, firstSeparatorIndex);
-        day = date.substring(firstSeparatorIndex + 1, secondSeparatorIndex);
-        year = date.substring(secondSeparatorIndex + 1, date.length());
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
-        calendar.set(Calendar.YEAR, Integer.parseInt(year));
-        return calendar.getTime();
     }
 
     public int getMaxStringLength(BoundElement element) {
@@ -146,13 +134,13 @@ public class OpenRosaConstraintHelper {
 
     public String getDateLowConstraint(String constraint){
         String constrStr = getLowConstraint(constraint);
-        Date low = createDate(constrStr);
+        Date low = OpenRosaUtils.getDateFromString(constrStr);
         return OpenRosaUtils.getUserFormatDate(low);
     }
 
     public String getDateHighConstraint(String constraint){
         String constrStr = getHighConstraint(constraint);
-        Date highDate = createDate(constrStr);
+        Date highDate = OpenRosaUtils.getDateFromString(constrStr);
         return OpenRosaUtils.getUserFormatDate(highDate);
     }
 }

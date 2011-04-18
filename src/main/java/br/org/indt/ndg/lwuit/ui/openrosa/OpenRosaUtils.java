@@ -10,6 +10,11 @@ import java.util.Date;
  */
 public class OpenRosaUtils {
 
+    /**
+     *
+     * @param date
+     * @return date string in formate choosed by user (DD/MM/YYYY)
+     */
     public static String getUserFormatDate(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -28,6 +33,11 @@ public class OpenRosaUtils {
         return retString;
     }
 
+    /**
+     *
+     * @param date
+     * @return string in XML format (YYYY-MM-DD)
+     */
     public static String getStringFromDate(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -39,6 +49,11 @@ public class OpenRosaUtils {
         return String.valueOf(year)+ "-" + String.valueOf(month)+ "-" + String.valueOf(day);
     }
 
+    /**
+     *
+     * @param dateString - string with date in XML format (YYYY-MM-DD)
+     * @return Date
+     */
     public static Date getDateFromString(String dateString) {
 
         String separator = "-";

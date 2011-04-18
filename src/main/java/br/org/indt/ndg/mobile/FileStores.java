@@ -1,5 +1,7 @@
 package br.org.indt.ndg.mobile;
 
+import br.org.indt.ndg.lwuit.control.AES;
+import br.org.indt.ndg.lwuit.control.ExitCommand;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.CategoryAnswer;
@@ -7,6 +9,7 @@ import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.NDGQuestion;
 import br.org.indt.ndg.lwuit.model.Survey;
+import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import java.util.Vector;
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
@@ -105,7 +108,24 @@ public class FileStores {
         FileConnection fc;
         try {
             fc = (FileConnection) Connector.open(resultPath, Connector.READ);
+
+            boolean encryption = false;
+            if(AppMIDlet.getInstance().getSettings() != null) {
+                if( AppMIDlet.getInstance().getSettings().getStructure().isEncryptionConfigured() )
+                    encryption = AppMIDlet.getInstance().getSettings().getStructure().getEncryption();
+            }
             InputStream is = fc.openInputStream();
+
+            if( encryption ) {
+                AES encrypter = new AES();
+                try {
+                    is = encrypter.decryptInputStreamToInputStream( is );
+                } catch (Exception e) {
+                    GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
+                    GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.WRONG_KEY, GeneralAlert.ERROR );
+                }
+            }
+
             KXmlParser parser = new KXmlParser();
             parser.setInput(is, "UTF-8");
 

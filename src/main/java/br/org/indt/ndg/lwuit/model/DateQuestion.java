@@ -67,10 +67,9 @@ public class DateQuestion extends NDGQuestion {
         }
     }
 
-    private boolean passLowConstraint( DateAnswer aAnswer ) {
+    private boolean passLowConstraint( long value ) {
        if (low == Resources.NOENTRY) return true;
        else {
-           long value = aAnswer.getDate();
            if (value >= low) return true;
            else {
                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -80,10 +79,9 @@ public class DateQuestion extends NDGQuestion {
        }
     }
 
-    private boolean passHighConstraint( DateAnswer aAnswer ) {
+    private boolean passHighConstraint( long value ) {
         if (high == Resources.NOENTRY) return true;
         else {
-            long value = aAnswer.getDate();
             if (value <= high) return true;
             else {
                 GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
@@ -93,8 +91,7 @@ public class DateQuestion extends NDGQuestion {
         }
     }
 
-    public boolean passConstraints( NDGAnswer aAnswer ) {
-        DateAnswer dateAnswer = (DateAnswer)aAnswer;
+    public boolean passConstraints( long dateAnswer ) {
         if (passLowConstraint( dateAnswer ))
             if (passHighConstraint( dateAnswer )) return true;
             else return false;
