@@ -50,7 +50,7 @@ public class DownloadNewSurveys implements Runnable{
     private Thread thread = null;
 
     private String serverStatus = Resources.CONNECTING;
-    private ErrorsHandler mErrorsHandler = new ErrorsHandler();
+    public ErrorsHandler mErrorsHandler = new ErrorsHandler();
 
     private DownloadNewSurveys() {
         updateRequestUrls();
@@ -987,7 +987,7 @@ public class DownloadNewSurveys implements Runnable{
         }
     }
 
-    private class ErrorsHandler {
+    public class ErrorsHandler {
 
         public void handleSurveyParserError() {
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
