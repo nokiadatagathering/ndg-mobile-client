@@ -4,21 +4,26 @@
  */
 
 package br.org.indt.ndg.lwuit.control;
+
 import br.org.indt.ndg.lwuit.ui.SurveyList;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import com.sun.lwuit.Command;
 import com.nokia.mid.appl.cmd.Local;
+import com.sun.lwuit.Command;
 
-public class BackGpsFormCommand extends BackCommand {
+/**
+ *
+ * @author damian.janicki
+ */
+public class BackToSurveyListCommand extends BackCommand{
 
-    private static BackGpsFormCommand instance;
+    private static BackToSurveyListCommand instance = null;
 
-    public static BackGpsFormCommand getInstance() {
-        if (instance == null)
-            instance = new BackGpsFormCommand();
+    public static BackToSurveyListCommand getInstance(){
+        if(instance == null){
+            instance = new BackToSurveyListCommand();
+        }
         return instance;
     }
-
     protected Command createCommand() {
         return new Command(Local.getText(Local.QTJ_CMD_BACK));
     }

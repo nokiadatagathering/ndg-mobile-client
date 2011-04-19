@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackResolutionSelectFormCommand;
+import br.org.indt.ndg.lwuit.control.BackToSettingsFormCommand;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -20,7 +20,7 @@ public class ResolutionSelectForm extends Screen implements ActionListener, Choi
     protected void customize() {
         setTitle(Resources.NEWUI_NOKIA_DATA_GATHERING, Resources.PHOTO_RESOLUTION);
         form.removeAllCommands();
-        form.addCommand(BackResolutionSelectFormCommand.getInstance().getCommand());
+        form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {
@@ -51,8 +51,8 @@ public class ResolutionSelectForm extends Screen implements ActionListener, Choi
 
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
-        if (cmd == BackResolutionSelectFormCommand.getInstance().getCommand()) {
-           BackResolutionSelectFormCommand.getInstance().execute(null);
+        if (cmd == BackToSettingsFormCommand.getInstance().getCommand()) {
+           BackToSettingsFormCommand.getInstance().execute(null);
         } 
     }
 

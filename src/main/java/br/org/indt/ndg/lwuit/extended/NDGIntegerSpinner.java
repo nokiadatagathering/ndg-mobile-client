@@ -92,6 +92,7 @@ public class NDGIntegerSpinner extends Container implements FocusListener {
 
             public void actionPerformed(ActionEvent evt) {
                 validateAndCorrectDisplay();
+                update();
             }
         });
         m_increaseButton.addFocusListener(new DecreaseIncreaseFocusListener());

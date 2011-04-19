@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackSelectStyleViewCommand;
+import br.org.indt.ndg.lwuit.control.BackToSettingsFormCommand;
 import br.org.indt.ndg.lwuit.extended.ChoiceGroup;
 import br.org.indt.ndg.lwuit.extended.ChoiceGroupListener;
 import br.org.indt.ndg.lwuit.extended.DateField;
@@ -39,7 +39,7 @@ public class SelectDateFormatForm extends Screen implements ActionListener, Choi
         label.setFocusable(false);
         form.addComponent(label);
 
-        form.addCommand(BackSelectStyleViewCommand.getInstance().getCommand());
+        form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
 
         String[] choices = new String[]{Resources.DDMMYYYY, Resources.MMDDYYYY};
         int id = AppMIDlet.getInstance().getSettings().getStructure().getDateFormatId();
@@ -57,8 +57,8 @@ public class SelectDateFormatForm extends Screen implements ActionListener, Choi
 
     public void actionPerformed(ActionEvent ae) {
         Object cmd = ae.getSource();
-        if (cmd == BackSelectStyleViewCommand.getInstance().getCommand()) {
-            BackSelectStyleViewCommand.getInstance().execute(null);
+        if (cmd == BackToSettingsFormCommand.getInstance().getCommand()) {
+            BackToSettingsFormCommand.getInstance().execute(null);
         }
     }
 

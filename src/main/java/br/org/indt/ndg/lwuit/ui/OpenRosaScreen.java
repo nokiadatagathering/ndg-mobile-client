@@ -38,9 +38,6 @@ public abstract class OpenRosaScreen extends Screen implements UserInterface{
 
             is.close();
             fc.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            loadError();
         } catch (Exception ex){
             ex.printStackTrace();
             loadError();

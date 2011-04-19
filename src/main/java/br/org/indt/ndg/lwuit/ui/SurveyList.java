@@ -1,14 +1,11 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.ResolutionSelectionViewCommand;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.CheckNewSurveysCommand;
 import br.org.indt.ndg.lwuit.control.DeleteSurveyCommand;
 import br.org.indt.ndg.lwuit.control.ExitCommand;
-import br.org.indt.ndg.lwuit.control.GPSCommand;
+import br.org.indt.ndg.lwuit.control.OpenSettingsForm;
 import br.org.indt.ndg.lwuit.control.OpenSurveyCommand;
-import br.org.indt.ndg.lwuit.control.SelectDateFormatCommand;
-import br.org.indt.ndg.lwuit.control.SelectStyleViewCommand;
 import br.org.indt.ndg.lwuit.control.TestConnectionCommand;
 import br.org.indt.ndg.lwuit.control.UpdateCommand;
 import com.sun.lwuit.List;
@@ -80,8 +77,6 @@ public class SurveyList extends Screen implements ActionListener{
             Object cmd = evt.getSource();
             if (cmd == ExitCommand.getInstance().getCommand()) {
                 ExitCommand.getInstance().execute(null);
-            } else if (cmd == GPSCommand.getInstance().getCommand()) {
-                GPSCommand.getInstance().execute(null);
             } else if (cmd == OpenSurveyCommand.getInstance().getCommand() || cmd == list) {
                 if (list.size() > 0) {
                     if( list.getSelectedIndex() > 0)
@@ -97,12 +92,8 @@ public class SurveyList extends Screen implements ActionListener{
                 DeleteSurveyCommand.getInstance().execute(new Integer( list.getSelectedIndex() - 1 ));
             } else if (cmd == TestConnectionCommand.getInstance().getCommand()) {
                 TestConnectionCommand.getInstance().execute(null);
-            } else if ( cmd == ResolutionSelectionViewCommand.getInstance().getCommand() ){
-                ResolutionSelectionViewCommand.getInstance().execute(null);
-            }else if ( cmd == SelectStyleViewCommand.getInstance().getCommand()) {
-                SelectStyleViewCommand.getInstance().execute(null);
-            }else if ( cmd == SelectDateFormatCommand.getInstance().getCommand()){
-                SelectDateFormatCommand.getInstance().execute(null);
+            } else if ( cmd == OpenSettingsForm.getInstance().getCommand() ){
+                OpenSettingsForm.getInstance().execute(cmd);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,10 +107,7 @@ public class SurveyList extends Screen implements ActionListener{
         form.addCommand(TestConnectionCommand.getInstance().getCommand());
         form.addCommand(CheckNewSurveysCommand.getInstance().getCommand());
         form.addCommand(DeleteSurveyCommand.getInstance().getCommand());
-        form.addCommand(SelectStyleViewCommand.getInstance().getCommand());
-        form.addCommand(ResolutionSelectionViewCommand.getInstance().getCommand());
-        form.addCommand(GPSCommand.getInstance().getCommand());
-        form.addCommand(SelectDateFormatCommand.getInstance().getCommand());
+        form.addCommand(OpenSettingsForm.getInstance().getCommand());
         if (surveys.size() > 0)
             form.addCommand(OpenSurveyCommand.getInstance().getCommand());
     }

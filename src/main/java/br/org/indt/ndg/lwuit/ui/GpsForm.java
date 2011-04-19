@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackGpsFormCommand;
+import br.org.indt.ndg.lwuit.control.BackToSettingsFormCommand;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.events.ActionEvent;
@@ -32,7 +32,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
     protected void customize() {
         setTitle(Resources.NEWUI_NOKIA_DATA_GATHERING, Resources.GPS);
         form.removeAllCommands();
-        form.addCommand(BackGpsFormCommand.getInstance().getCommand());
+        form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {
@@ -135,7 +135,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
         if (cmd == ViewDetailsGpsFormCommand.getInstance().getCommand()) {
             ViewDetailsGpsFormCommand.getInstance().execute(null);
         } else {
-            BackGpsFormCommand.getInstance().execute(null);
+            BackToSettingsFormCommand.getInstance().execute(null);
         }
     }
 

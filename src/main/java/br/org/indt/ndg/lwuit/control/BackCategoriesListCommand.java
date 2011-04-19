@@ -23,7 +23,7 @@ public class BackCategoriesListCommand extends BackCommand implements SaveResult
 
         if (SurveysControl.getInstance().isSurveyChanged() &&
                 GeneralAlert.RESULT_YES ==  GeneralAlert.getInstance().show( Resources.CMD_SAVE,
-                                             Resources.SAVE_SURVEY_QUESTION, // TODO localization
+                                             Resources.SAVE_SURVEY_QUESTION,
                                              GeneralAlert.CONFIRMATION) ) {
             SaveResultCommand.getInstance().setObserver(this);
             SaveResultCommand.getInstance().execute(null);

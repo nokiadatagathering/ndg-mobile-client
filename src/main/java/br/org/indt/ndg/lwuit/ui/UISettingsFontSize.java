@@ -1,17 +1,12 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackSelectStyleViewCommand;
 import br.org.indt.ndg.lwuit.control.BackUISettingsCommand;
-import br.org.indt.ndg.lwuit.control.UISettingsColorCommand;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import br.org.indt.ndg.lwuit.extended.ChoiceGroupListener;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
-import br.org.indt.ndg.lwuit.ui.style.StyleConst;
-import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;

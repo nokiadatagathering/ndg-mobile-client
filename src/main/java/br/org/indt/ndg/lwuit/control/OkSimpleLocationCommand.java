@@ -1,11 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.SurveyList;
+import br.org.indt.ndg.lwuit.ui.SettingsForm;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.AppMIDlet;
@@ -25,7 +20,7 @@ public class OkSimpleLocationCommand extends BackCommand {
     }
 
     protected void doAction(Object parameter) {
-        AppMIDlet.getInstance().setDisplayable(SurveyList.class);
+        AppMIDlet.getInstance().setDisplayable(SettingsForm.class);
     }
 
 }

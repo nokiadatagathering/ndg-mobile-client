@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.ui;
 
-import br.org.indt.ndg.lwuit.control.BackSelectStyleViewCommand;
+import br.org.indt.ndg.lwuit.control.BackToSettingsFormCommand;
 import br.org.indt.ndg.lwuit.control.UISettingsColorCommand;
 import br.org.indt.ndg.lwuit.control.UISettingsSizeCommand;
 import br.org.indt.ndg.mobile.Resources;
@@ -43,7 +43,7 @@ public class SelectStyleView extends Screen implements ActionListener, ChoiceGro
         form.addComponent(cg);
 
         cg.setItemFocused(AppMIDlet.getInstance().getSettings().getStructure().getStyleId());
-        form.addCommand(BackSelectStyleViewCommand.getInstance().getCommand());
+        form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
         if( AppMIDlet.getInstance().getSettings().getStructure().getStyleId() == StyleConst.CUSTOM ) {
             form.addCommand(UISettingsColorCommand.getInstance().getCommand());
             form.addCommand(UISettingsSizeCommand.getInstance().getCommand());
@@ -52,8 +52,8 @@ public class SelectStyleView extends Screen implements ActionListener, ChoiceGro
 
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
-        if (cmd == BackSelectStyleViewCommand.getInstance().getCommand()) {
-            BackSelectStyleViewCommand.getInstance().execute(null);
+        if (cmd == BackToSettingsFormCommand.getInstance().getCommand()) {
+            BackToSettingsFormCommand.getInstance().execute(null);
         } else if ( cmd == UISettingsColorCommand.getInstance().getCommand() ) {
             UISettingsColorCommand.getInstance().execute(null);
         } else if ( cmd == UISettingsSizeCommand.getInstance().getCommand() ) {
@@ -66,11 +66,11 @@ public class SelectStyleView extends Screen implements ActionListener, ChoiceGro
         cg.setSelectedIndex(i);
         form.removeAllCommands();
         if( i == StyleConst.CUSTOM ) {
-            form.addCommand(BackSelectStyleViewCommand.getInstance().getCommand());
+            form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
             form.addCommand(UISettingsColorCommand.getInstance().getCommand());
             form.addCommand(UISettingsSizeCommand.getInstance().getCommand());
         } else {
-            form.addCommand(BackSelectStyleViewCommand.getInstance().getCommand());
+            form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
         }
         AppMIDlet.getInstance().getSettings().getStructure().setStyleId(i);
         AppMIDlet.getInstance().getSettings().writeSettings();
