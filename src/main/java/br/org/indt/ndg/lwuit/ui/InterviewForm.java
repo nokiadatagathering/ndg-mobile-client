@@ -298,6 +298,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                                                         NDGStyleToolbox.getInstance().focusLostColor ));
         mQuestion  = aQuestion;
         mAnswer = aAnswer;
+        mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
     }
 
     public NDGQuestion getQuestion() {
@@ -343,7 +344,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
             addComponent(mQuestionTextArea);
 
             mDescriptionTextField = new DescriptiveField(((DescriptiveQuestion) mQuestion).getLength());
@@ -424,7 +424,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion( ) {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
             addComponent(mQuestionTextArea);
 
             mNumberTextField = new NumericField( ((NumericQuestion) mQuestion).getLength(),
@@ -467,7 +466,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout( new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
 
             addComponent(mQuestionTextArea);
 
@@ -538,7 +536,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
             addComponent(mQuestionTextArea);
 
             Vector vChoices = ((ChoiceQuestion) mQuestion).getChoices();
@@ -574,6 +571,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             ExclusiveChoiceFieldController controller = ExclusiveChoiceFieldController.getInstance();
             controller.setData( mDataModel, mQuestion.getName(), mMaxQuestionLength);
             mChoiceList = controller.getListForModel();
+            mChoiceList.addActionListener(new HandleChoiceAnswersModified());
             mChoiceList.addActionListener(mSelectionListener);
             mChoiceList.addExclusiveChoiceListListener(mListListener);
             mChoiceList.getStyle().setBorder(Border.createEmpty());
@@ -760,8 +758,6 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
-
             addComponent(mQuestionTextArea);
 
             mGroupButton = new Vector();
@@ -781,6 +777,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                 cb.setOtherText("");
                 cb.addFocusListener(this); // Controls when changing to a new question
                 cb.addActionListener(mActionListener);
+                cb.addActionListener(new HandleChoiceAnswersModified());
                 cb.setNextFocusRight(cb);
                 cb.setNextFocusLeft(cb);
                 mGroupButton.addElement(cb);
@@ -789,7 +786,11 @@ abstract class ContainerUI extends Container implements FocusListener {
 
             Vector vSelectedIndexes = ((ChoiceAnswer)mAnswer).getSelectedIndexes();
             for ( int i=0; i< vSelectedIndexes.size(); i++ ) {
-                ((CheckBox) mGroupButton.elementAt(i)).setSelected(true);
+
+                int index = Integer.parseInt( (String)vSelectedIndexes.elementAt( i ) );
+                if(index < mGroupButton.size()){
+                    ((CheckBox) mGroupButton.elementAt(index)).setSelected(true);
+                }
 
                 if ( ((ChoiceAnswer)mAnswer).getOtherText( String.valueOf(i) )!= null ) {
                     ((CheckBox) mGroupButton.elementAt(i)).setOtherText((String)((ChoiceAnswer)mAnswer).getOtherText( String.valueOf( i ) ) );
@@ -820,6 +821,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             Vector selectedIndexes = new Vector();
             Hashtable othersText = new Hashtable();
 
+            selectedIndexes.removeAllElements();
             for ( int i = 0; i < mGroupButton.size(); i++ ) {
                 CheckBox cb = (CheckBox) mGroupButton.elementAt(i);
                 if ( cb.isSelected() ) {
@@ -883,20 +885,16 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void registerQuestion(){
             AppMIDlet.getInstance().setCurrentCameraManager(NDGCameraManager.getInstance());
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+            addComponent(mQuestionTextArea);
 
+            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
+            maxPhotoCount.getStyle().setFont( NDGStyleToolbox.fontSmall );
+            addComponent(maxPhotoCount);
             ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
 
             mImageContainer = new Container( new FlowLayout() );
 
             ImageData imgData = null;
-
-
-            TextArea questionText = UIUtils.createQuestionName( mQuestion.getName() );
-            addComponent(questionText);
-            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
-            maxPhotoCount.getStyle().setFont( NDGStyleToolbox.fontSmall );
-            addComponent(maxPhotoCount);
-
             if(imgAnswer.getImages().size() > 0){
                 for(int idx = 0; idx < imgAnswer.getImages().size(); idx++){
                     imgData = (ImageData)imgAnswer.getImages().elementAt(idx);
@@ -980,6 +978,12 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
+            if ( mImageContainer != null ) {
+                for( int i = 0; i< mImageContainer.getComponentCount(); i++ ) {
+                    mImageContainer.getComponentAt(i).setEnabled(enabled);
+                }
+                mImageContainer.setEnabled(enabled);
+            }
         }
 
         public boolean validate() {
@@ -996,9 +1000,8 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion() {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
-
             addComponent(mQuestionTextArea);
+
             mTimeTextField = new TimeField(TimeField.HHMM1);
 
             long datelong =  ((TimeAnswer)mAnswer).getTime();
@@ -1043,9 +1046,8 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void registerQuestion(){
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            mQuestionTextArea = UIUtils.createQuestionName(mQuestion.getName());
-
             addComponent(mQuestionTextArea);
+
             mTimeTextField = new TimeField(TimeField.HHMM);
             mTimeTextField.addFocusListener(this);
 
@@ -1138,6 +1140,12 @@ abstract class ContainerUI extends Container implements FocusListener {
             return true;
         }
      }
+
+    class HandleChoiceAnswersModified implements ActionListener{
+        public void actionPerformed(ActionEvent ae) {
+            setModifiedInterview(true);
+        }
+    }
 
     class HandleInterviewAnswersModified implements DataChangedListener {
 

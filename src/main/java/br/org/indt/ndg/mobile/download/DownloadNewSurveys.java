@@ -50,7 +50,7 @@ public class DownloadNewSurveys implements Runnable{
     private Thread thread = null;
 
     private String serverStatus = Resources.CONNECTING;
-    public ErrorsHandler mErrorsHandler = new ErrorsHandler();
+    private ErrorsHandler mErrorsHandler = new ErrorsHandler();
 
     private DownloadNewSurveys() {
         updateRequestUrls();
