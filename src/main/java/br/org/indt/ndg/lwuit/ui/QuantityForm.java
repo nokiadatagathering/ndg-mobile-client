@@ -4,6 +4,7 @@ import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.extended.DescriptiveField;
 import br.org.indt.ndg.lwuit.ui.renderers.TitlePainterDialog;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
@@ -21,7 +22,7 @@ public class QuantityForm extends Screen implements ActionListener {
     private Dialog dialog;
     private TitlePainterDialog tp = new TitlePainterDialog();
 
-    private static String title = "Condition";//TODO localize;
+    private static String title = Resources.CONDITION;
     private static String label;
     private static String otrText;
     private Command cmdOk;

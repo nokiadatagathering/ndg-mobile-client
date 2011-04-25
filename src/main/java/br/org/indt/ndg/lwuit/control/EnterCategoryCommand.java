@@ -6,6 +6,7 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.QuantityForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
@@ -41,12 +42,13 @@ public class EnterCategoryCommand extends CommandControl {
 
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_YES_NO, true);
             if( quantity < cat.getQuantity() ) {//confirm removing
-                if ( GeneralAlert.getInstance().show( "Remove categories", "There are more copies of category than currenlty selected. Do you want to limit copies to selected amount?", GeneralAlert.CONFIRMATION ) == GeneralAlert.RESULT_YES ) {//TODO localize
+                if ( GeneralAlert.getInstance().show( Resources.REMOVE_CATEGORIES,
+                                    Resources.CATEGORIES_LIMIT, GeneralAlert.CONFIRMATION ) == GeneralAlert.RESULT_YES ) {
                     cat.setQuantity( quantity );
                     SurveysControl.getInstance().removeResultsFromConditionaCategory( cat );
                 }
             } else if ( quantity > cat.getQuantity() ) {//confirm adding
-                if ( GeneralAlert.getInstance().show( "Add categories", "Do you want to add additional copies of category?", GeneralAlert.CONFIRMATION ) == GeneralAlert.RESULT_YES ) {//TODO localize
+                if ( GeneralAlert.getInstance().show( Resources.ADD_CATEGORIES, Resources.ADD_ADDITIONAL_COPIES, GeneralAlert.CONFIRMATION ) == GeneralAlert.RESULT_YES ) {
                     SurveysControl.getInstance().prepareResultsForConditionaCategory( cat, quantity );
                     cat.setQuantity( quantity );
                 }

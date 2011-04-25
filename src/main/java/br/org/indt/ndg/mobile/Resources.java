@@ -10,15 +10,37 @@ public class Resources {
 
     /** Internationalized Resources */
     //****************************************************************************
-    // TO BE INTERNATIONALIZED
-    public static final String SAVE_SURVEY_QUESTION = "Do You want to save the survey?";
-    public static final String ADD_LOCATION_FAILURE = "Cannot access gps. Location info will not be added to result.";
-    public static final String LOCATION_OUT_OF_DATE = "Gps location is out of date. Save with old location?";
-    public static final String LOCATION_OUT_OF_DATE_WARN = "Added geotagging info is out of date";
-    public static final String NEWUI_NOKIA_DATA_GATHERING = "Nokia Data Gathering";
-    public static final String DATE_FORMAT = "Date format";
-    public static final String AVAILABLE_DATE_FORMAT = "Available date format";
-    public static final String OR_FORM_LOADING_FAILURE = "Can not open open rosa interview form";
+    public static final String SAVE_SURVEY_QUESTION = Local.getText(Local.QTJ_SAVE_SURVEY_QUESTION);
+    public static final String ADD_LOCATION_FAILURE = Local.getText(Local.QTJ_ADD_LOCATION_FAILURE);
+    public static final String LOCATION_OUT_OF_DATE = Local.getText(Local.QTJ_LOCATION_OUT_OF_DATE);
+    public static final String LOCATION_OUT_OF_DATE_WARN = Local.getText(Local.QTJ_LOCATION_OUT_OF_DATE_WARN);
+    public static final String NEWUI_NOKIA_DATA_GATHERING = Local.getText(Local.QTJ_NEWUI_NOKIA_DATA_GATHERING);
+    public static final String DATE_FORMAT = Local.getText(Local.QTJ_DATE_FORMAT);
+    public static final String AVAILABLE_DATE_FORMAT = Local.getText(Local.QTJ_AVAILABLE_DATE_FORMAT);
+    public static final String OR_FORM_LOADING_FAILURE = Local.getText(Local.QTJ_OR_FORM_LOADING_FAILURE);
+
+    public static final String OR_VALID_INPUT_FROM = Local.getText(Local.QTJ_OR_VALID_INPUT_FROM);
+    public static final String TO = Local.getText(Local.QTJ_TO);
+    public static final String OR_INVALID_INPUT = Local.getText(Local.QTJ_OR_INVALID_INPUT);
+    public static final String SEND_ERRORS = Local.getText(Local.QTJ_SEND_ERRORS);
+    public static final String RESULT_NOT_SENT = Local.getText(Local.QTJ_RESULT_NOT_SENT);
+    public static final String REMOVE_CATEGORIES = Local.getText(Local.QTJ_REMOVE_CATEGORIES);
+    public static final String CATEGORIES_LIMIT = Local.getText(Local.QTJ_CATEGORIES_LIMIT);
+    public static final String ADD_CATEGORIES = Local.getText(Local.QTJ_ADD_CATEGORIES);
+    public static final String ADD_ADDITIONAL_COPIES = Local.getText(Local.QTJ_ADD_ADDITIONAL_COPIES);
+    public static final String FAIL_IMAGE_SAVE = Local.getText(Local.QTJ_FAIL_IMAGE_SAVE);
+    public static final String OUT_OF_MEMORY = Local.getText(Local.QTJ_OUT_OF_MEMORY);
+
+    public static final String NOT_ENOUGH_MEMORY = Local.getText(Local.QTJ_NOT_ENOUGH_MEMORY);
+    public static final String CATEGORY_DISABLE = Local.getText(Local.QTJ_CATEGORY_DISABLE);
+    public static final String SUB_CATEGORY = Local.getText(Local.QTJ_SUB_CATEGORY);
+    public static final String AVAILABLE_STYLES = Local.getText(Local.QTJ_AVAILABLE_STYLES);
+    public static final String AVAILABLE_FONT_SIZE = Local.getText(Local.QTJ_AVAILABLE_FONT_SIZE);
+    public static final String UNSUPPORTED_TYPE = Local.getText(Local.QTJ_UNSUPPORTED_TYPE);
+    public static final String SURVEY_LOCALIZED = Local.getText(Local.QTJ_SURVEY_LOCALIZED);
+    public static final String CORRUPTED_SURVEY = Local.getText(Local.QTJ_CORRUPTED_SURVEY);
+    public static final String ONE_SURVEY_CORRUPTED = Local.getText(Local.QTJ_ONE_SURVEY_CORRUPTED);
+    public static final String CONDITION = Local.getText(Local.QTJ_CONDITION);
 
     //public static final String NEWUI_TITLE_SURVEY_LIST = "List of Surveys";
     //public static final String NEWUI_TITLE_CATEGORIES = "Categories";
@@ -282,9 +304,10 @@ public class Resources {
     public static final String EDOWNLOAD_ACK_ERROR = Local.getText(Local.QTJ_EDOWNLOAD_ACK_ERROR);
     public static final String EINVALID_SURVEYS = Local.getText(Local.QTJ_EINVALID_SURVEYS);
     public static final String EINVALID_XML_FILE = Local.getText(Local.QTJ_EINVALID_XML_FILE);
-    public static final String EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = "Due to limited resources of the device "
-            + "it was not possible to show the picture preview. "
-            + "However picture might still be readable on server side."; // TODO localization
+    public static final String EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = Local.getText(Local.QTJ_EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES);
+    public static final String SHOW_CHOICES = Local.getText(Local.QTJ_SHOW_CHOICES);
+    public static final String NATIVE_RESOLUTION = Local.getText(Local.QTJ_NATIVE_RESOLUTION);
+
     private boolean error = false;
     public static Image check;
     public static Image question;

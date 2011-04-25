@@ -109,9 +109,9 @@ public class SubmitServer {
                 filesNotSentFormatted.append((String) m_filesNotSent.elementAt(i)).append("\n");
             }
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            GeneralAlert.getInstance().show("Send Errors",
-                    "Some results were not sent:\n" + filesNotSentFormatted,
-                    GeneralAlert.ALARM); // TODO localization
+            GeneralAlert.getInstance().show(Resources.SEND_ERRORS,
+                    Resources.RESULT_NOT_SENT + ":\n" + filesNotSentFormatted,
+                    GeneralAlert.ALARM);
         }
         AppMIDlet.getInstance().setResultList(new ResultList());
         AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);

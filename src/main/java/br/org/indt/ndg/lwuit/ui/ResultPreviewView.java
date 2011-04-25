@@ -27,7 +27,6 @@ import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.model.TimeQuestion;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.FileStores;
 import br.org.indt.ndg.mobile.FileSystem;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
@@ -109,14 +108,14 @@ public class ResultPreviewView extends Screen implements ActionListener {
             int subCategoriesCount = categoryAnswer.getSubcategoriesCount();
 
             if( subCategoriesCount == 0 ) {
-                TextArea labelSubCategory = UIUtils.createTextArea( "Category has been disabled", categoryFont );
+                TextArea labelSubCategory = UIUtils.createTextArea( Resources.CATEGORY_DISABLE, categoryFont );
                 form.addComponent( labelSubCategory );
             }
 
 
             for( int subCatIndex = 0; subCatIndex < subCategoriesCount; subCatIndex++ ) {
                 if( category instanceof CategoryConditional ) {
-                    TextArea labelSubCategory = UIUtils.createTextArea( "Sub-category: #" + (subCatIndex + 1), categoryFont );//TODO localize
+                    TextArea labelSubCategory = UIUtils.createTextArea( Resources.SUB_CATEGORY + (subCatIndex + 1), categoryFont );
                     labelSubCategory.setSelectedStyle( labelSubCategory.getUnselectedStyle() );
                     form.addComponent( labelSubCategory );
                 }

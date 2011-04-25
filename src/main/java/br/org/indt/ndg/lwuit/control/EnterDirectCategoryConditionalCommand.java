@@ -5,6 +5,7 @@ import br.org.indt.ndg.lwuit.ui.CategoryConditionalList;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.QuantityForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
@@ -13,7 +14,7 @@ public class EnterDirectCategoryConditionalCommand extends CommandControl {
     private static EnterDirectCategoryConditionalCommand instance;
 
     protected Command createCommand() {
-        return new Command("Open");//TODO localize
+        return new Command(Resources.NEWUI_OPEN_RESULT);
     }
 
     protected void doAction(Object parameter) {

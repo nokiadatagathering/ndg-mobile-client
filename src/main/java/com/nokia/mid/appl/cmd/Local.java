@@ -4,7 +4,7 @@
  * Copyright (c) 2002 Nokia Mobile Phones. All Rights Reserved.
  */
 
-//WARNING: If there exists a number in the MIDLet-abbreviation or package name 
+//WARNING: If there exists a number in the MIDLet-abbreviation or package name
 //         there could appear errors in the following line!
 package com.nokia.mid.appl.cmd;
 
@@ -291,9 +291,42 @@ public class Local {
     public final static short QTJ_EMPTY_KEY = 241;
     public final static short QTJ_WRONG_KEY = 242;
 
+    public final static short QTJ_SAVE_SURVEY_QUESTION = 243;
+    public final static short QTJ_ADD_LOCATION_FAILURE = 244;
+    public final static short QTJ_LOCATION_OUT_OF_DATE = 245;
+    public final static short QTJ_LOCATION_OUT_OF_DATE_WARN = 246;
+    public final static short QTJ_NEWUI_NOKIA_DATA_GATHERING = 247;
+    public final static short QTJ_DATE_FORMAT = 248;
+    public final static short QTJ_AVAILABLE_DATE_FORMAT = 249;
+    public final static short QTJ_OR_FORM_LOADING_FAILURE = 250;
+
+    public final static short QTJ_OR_VALID_INPUT_FROM = 251;
+    public final static short QTJ_TO = 252;
+    public final static short QTJ_OR_INVALID_INPUT = 253;
+    public final static short QTJ_SEND_ERRORS = 254;
+    public final static short QTJ_RESULT_NOT_SENT = 255;
+    public final static short QTJ_REMOVE_CATEGORIES = 256;
+    public final static short QTJ_CATEGORIES_LIMIT = 257;
+    public final static short QTJ_ADD_CATEGORIES = 258;
+    public final static short QTJ_ADD_ADDITIONAL_COPIES = 259;
+    public final static short QTJ_FAIL_IMAGE_SAVE = 260;
+    public final static short QTJ_OUT_OF_MEMORY = 261;
+
+    public final static short QTJ_NOT_ENOUGH_MEMORY = 262;
+    public final static short QTJ_CATEGORY_DISABLE = 263;
+    public final static short QTJ_SUB_CATEGORY = 264;
+    public final static short QTJ_AVAILABLE_STYLES = 265;
+    public final static short QTJ_AVAILABLE_FONT_SIZE = 266;
+    public final static short QTJ_UNSUPPORTED_TYPE = 267;
+    public final static short QTJ_SURVEY_LOCALIZED = 268;
+    public final static short QTJ_CORRUPTED_SURVEY = 269;
+    public final static short QTJ_ONE_SURVEY_CORRUPTED = 270;
+    public final static short QTJ_CONDITION = 271;
+    public final static short QTJ_EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = 272;
+    public final static short QTJ_SHOW_CHOICES = 273;
+    public final static short QTJ_NATIVE_RESOLUTION = 274;
 
     public static String phoneLang = System.getProperty("microedition.locale");
-
 
     /**
      * Generates a Local object.
@@ -302,7 +335,7 @@ public class Local {
     private Local() {
       ; // do nothing
     }
-    
+
     static {
         LanguageHandler handler = new LanguageHandler();
         phoneLang = handler.getLanguage();
@@ -353,7 +386,7 @@ public class Local {
         try {
 
             // create Local object if necessary
-            if (loc == null) 
+            if (loc == null)
                 loc = new Local();
 
             if( dis == null ) {

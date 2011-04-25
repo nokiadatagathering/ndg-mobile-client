@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.ui.openrosa;
 import br.org.indt.ndg.lwuit.ui.UIUtils;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import com.nokia.xfolite.xforms.dom.BoundElement;
 import com.nokia.xfolite.xforms.model.datatypes.DataTypeBase;
@@ -92,7 +93,7 @@ public class OpenRosaResultWidgetFactory implements WidgetFactory, XPathNSResolv
 
         DataTypeBase a = element.getDataType();
         if (a != null && a.getBaseTypeID() == DataTypeBase.XML_SCHEMAS_UNKNOWN) {
-            questionValue = "Unsuportted type";//TODO Localize
+            questionValue = Resources.UNSUPPORTED_TYPE;
         } else{
             questionValue = element.getStringValue();
         }

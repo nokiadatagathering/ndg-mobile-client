@@ -1,5 +1,6 @@
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.mobile.Resources;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -116,10 +117,8 @@ public class PhotoSettings {
 
         public String toString() {
             double megaPixel = getMegapixel();
-            String nativeIndicator = (mIsNative ? "(" + "Native" + ")": ""); // TODO Localization, 'native' as 'native resolution for device'
+            String nativeIndicator = (mIsNative ? "(" + Resources.NATIVE_RESOLUTION + ")": "");
             return getWidth() + "x" + getHeight() + " (" + megaPixel + "M)" + nativeIndicator;
         }
-
     }
-
 }

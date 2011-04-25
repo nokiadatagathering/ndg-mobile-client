@@ -35,6 +35,13 @@ public class ExclusiveChoiceFieldController {
         mList.setListCellRenderer(new RadioButtonRenderer());
     }
 
+    public void setData(ExclusiveChoiceList list, ListModel dataModel, String question, int maxQuestionLength){
+        mQuestionText = question;
+        mMaxQuestionLength = maxQuestionLength;
+        mDataModel = dataModel;
+        mList = list;
+    }
+
     public String getQuestion() {
         return mQuestionText;
     }

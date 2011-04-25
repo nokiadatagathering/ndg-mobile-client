@@ -136,7 +136,11 @@ public class InterviewForm extends Screen implements ActionListener {
                         form.addComponent(ecfa);
                         lastUI = ecfa;
                     }
-                    updateSkippedQuestion((ChoiceQuestion)currentQuestion,(ChoiceAnswer)currentAnswer);
+                    ChoiceAnswer choiceAnswer = (ChoiceAnswer)currentAnswer;
+                    if( choiceAnswer.getSelectedIndexes().size() > 0 ){
+                        int selected = Integer.parseInt( (String)choiceAnswer.getSelectedIndexes().elementAt(0) );
+                        updateSkippedQuestion((ChoiceQuestion)currentQuestion, selected);
+                    }
                 } else {
                     ChoiceFieldUI cf = new ChoiceFieldUI(currentQuestion, currentAnswer);
                     cf.registerQuestion();
@@ -227,10 +231,9 @@ public class InterviewForm extends Screen implements ActionListener {
         return true;
     }
 
-    private void updateSkippedQuestion( ChoiceQuestion aQuestion, ChoiceAnswer aAnswer ) {
+    private void updateSkippedQuestion( ChoiceQuestion aQuestion, int selectedChoiceItem ) {
         try
         {
-            int selectedChoiceItem = Integer.parseInt( (String)aAnswer.getSelectedIndexes().elementAt(0) );
             boolean sentence1 = ((selectedChoiceItem != ((ChoiceQuestion) aQuestion).getChoiceItem()) && (((ChoiceQuestion) aQuestion).isInverse()));
             boolean sentence2 = ((selectedChoiceItem == ((ChoiceQuestion) aQuestion).getChoiceItem()) && (!((ChoiceQuestion) aQuestion).isInverse()));
 
@@ -492,7 +495,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void setEnabled(boolean enabled) {
-            mQuestionTextArea.setEditable(enabled);
+            mQuestionTextArea.setEnabled(enabled);
             mDateTextField.setEnabled(enabled);
         }
 
@@ -518,9 +521,9 @@ abstract class ContainerUI extends Container implements FocusListener {
                 } else {
                     handleSelection(mChoiceList);
                     mChoiceList.setHandlesInput(true);
+                    setModifiedInterview(true);
                 }
             }
-
         };
         protected ExclusiveChoiceListListener mListListener = new ExclusiveChoiceListListener() {
 
@@ -546,13 +549,9 @@ abstract class ContainerUI extends Container implements FocusListener {
             for (int i = 0; i < totalChoices; i++) {
                 String choice = (String) vChoices.elementAt(i);
                 RadioChoiceItem item = new RadioChoiceItem(choice, mDataModel);
-                RadioButton rb = new RadioButton(choice);
-                rb.setFocusable(false);
-                rb.addFocusListener(this); // Controls when changing to a new question
                 boolean hasMoreDetails = ((String) vOthers.elementAt(i)).equals("1");
                 if ( hasMoreDetails ) {
                     item.setMoreDetailsText("");
-                    rb.useMoreDetails(true);
                 }
                 mDataModel.addItem(item);
                 mMaxQuestionLength = (choice.length() > mMaxQuestionLength) ? choice.length() : mMaxQuestionLength;
@@ -571,7 +570,6 @@ abstract class ContainerUI extends Container implements FocusListener {
             ExclusiveChoiceFieldController controller = ExclusiveChoiceFieldController.getInstance();
             controller.setData( mDataModel, mQuestion.getName(), mMaxQuestionLength);
             mChoiceList = controller.getListForModel();
-            mChoiceList.addActionListener(new HandleChoiceAnswersModified());
             mChoiceList.addActionListener(mSelectionListener);
             mChoiceList.addExclusiveChoiceListListener(mListListener);
             mChoiceList.getStyle().setBorder(Border.createEmpty());
@@ -599,13 +597,14 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void handleSelection(Object obj) {
             List list = (List) obj;
             Object selectedItem = list.getSelectedItem();
+            int selectedItemIdx = list.getSelectedIndex();
             if (selectedItem != null) {
                 RadioChoiceItem item = (RadioChoiceItem) list.getSelectedItem();
                 boolean checkedNew = !item.isChecked();
                 item.setChecked(checkedNew);
                 if ( checkedNew && item.hasMoreDetails() && item.getMoreDetails().length() == 0 )
                     handleMoreDetails(obj);
-                updateSkippedQuestion((ChoiceQuestion) getQuestion(), (ChoiceAnswer) getAnswer());
+                updateSkippedQuestion((ChoiceQuestion) getQuestion(), selectedItemIdx);
             }
         }
 
@@ -616,6 +615,7 @@ abstract class ContainerUI extends Container implements FocusListener {
                 if ( item.isChecked() ) {
                     DetailsForm.show(item.getValue(), item.getMoreDetails());
                     item.setMoreDetailsText( SurveysControl.getInstance().getItemOtherText() );
+                    setModifiedInterview(true);
                 }
             }
             commitValue(); // TODO remove?
@@ -639,6 +639,10 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public boolean validate(){
             return true;
+        }
+
+        public int getSelectedItemIdx(){
+            return mChoiceList.getSelectedIndex();
         }
 
     }
@@ -666,13 +670,14 @@ abstract class ContainerUI extends Container implements FocusListener {
     class ExclusiveChoiceFieldAutoCompleteUI extends ExclusiveChoiceFieldBaseUI {
 
         private static final String mEmpty = "----";
-        private final Button mShowChoiceDialogButton = new Button("-> " + "Show choices" + " <-"); // TODO Localization
+        private final Button mShowChoiceDialogButton = new Button("-> " + Resources.SHOW_CHOICES + " <-");
         private final TextArea mSelectedChoice = UIUtils.createTextArea( mEmpty, NDGStyleToolbox.fontSmall );
         private final ActionListener mChoiceDialogListener = new ActionListener() {
 
             public void actionPerformed(ActionEvent evt) {
                 Object source = evt.getSource();
                 ExclusiveChoiceFieldController controller = ExclusiveChoiceFieldController.getInstance();
+                controller.setData(mChoiceList, mDataModel, mQuestion.getName(), mMaxQuestionLength);
                 if (source == mShowChoiceDialogButton) {
                     controller.addActionListener(mChoiceDialogListener);
                     AppMIDlet.getInstance().setDisplayable(ExclusiveChoiceFieldView.class);
@@ -722,6 +727,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
             mShowChoiceDialogButton.setEnabled(enabled);
+            mChoiceList.setEnabled(enabled);
         }
 
         public void updateSelectedChoice() {
@@ -740,8 +746,10 @@ abstract class ContainerUI extends Container implements FocusListener {
                     handleMoreDetails(mCurrentlyFocused);
                 } else if ( evt.getSource() instanceof CheckBox ) {
                     CheckBox checkbox = (CheckBox)evt.getSource();
-                    if (checkbox.isSelected() && checkbox.hasOther() && checkbox.getOtherText().length() == 0)
+                    if (checkbox.isSelected() && checkbox.hasOther() && checkbox.getOtherText().length() == 0){
                         handleMoreDetails(checkbox);
+                    }
+                    setModifiedInterview(true);
                 }
             }
         };
@@ -777,7 +785,6 @@ abstract class ContainerUI extends Container implements FocusListener {
                 cb.setOtherText("");
                 cb.addFocusListener(this); // Controls when changing to a new question
                 cb.addActionListener(mActionListener);
-                cb.addActionListener(new HandleChoiceAnswersModified());
                 cb.setNextFocusRight(cb);
                 cb.setNextFocusLeft(cb);
                 mGroupButton.addElement(cb);
@@ -852,6 +859,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             if ( (choiceCheckbox.hasOther()) && (choiceCheckbox.isSelected()) ) {
                DetailsForm.show(choiceCheckbox.getText(), choiceCheckbox.getOtherText());
                choiceCheckbox.setOtherText(SurveysControl.getInstance().getItemOtherText());
+               setModifiedInterview(true);
             }
         }
 
@@ -863,6 +871,7 @@ abstract class ContainerUI extends Container implements FocusListener {
     class ImageFieldUI extends ContainerUI implements ActionListener, CameraManagerListener {
 
         private Container mImageContainer;
+        private Label maxPhotoCount;
 
         public ImageFieldUI( NDGQuestion aQuestion, NDGAnswer aAnswer ) {
             super( aQuestion, aAnswer );
@@ -887,7 +896,7 @@ abstract class ContainerUI extends Container implements FocusListener {
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             addComponent(mQuestionTextArea);
 
-            Label maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
+            maxPhotoCount = new Label( Resources.MAX_IMG_NO + String.valueOf(((ImageQuestion)mQuestion).getMaxCount()) );
             maxPhotoCount.getStyle().setFont( NDGStyleToolbox.fontSmall );
             addComponent(maxPhotoCount);
             ImageAnswer imgAnswer = (ImageAnswer)mAnswer;
@@ -978,6 +987,7 @@ abstract class ContainerUI extends Container implements FocusListener {
 
         public void setEnabled(boolean enabled) {
             mQuestionTextArea.setEnabled(enabled);
+            maxPhotoCount.setEnabled(enabled);
             if ( mImageContainer != null ) {
                 for( int i = 0; i< mImageContainer.getComponentCount(); i++ ) {
                     mImageContainer.getComponentAt(i).setEnabled(enabled);
@@ -1086,13 +1096,13 @@ abstract class ContainerUI extends Container implements FocusListener {
             mTimeTextField.addFocusListener(this);
             mTimeTextField.addDataChangeListener(new HandleInterviewAnswersModified());
 
-        addComponent(mTimeTextField);
-        addComponent(am);
-        addComponent(pm);
+            addComponent(mTimeTextField);
+            addComponent(am);
+            addComponent(pm);
 
-        Label spacer = new Label("");
-        spacer.setFocusable(false);
-        addComponent(spacer);
+            Label spacer = new Label("");
+            spacer.setFocusable(false);
+            addComponent(spacer);
         }
 
         public void commitValue() {
@@ -1114,7 +1124,7 @@ abstract class ContainerUI extends Container implements FocusListener {
         }
 
         public void setEnabled(boolean enabled) {
-            mQuestionTextArea.setEditable(enabled);
+            mQuestionTextArea.setEnabled(enabled);
             mTimeTextField.setEnabled(enabled);
             for( int i = 0; i < mAmPmGroupButton.getButtonCount(); i++)
             {

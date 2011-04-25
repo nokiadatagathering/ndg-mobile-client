@@ -30,6 +30,8 @@ public class RadioButtonRenderer extends RadioButton implements ListCellRenderer
         useMoreDetails(hasDetails);
         setText(radioItem.getValue());
 
+        setEnabled(list.isEnabled());
+
         if ( isSelected && list.hasFocus() ) {
             setFocus(true);
             getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);

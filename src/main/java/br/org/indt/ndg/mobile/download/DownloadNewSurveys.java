@@ -919,7 +919,7 @@ public class DownloadNewSurveys implements Runnable{
 
             if ( startIndex < 0 || endIndex < 0 || endIndex < startIndex ) {
                 GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-                GeneralAlert.getInstance().show( "Survey", "Corrupted survey", GeneralAlert.ERROR );//TODO localize
+                GeneralAlert.getInstance().show( Resources.SURVEY_LOCALIZED, Resources.CORRUPTED_SURVEY, GeneralAlert.ERROR );
                 return;
             }
 
@@ -939,7 +939,7 @@ public class DownloadNewSurveys implements Runnable{
                     break;//end of survey(s)
                 } else if ( startIndex >= 0 && endIndex < 0 ) {
                     GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-                    GeneralAlert.getInstance().show( "Survey", "At least one survey is corrupted", GeneralAlert.ERROR );//TODO localize
+                    GeneralAlert.getInstance().show( Resources.SURVEY_LOCALIZED, Resources.ONE_SURVEY_CORRUPTED, GeneralAlert.ERROR );
                     break;
                 }
             } while (true);

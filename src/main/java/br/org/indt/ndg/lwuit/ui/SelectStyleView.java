@@ -31,7 +31,7 @@ public class SelectStyleView extends Screen implements ActionListener, ChoiceGro
         }
         form.addCommandListener(this);
         form.removeAll();
-        Label label = new Label("Available styles");//TODO localize
+        Label label = new Label(Resources.AVAILABLE_STYLES);
         label.getStyle().setFont( NDGStyleToolbox.fontSmall );
         label.setFocusable(false);
         form.addComponent(label);

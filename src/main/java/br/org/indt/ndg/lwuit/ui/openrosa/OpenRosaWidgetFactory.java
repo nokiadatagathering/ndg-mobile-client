@@ -269,15 +269,15 @@ abstract class ContainerUI extends Container implements FocusListener {
 
             GeneralAlert.getInstance().show(
                                         Resources.CMD_SAVE,
-                                        "Valid input " + "from: " + lowConstraint +
-                                        " to: " + highConstraint,
-                                        GeneralAlert.WARNING); // TODO localization
+                                        Resources.OR_VALID_INPUT_FROM + " " + lowConstraint
+                                        + " " + Resources.TO + " " + highConstraint,
+                                        GeneralAlert.WARNING);
 
         } else {
             GeneralAlert.getInstance().show(
                     Resources.CMD_SAVE,
-                    "Invalid input ",
-                    GeneralAlert.WARNING); // TODO localization
+                    Resources.OR_INVALID_INPUT,
+                    GeneralAlert.WARNING);
         }
     }
 
@@ -814,6 +814,6 @@ class XfoilMockComponent extends ContainerUI {
     }
 
     private void addMockLabel() {
-        addComponent(UIUtils.createQuestionName("Unsupported type"));//TODO localize
+        addComponent(UIUtils.createQuestionName(Resources.UNSUPPORTED_TYPE));
     }
 }

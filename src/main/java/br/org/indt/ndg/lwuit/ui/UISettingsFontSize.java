@@ -43,14 +43,14 @@ public class UISettingsFontSize extends Screen implements ActionListener {
         }
         form.addCommandListener(this);
 
-        Label label = new Label("Available font sizes");//TODO localize
+        Label label = new Label(Resources.AVAILABLE_FONT_SIZE);
         label.getStyle().setFont( NDGStyleToolbox.fontSmall );
         label.setFocusable(false);
         form.addComponent(label);
         Container container = new Container( new BoxLayout( BoxLayout.Y_AXIS ) );
         container.getStyle().setBorder(Border.createRoundBorder(8, 8, UIManager.getInstance().getComponentStyle("RadioButton").getFgColor()));
 
-        defaultFont = new RadioButton( "Default" );//TODO localize
+        defaultFont = new RadioButton( Resources.DEFAULT );
         defaultFont.setSelected(false);
         defaultFont.getUnselectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ) );
         defaultFont.getSelectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ));
@@ -58,21 +58,21 @@ public class UISettingsFontSize extends Screen implements ActionListener {
         defaultFont.addFocusListener( new RadioButtonFocusListener() );
         defaultFont.addActionListener(this);
 
-        smallFont = new RadioButton( "Small" );//TODO localize
+        smallFont = new RadioButton( Resources.SMALL );
         smallFont.getUnselectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_SMALL ) );
         smallFont.getSelectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_SMALL ) );
         smallFont.removeFocusListener( smallFont );
         smallFont.addFocusListener( new RadioButtonFocusListener() );
         smallFont.addActionListener(this);
 
-        mediumFont = new RadioButton( "Medium" );//TODO localize
+        mediumFont = new RadioButton( Resources.MEDIUM );
         mediumFont.getUnselectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ) );
         mediumFont.getSelectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ) );
         mediumFont.removeFocusListener( mediumFont );
         mediumFont.addFocusListener( new RadioButtonFocusListener() );
         mediumFont.addActionListener(this);
 
-        largeFont = new RadioButton( "Large" );//TODO localize
+        largeFont = new RadioButton( Resources.LARGE );
         largeFont.getUnselectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_LARGE ) );
         largeFont.getSelectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_LARGE ) );
         largeFont.removeFocusListener( largeFont );

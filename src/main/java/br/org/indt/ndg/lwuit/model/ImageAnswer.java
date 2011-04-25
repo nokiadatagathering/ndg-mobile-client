@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
@@ -82,7 +83,7 @@ public class ImageAnswer extends NDGAnswer{
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         } catch (OutOfMemoryError er) {
-                            throw new OutOfMemoryErrorExtended("Failed to encode and save image data to answer");
+                            throw new OutOfMemoryErrorExtended(Resources.FAIL_IMAGE_SAVE);
                         } finally {
                             _output.println("</img_data>");
                         }
@@ -92,7 +93,7 @@ public class ImageAnswer extends NDGAnswer{
                 } catch (OutOfMemoryErrorExtended ex) {
                     if( !outOfMemoryNotified ) {
                         GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
-                        GeneralAlert.getInstance().show( "OutOfMemory", "Not enough memory to encode one or more images. Images won't be saved.", GeneralAlert.ERROR );//TODO localize
+                        GeneralAlert.getInstance().show( Resources.OUT_OF_MEMORY, Resources.NOT_ENOUGH_MEMORY, GeneralAlert.ERROR );
                         outOfMemoryNotified = true;
                     }
                 }
