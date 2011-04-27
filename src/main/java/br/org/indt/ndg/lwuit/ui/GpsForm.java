@@ -31,8 +31,13 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
 
     protected void customize() {
         setTitle(Resources.NEWUI_NOKIA_DATA_GATHERING, Resources.GPS);
+        form.removeAll();
         form.removeAllCommands();
         form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
+        if ( gps_state ) {
+            form.addCommand(ViewDetailsGpsFormCommand.getInstance().getCommand());
+        }
+
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {
@@ -40,17 +45,15 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
             //this ensure that we have registered listener once
         }
         form.addCommandListener(this);
-        form.removeAll();
+
         TextArea useGpsQuestion = new TextArea(5, 20);
         useGpsQuestion.setText(Resources.GPSCONFIG);
         useGpsQuestion.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
         useGpsQuestion.getStyle().setFont(NDGStyleToolbox.fontSmall);
         useGpsQuestion.setRows(useGpsQuestion.getLines() - 1);
         useGpsQuestion.setEditable(false);
+        useGpsQuestion.setFocusable(false);
 
-        if (gps_state) {
-            form.addCommand(ViewDetailsGpsFormCommand.getInstance().getCommand());
-        }
         String[] choices = new String[2];
         choices[0] = Resources.ON;
         choices[1] = Resources.OFF;
@@ -64,17 +67,8 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
         }
         useGpsChoice = new ChoiceGroup(choices, gpsInitItem);
         useGpsChoice.setCgListener(this);
-        // for a better scroll
-        useGpsQuestion.setFocusable(true);
-        useGpsQuestion.addFocusListener(new FocusListener() {
-
-            public void focusGained(Component c) {
-                useGpsChoice.requestFocus();
-            }
-
-            public void focusLost(Component c) {
-            }
-        });
+        // to prevent scrolling on top of the settings list
+        useGpsChoice.blockLosingFocusUp();
         // is visible only when useGpsChoice[0] (GPS ON) is checked
         useGeoTagQuestion = new TextArea(5, 20);
         useGeoTagQuestion.setText(Resources.GEO_TAGGING_CONF);
@@ -106,10 +100,11 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
             }
         });
 
-        Label spaceBotton = new Label("spaceBotton");
-        spaceBotton.getStyle().setFgColor(form.getStyle().getBgColor());
-        spaceBotton.setFocusable(true);
-        spaceBotton.addFocusListener(new FocusListener() {
+        // used to transfer the focus on bottom of the list to the right component
+        Label focusBumper = new Label("focusBumper");
+        focusBumper.getStyle().setFgColor(form.getStyle().getBgColor());
+        focusBumper.setFocusable(true);
+        focusBumper.addFocusListener(new FocusListener() {
 
             public void focusGained(Component arg0) {
                 if (useGeoTagChoice.isVisible())
@@ -126,7 +121,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
         form.addComponent(useGpsChoice);
         form.addComponent(useGeoTagQuestion);
         form.addComponent(useGeoTagChoice);
-        form.addComponent(spaceBotton);
+        form.addComponent(focusBumper);
         useGpsChoice.setItemFocused(gpsInitItem);
     }
 
@@ -168,6 +163,7 @@ public class GpsForm extends Screen implements ActionListener, ChoiceGroupListen
     private void setUseGeoTagConfigurationVisible( boolean visible ) {
         useGeoTagQuestion.setVisible(visible);
         useGeoTagChoice.setVisible(visible);
+        useGeoTagChoice.setFocusable(visible);
         form.repaint();
     }
 }
