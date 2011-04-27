@@ -1,6 +1,5 @@
 package br.org.indt.ndg.lwuit.control;
 
-import br.org.indt.ndg.lwuit.ui.UISettings;
 import br.org.indt.ndg.lwuit.ui.UISettingsFontSize;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
@@ -13,7 +12,7 @@ public class UISettingsSizeCommand extends CommandControl {
     private static  UISettingsSizeCommand instance;
 
     protected Command createCommand() {
-        return new Command( "Sizes" );//Resources.UI_SETTINGS
+        return new Command( Resources.CMD_FONT_SIZES );
     }
 
     public static UISettingsSizeCommand getInstance() {

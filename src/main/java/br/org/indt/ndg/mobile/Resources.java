@@ -307,6 +307,8 @@ public class Resources {
     public static final String EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = Local.getText(Local.QTJ_EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES);
     public static final String SHOW_CHOICES = Local.getText(Local.QTJ_SHOW_CHOICES);
     public static final String NATIVE_RESOLUTION = Local.getText(Local.QTJ_NATIVE_RESOLUTION);
+    public static final String CMD_UI_COLORS =  Local.getText(Local.QTJ_CMD_COLORS);
+    public static final String CMD_FONT_SIZES = Local.getText(Local.QTJ_CMD_SIZES);
 
     private boolean error = false;
     public static Image check;

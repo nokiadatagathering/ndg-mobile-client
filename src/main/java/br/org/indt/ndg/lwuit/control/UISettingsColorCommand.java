@@ -12,7 +12,7 @@ public class UISettingsColorCommand extends CommandControl {
     private static  UISettingsColorCommand instance;
 
     protected Command createCommand() {
-        return new Command( "Colors" );//Resources.UI_SETTINGS
+        return new Command( Resources.CMD_UI_COLORS );
     }
 
     public static UISettingsColorCommand getInstance() {

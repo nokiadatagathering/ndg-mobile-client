@@ -118,14 +118,14 @@ public class GeneralAlert extends Screen implements ActionListener {
 
         Container c2 = new Container( new BoxLayout(BoxLayout.Y_AXIS));
 
-        int displayW = Display.getInstance().getDisplayWidth();
+        int displayW = Display.getInstance().getDisplayWidth() - 10; // magic number, it should rather be set to width of margins+borders+padding
         int displayH = Display.getInstance().getDisplayHeight();
 
         TextArea msg = new TextArea( );
         msg.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
         msg.getSelectedStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
         msg.getSelectedStyle().setBgTransparency(0x00);
-        int textWidth = msg.getSelectedStyle().getFont().stringWidth(label) + 5;
+        int textWidth = msg.getSelectedStyle().getFont().stringWidth(label);
         int lineHeight = msg.getSelectedStyle().getFont().getHeight() + msg.getRowsGap();
         msg.setText(label);
         msg.setIsScrollVisible(false);
@@ -138,7 +138,7 @@ public class GeneralAlert extends Screen implements ActionListener {
             int preferredH = lineHeight * msg.getRows() + 2;
             if(preferredH > (displayH * 0.5) ) {
                 msg.setIsScrollVisible(true);
-                preferredH = (int) (  displayH * 0.5);
+                preferredH = (int) ( displayH * 0.5);
             }
             msg.setPreferredH(preferredH);
             msg.setGrowByContent(true);
@@ -147,8 +147,8 @@ public class GeneralAlert extends Screen implements ActionListener {
         {
             msg.setGrowByContent(false);
             msg.setRows(1);
-            msg.setPreferredW( msg.getSelectedStyle().getFont().stringWidth( label ) + 5 );
-            msg.setPreferredH( msg.getSelectedStyle().getFont().getHeight() + 3 );
+            msg.setPreferredW( textWidth );
+            msg.setPreferredH( lineHeight );
         }
         // WARN: the following line is important!
         // Setting it to false caused hard to track OutOfMemoryException

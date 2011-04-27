@@ -325,6 +325,8 @@ public class Local {
     public final static short QTJ_EFAILED_LOAD_IMAGE_LIMITED_DEVICE_RESOURCES = 272;
     public final static short QTJ_SHOW_CHOICES = 273;
     public final static short QTJ_NATIVE_RESOLUTION = 274;
+    public final static short QTJ_CMD_COLORS = 275;
+    public final static short QTJ_CMD_SIZES = 276;
 
     public static String phoneLang = System.getProperty("microedition.locale");
 
