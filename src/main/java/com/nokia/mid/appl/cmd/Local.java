@@ -327,6 +327,7 @@ public class Local {
     public final static short QTJ_NATIVE_RESOLUTION = 274;
     public final static short QTJ_CMD_COLORS = 275;
     public final static short QTJ_CMD_SIZES = 276;
+    public final static short QTJ_CMD_CLEAR = 277;
 
     public static String phoneLang = System.getProperty("microedition.locale");
 

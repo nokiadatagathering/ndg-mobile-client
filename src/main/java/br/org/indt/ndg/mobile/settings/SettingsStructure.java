@@ -20,10 +20,13 @@ import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
 
 public class SettingsStructure {
 
+    public static final int NOT_REGISTERED = 0;
+    public static final int REGISTERED = 1;
+
     /* Default values */
     private static final boolean DEFAULT_USE_COMPRESSION = true;
     private static final int DEFAULT_SPLASH_TIME = 8000;
-    private static final int DEFAULT_IS_REGISTERED = 0;
+    private static final int DEFAULT_IS_REGISTERED = NOT_REGISTERED;
     private static final boolean DEFAULT_GPS = true;
     private static final boolean DEFAULT_GEO_TAGGING = true;
     private static final int DEFAULT_PHOTO_RESULUTION_ID = 0;

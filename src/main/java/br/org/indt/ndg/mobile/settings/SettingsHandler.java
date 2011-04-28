@@ -28,7 +28,7 @@ public class SettingsHandler extends DefaultHandler {
                 structure.setRegisteredFlag(Integer.parseInt(isRegisteredFlag));
             }
             else {
-                structure.setRegisteredFlag(0);
+                structure.setRegisteredFlag(SettingsStructure.NOT_REGISTERED);
             }
 
             String isShowEncriptionScreenFlag = attributes.getValue(attributes.getIndex("showEncryptionScreen"));

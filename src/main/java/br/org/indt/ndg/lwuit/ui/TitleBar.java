@@ -36,7 +36,7 @@ public class TitleBar implements Painter {
     public int getPrefferedH() {
         if( title1.length() == 0 && title2.length() == 0 )
             return 0;
-        int fontsHight = 3*textPadding + NDGStyleToolbox.fontSmall.getHeight() + NDGStyleToolbox.fontMedium.getHeight();
+        int fontsHight = 3*textPadding + NDGStyleToolbox.fontSmall.getHeight() + NDGStyleToolbox.fontSmall.getHeight();//title1 height and title2 height
         int logoHight = 2*textPadding + logoHeight;
         return fontsHight < logoHight ? logoHight : fontsHight;
     }
@@ -57,7 +57,7 @@ public class TitleBar implements Painter {
         int textOffsetHorizontal = textPadding + gpsWidth + textPadding + logoWidth + textPadding;
         int spacingVertical =  ( height - NDGStyleToolbox.fontSmall.getHeight() - NDGStyleToolbox.fontMedium.getHeight() )/3;
         g.drawString( title1, textOffsetHorizontal, spacingVertical );
-        g.setFont( NDGStyleToolbox.fontMedium );
+        g.setFont( NDGStyleToolbox.fontSmall );
         g.drawString( title2, textOffsetHorizontal, spacingVertical +  NDGStyleToolbox.fontSmall.getHeight() + spacingVertical );
         LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
         if ( locationHandler != null && locationHandler.locationObtained() ) {

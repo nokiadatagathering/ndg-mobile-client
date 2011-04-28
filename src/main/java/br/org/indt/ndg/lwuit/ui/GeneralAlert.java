@@ -124,6 +124,7 @@ public class GeneralAlert extends Screen implements ActionListener {
         TextArea msg = new TextArea( );
         msg.getSelectedStyle().setFgColor( NDGStyleToolbox.getInstance().menuStyle.unselectedFontColor );
         msg.getSelectedStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        msg.getUnselectedStyle().setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
         msg.getSelectedStyle().setBgTransparency(0x00);
         int textWidth = msg.getSelectedStyle().getFont().stringWidth(label);
         int lineHeight = msg.getSelectedStyle().getFont().getHeight() + msg.getRowsGap();

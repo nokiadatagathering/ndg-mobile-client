@@ -103,7 +103,7 @@ public class NDGStyleToolbox {
             PrintStream output = new PrintStream(out);
 
             output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            output.print("<settings fontSize=\"" + fontSizeSetting +"\">");
+            output.println("<settings fontSize=\"" + fontSizeSetting +"\">");
             output.println("<style name=\"" + "list" + "\">" );
             listStyle.writeSettings(output);
             output.println("</style>");

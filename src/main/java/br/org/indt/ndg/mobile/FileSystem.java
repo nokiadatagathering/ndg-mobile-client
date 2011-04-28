@@ -293,25 +293,26 @@ public class FileSystem {
         moveResult(path, _filename, "s_");
     }
 
-    public void moveSentResult(String fileDir, String fileName){
-        String path = root + fileDir + fileName;
-        moveResult(path, fileName, "s_");
-    }
-
     private void moveResult(String path, String fileName, String prefix){
+        FileConnection fc = null;
         try {
-            FileConnection fc = (FileConnection) Connector.open(path);
+            fc = (FileConnection) Connector.open(path);
             if (fc.exists()) {
                 this.removeDisplayName(fileName);
                 this.removeFile(fileName);
                 fc.rename(prefix + fileName);
             }
-            if(fc != null){
-                fc.close();
-            }
         } catch (IOException ioe) {
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
             GeneralAlert.getInstance().show(Resources.ERROR_TITLE, Resources.ERENAME, GeneralAlert.ERROR );
+        } finally {
+            if(fc != null){
+                try {
+                    fc.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
 

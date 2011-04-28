@@ -59,13 +59,15 @@ public class Settings {
     
     public void loadSettingsInfo() {
         createSettingsFile();
-
         parseSettingsFile();
-
         if (!settingsStructure.getAppVersion().equals(AppMIDlet.getInstance().getAppVersion())) {
             deleteSettingsFile();
             createSettingsFile();
             parseSettingsFile();
+            // workaround for loosing registration and MSISDN info on update
+            // WARN: MSISDN info will be still lost on update until reimplemented on server! (== dynamic instead of static jad on update)
+            settingsStructure.setRegisteredFlag(SettingsStructure.REGISTERED);
+            writeSettings();
         }
     }
     

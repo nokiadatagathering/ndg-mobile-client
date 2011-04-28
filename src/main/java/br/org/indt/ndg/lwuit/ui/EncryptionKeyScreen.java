@@ -38,7 +38,7 @@ public class EncryptionKeyScreen extends Screen implements ActionListener {
 
         TextArea questionName = UIUtils.createTextArea( Resources.ENCRYPTION_PASSWORD,
                                                         NDGStyleToolbox.fontMedium );
-        questionName.getStyle().setFgColor( NDGStyleToolbox.getInstance().questionPreviewColor );
+        questionName.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
         form.addComponent(questionName);
 
         tfDesc = new DescriptiveField(16);

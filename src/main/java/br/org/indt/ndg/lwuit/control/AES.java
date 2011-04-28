@@ -285,6 +285,14 @@ public class AES {
             out.close();
         } catch (java.io.IOException e) {
              System.out.println(e.getMessage());
+        } finally {
+            if ( in!= null ) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
         return input;

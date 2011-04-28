@@ -164,16 +164,12 @@ public class SubmitServer {
             }
             fileContents = outputStream.toString();
         } finally {
-            try {
                 if (inputStream != null)
                     inputStream.close();
                 if (outputStream != null)
                     outputStream.close();
                 if (fc != null)
                     fc.close();
-            } catch (IOException ex) {
-                Logger.getInstance().logException(ex.getMessage());
-            }
         }
         return fileContents;
     }

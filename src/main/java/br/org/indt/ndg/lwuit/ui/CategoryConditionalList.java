@@ -4,12 +4,9 @@ import br.org.indt.ndg.lwuit.control.AcceptCategoryConditionalCommand;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.control.BackCategoryConditionalFormCommand;
 import br.org.indt.ndg.lwuit.control.EnterCategoryConditionalCommand;
-import br.org.indt.ndg.lwuit.control.SaveResultsObserver;
 import br.org.indt.ndg.lwuit.control.SurveysControl;
-import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.ui.renderers.SimpleListCellRenderer;
-import br.org.indt.ndg.mobile.AppMIDlet;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -18,7 +15,7 @@ import com.sun.lwuit.list.ListModel;
 import java.util.Vector;
 
 
-public class CategoryConditionalList extends Screen implements ActionListener, SaveResultsObserver {
+public class CategoryConditionalList extends Screen implements ActionListener {
 
     private String title2 = Resources.CATEGORY_LIST_TITLE;
     private String title1;
@@ -27,21 +24,15 @@ public class CategoryConditionalList extends Screen implements ActionListener, S
     private ListModel underlyingModel;
 
     private SurveysControl surveysControl = SurveysControl.getInstance();
-    private Category[] categories;
     private Vector entries;
     private CategoryConditional selectedCategory;
 
     protected void loadData() {
         selectedCategory = (CategoryConditional)SurveysControl.getInstance().getSelectedCategory();
-        boolean xx = selectedCategory instanceof CategoryConditional;
-        if ( !xx ) {
-            //throw new UnsupportedOperationException("This cannot happen!!!");
-        }
         entries = new Vector();
         for( int i=0; i < selectedCategory.getQuantity(); i++ ) {
-            entries.addElement( "No. " + String.valueOf(i) );
+            entries.addElement( "No. " + String.valueOf(i+1) );
         }
-
         title1 = surveysControl.getSurveyTitle();
     }
 
@@ -64,16 +55,12 @@ public class CategoryConditionalList extends Screen implements ActionListener, S
         }
         form.addCommandListener(this);
 
-        // Client 2.0 can use the list.modelChanged(int, int) callback to refresh Lists
-
         underlyingModel = new DefaultListModel(entries);
         underlyingModel.setSelectedIndex( SurveysControl.getInstance().getSelectedSubCategoryIndex());
         list = new List(underlyingModel);
         list.setItemGap(0);
         list.addActionListener(this);
-
         list.setListCellRenderer( new SimpleListCellRenderer() );
-
         list.setFixedSelection(List.FIXED_NONE_CYCLIC);
         form.addComponent(list);
         form.setScrollable(false);
@@ -83,18 +70,10 @@ public class CategoryConditionalList extends Screen implements ActionListener, S
         Object cmd = evt.getSource();
         if (cmd ==  BackCategoryConditionalFormCommand.getInstance().getCommand()) {
             BackCategoryConditionalFormCommand.getInstance().execute(null);
-        }
-        else if (cmd == AcceptCategoryConditionalCommand.getInstance().getCommand()) {
-            //AcceptCategoryConditionalCommand.getInstance().setObserver(this);
+        } else if (cmd == AcceptCategoryConditionalCommand.getInstance().getCommand()) {
             AcceptCategoryConditionalCommand.getInstance().execute(null);
-        }
-        else if (cmd == EnterCategoryConditionalCommand.getInstance().getCommand() || cmd == list) {
+        } else if (cmd == EnterCategoryConditionalCommand.getInstance().getCommand() || cmd == list) {
             EnterCategoryConditionalCommand.getInstance().execute(new Integer(list.getSelectedIndex()));
         }
-    }
-
-    public void onResultsSaved() {
-        // Refresh ResultList since a new result was probbaly created
-        AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.ResultList.class);
     }
 }

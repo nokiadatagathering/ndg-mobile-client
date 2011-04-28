@@ -21,7 +21,7 @@ public class UIUtils {
         item.setGrowByContent(false);
         item.setText(aText);
 
-        int pw = Display.getInstance().getDisplayWidth();
+        int pw = Display.getInstance().getDisplayWidth() - 10;// magic number, it should rather be set to width of margins+borders+padding
         int w = aFont.stringWidth(aText);
         if (w > pw) {
             item.setGrowByContent(true);

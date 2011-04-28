@@ -34,19 +34,19 @@ abstract public class StyleProxy {
 
     public void updateFonts() {
         if( selectedFont.getStyle() == Font.STYLE_PLAIN ) {
-            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM );
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_SMALL );
         } else if ( selectedFont.getStyle() == Font.STYLE_BOLD ) {
-            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_MEDIUM );
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_SMALL );
         } else if ( selectedFont.getStyle() == Font.STYLE_ITALIC) {
-            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_MEDIUM );
+            selectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_SMALL );
         }
 
         if( unselectedFont.getStyle() == Font.STYLE_PLAIN ) {
-            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM );
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_SMALL );
         } else if ( unselectedFont.getStyle() == Font.STYLE_BOLD ) {
-            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_MEDIUM );
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_SMALL );
         } else if ( unselectedFont.getStyle() == Font.STYLE_ITALIC) {
-            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_MEDIUM );
+            unselectedFont = NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANSBOLD, Font.SIZE_SMALL );
         }
     }
 }

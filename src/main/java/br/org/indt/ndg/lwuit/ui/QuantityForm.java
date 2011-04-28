@@ -25,15 +25,18 @@ public class QuantityForm extends Screen implements ActionListener {
     private static String title = Resources.CONDITION;
     private static String label;
     private static String otrText;
+
+    private final int CMD_CLEAR_ID = 256;
     private Command cmdOk;
+    private Command cmdClear;
+    private Command cmdDelete;
 
     private DescriptiveField tfDesc;
 
-    protected void loadData() {
-        cmdOk = new Command(br.org.indt.ndg.mobile.Resources.OK);
-    }
+    protected void loadData() {}
 
     protected void customize() {
+        cmdOk = new Command(br.org.indt.ndg.mobile.Resources.OK);
         dialog = new Dialog();
         dialog.setDialogStyle(NDGStyleToolbox.getInstance().menuStyle.getBaseStyle());
         dialog.getTitleComponent().setPreferredH( NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont.getHeight()
@@ -62,19 +65,32 @@ public class QuantityForm extends Screen implements ActionListener {
         dialog.addCommand(cmdOk);
         dialog.addCommandListener(this);
 
-        if(Display.getInstance().isTouchScreenDevice()) {
-            VirtualKeyboard vkExtendedOk= new VirtualKeyboard() {
-                //trigger cmdOK when 'OK' button is pressed on virtual keyboard
+        if ( Display.getInstance().isTouchScreenDevice() ) {
+            // 'delete' command overridden to make it's string localizable
+            cmdDelete = new Command(Resources.CMD_DELETE, VirtualKeyboard.DELETE_CHAR);
+            cmdClear = new Command(Resources.CMD_CLEAR, CMD_CLEAR_ID);
+            VirtualKeyboard vkb = new VirtualKeyboard() { // TODO move to separate class
                 protected void actionCommand(Command cmd) {
                     super.actionCommand(cmd);
                     if (cmd.getId() == OK) {
                         okPressed();
+                    } else if (cmd.getId() == QuantityForm.this.CMD_CLEAR_ID) {
+                        getInputField().clear(); // clears VrtKbrd input display
+                        clearPressed();
                     }
                 }
             };
-
-			//TODO add 'Clear' button to virtual keyboard if possible
-            VirtualKeyboard.bindVirtualKeyboard(tfDesc, vkExtendedOk);
+            String[][] ONLY_INT_WITH_CLEAR = new String[][]{
+            {"7", "8", "9"},
+            {"4", "5", "6"},
+            {"1", "2", "3"},
+            {"$Del$", "0", "$Clr$"},
+            {"$OK$"} };
+            vkb.addInputMode("NUM", ONLY_INT_WITH_CLEAR);
+            vkb.setInputModeOrder(new String[]{"NUM"});
+            vkb.addSpecialButton("Clr", cmdClear); // do NOT localize, it is only a identifier
+            vkb.addSpecialButton("Del", cmdDelete); // do NOT localize, it is only a identifier
+            VirtualKeyboard.bindVirtualKeyboard(tfDesc, vkb);
         }
 
         Style style = dialog.getSoftButtonStyle();
@@ -121,8 +137,12 @@ public class QuantityForm extends Screen implements ActionListener {
     }
 
     private void okPressed() {
-            SurveysControl.getInstance().setItemOtherText(tfDesc.getText());
-            otrText = tfDesc.getText();
-            dialog.dispose();
+        SurveysControl.getInstance().setItemOtherText(tfDesc.getText());
+        otrText = tfDesc.getText();
+        dialog.dispose();
+    }
+
+    private void clearPressed() {
+        tfDesc.clear();
     }
 }

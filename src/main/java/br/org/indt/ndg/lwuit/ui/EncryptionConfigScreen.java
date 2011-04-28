@@ -57,7 +57,7 @@ public class EncryptionConfigScreen extends Screen implements ActionListener, Ch
 
         TextArea questionName = UIUtils.createTextArea( Resources.ENCRYPTION_ENABLE,
                                                         NDGStyleToolbox.fontMedium );
-        questionName.getStyle().setFgColor( NDGStyleToolbox.getInstance().questionPreviewColor );
+        questionName.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
         form.addComponent(questionName);
 
         String[] choices = new String[2];
@@ -88,7 +88,7 @@ public class EncryptionConfigScreen extends Screen implements ActionListener, Ch
 
         passwordLabel = UIUtils.createTextArea( Resources.ENCRYPTION_WITH_PASSWORD,
                                                 NDGStyleToolbox.fontMedium );
-        passwordLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().questionPreviewColor );
+        passwordLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
         passwordLabel.setEditable(false);
         passwordLabel.setFocusable(false);
 
