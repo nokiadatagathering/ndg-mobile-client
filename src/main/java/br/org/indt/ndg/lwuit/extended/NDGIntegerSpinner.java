@@ -258,9 +258,10 @@ public class NDGIntegerSpinner extends Container implements FocusListener {
                 subValue(DECREASE_BY);
             } else if ( gameAction == Display.GAME_RIGHT ) {
                 addValue(INCREASE_BY);
-            } else {
-                super.keyPressed(keyCode);
-            }
+            } //else {
+//                super.keyPressed(keyCode);
+// Temporarily removing typed input, will only use the arrows on hw keyboard phones
+//            }
         }
     }
 }
