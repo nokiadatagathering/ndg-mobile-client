@@ -641,7 +641,10 @@ public class DownloadNewSurveys implements Runnable{
                     return;
                 }
                 for (;;) {
-                    conn = Connector.open(downloadUrl, Connector.READ);
+                    String urlValidated = fixParseError( downloadUrl );//this is a work around for parsing error
+                                                                       //MUST be investigated in the near future
+                                                                       //"?"(question marks) while parsing XML in XFormsSurveysListHandelr are removed form original string
+                    conn = Connector.open( urlValidated , Connector.READ);
 
                     if (isOperationCanceled()) {
                         break;
@@ -884,6 +887,18 @@ public class DownloadNewSurveys implements Runnable{
             } else {
                 cancelOperation();
                 removeInvalidSurveys();
+            }
+        }
+
+        private String fixParseError(String downloadUrl) {
+            if( downloadUrl.indexOf("ReceiveSurveys?do") >=0 ) {
+                return downloadUrl;//url seems to be OK
+            } else {
+                int start = downloadUrl.indexOf("ReceiveSurveys");
+                String url = downloadUrl.substring(0, start + "ReceiveSurveys".length() )
+                                            + "?"//missing question mark from parser
+                                            + downloadUrl.substring(start + "ReceiveSurveys".length() );
+                return url;
             }
         }
     }
