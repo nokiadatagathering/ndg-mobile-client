@@ -38,13 +38,15 @@ public class CheckBox extends com.sun.lwuit.CheckBox implements FocusListener {
     }
 
     public void focusGained(Component cmp) {
+        getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
+        getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
         getStyle().setBgPainter(focusBGPainter);
-        getStyle().setFont( NDGStyleToolbox.fontMediumBold );
     }
 
     public void focusLost(Component cmp) {
         getStyle().setBgPainter(bgPainter);
-        getStyle().setFont( NDGStyleToolbox.fontMedium );
+        getStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
+        getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
     }
 
     public void setOther(boolean _val) {

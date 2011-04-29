@@ -57,10 +57,12 @@ public class NDGIntegerSpinner extends Container implements FocusListener {
         m_valueDisplay.getSelectedStyle().setBgTransparency(0);
         m_increaseButton.getSelectedStyle().setBgTransparency(0);
         m_valueDisplay.getSelectedStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.selectedFontColor);
+        m_valueDisplay.getSelectedStyle().setFont(NDGStyleToolbox.getInstance().listStyle.selectedFont);
         m_decreaseButton.getUnselectedStyle().setBgTransparency(0);
         m_valueDisplay.getUnselectedStyle().setBgTransparency(0);
         m_increaseButton.getUnselectedStyle().setBgTransparency(0);
         m_valueDisplay.getUnselectedStyle().setFgColor(NDGStyleToolbox.getInstance().listStyle.unselectedFontColor);
+        m_valueDisplay.getUnselectedStyle().setFont(NDGStyleToolbox.getInstance().listStyle.unselectedFont);
         m_decreaseButton.setAlignment(CENTER);
         m_valueDisplay.setAlignment(CENTER);
         m_increaseButton.setAlignment(CENTER);

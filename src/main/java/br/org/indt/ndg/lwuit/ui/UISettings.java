@@ -107,11 +107,15 @@ public class UISettings extends Screen implements ActionListener, FocusListener,
     private void initUIComponents() {
         listSettings = new Container();
         listSettings.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        
+
         Label l1 = new Label( Resources.OBJECT );
+        l1.getStyle().setFont(NDGStyleToolbox.fontSmall);
+        l1.getSelectedStyle().setFont(NDGStyleToolbox.fontSmall);
         l1.setFocusable(false);
 
         Label l2 = new Label( Resources.ELEMENT );
+        l2.getStyle().setFont(NDGStyleToolbox.fontSmall);
+        l2.getSelectedStyle().setFont(NDGStyleToolbox.fontSmall);
         l2.setFocusable(false);
 
         comboObjects = new ComboBox();
@@ -142,12 +146,16 @@ public class UISettings extends Screen implements ActionListener, FocusListener,
         Container previewMainContainer = new Container( new BorderLayout() );
         Container previewContainer = new Container( new BoxLayout(BoxLayout.X_AXIS));
         selectedLabel = new Label( Resources.SELECTED );
+        selectedLabel.getStyle().setFont(NDGStyleToolbox.fontSmall);
+        selectedLabel.getSelectedStyle().setFont(NDGStyleToolbox.fontSmall);
         selectedLabel.setPreferredW( Display.getInstance().getDisplayWidth()/2 );
         selectedLabel.setAlignment(Container.CENTER);
         selectedLabel.getStyle().setBgTransparency(0xff);
         selectedLabel.setFocusable(false);
 
         unselectedLabel = new Label( Resources.UNSELECTED );
+        unselectedLabel.getStyle().setFont(NDGStyleToolbox.fontSmall);
+        unselectedLabel.getSelectedStyle().setFont(NDGStyleToolbox.fontSmall);
         unselectedLabel.setPreferredW( Display.getInstance().getDisplayWidth()/2 );
         unselectedLabel.setAlignment(Container.CENTER);
         selectedLabel.getStyle().setBgTransparency( 0xff );
@@ -156,6 +164,8 @@ public class UISettings extends Screen implements ActionListener, FocusListener,
         previewContainer.addComponent(selectedLabel);
         previewContainer.addComponent(unselectedLabel);
         Label preview = new Label( Resources.PREVIEW );
+        preview.getStyle().setFont(NDGStyleToolbox.fontSmall);
+        preview.getSelectedStyle().setFont(NDGStyleToolbox.fontSmall);
         preview.setAlignment(Component.CENTER);
         preview.setPreferredW( Display.getInstance().getDisplayWidth() );
         previewMainContainer.addComponent(BorderLayout.NORTH, preview );

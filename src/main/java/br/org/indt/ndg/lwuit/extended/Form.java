@@ -38,6 +38,13 @@ public class Form extends com.sun.lwuit.Form implements StyleListener {
         return menu.show( marginH,0, LEFT_MARGIN_OFFSET, marginW - LEFT_MARGIN_OFFSET, true );
     }
 
+    public void show() {
+        Style style = getSoftButtonStyle();
+        style.setFont( NDGStyleToolbox.getInstance().menuStyle.unselectedFont );
+        setSoftButtonStyle( style );
+        super.show();
+    }
+
     private int calculateMarginW( Dialog menuDialog ) {
          String longestDesc = "";
          for ( int i = 0; i< getCommandCount(); i++ ) {

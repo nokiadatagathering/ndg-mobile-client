@@ -17,37 +17,50 @@ public class PreviewStyleContainer {
 
     public PreviewStyleContainer() {
         listUnselectedStyle = new Style();
+        listUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
         listSelectedStyle = new Style();
+        listSelectedStyle.setFont(NDGStyleToolbox.fontSmall);
         menuUnselectedStyle = new Style();
+        menuUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
         menuSelectedStyle = new Style();
+        menuSelectedStyle.setFont(NDGStyleToolbox.fontSmall);
         dialogTitleUnselectedStyle = new Style();
+        dialogTitleUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
         dialogTitleSelectedStyle = new Style();
+        dialogTitleUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
     }
 
     public void init() {
         listUnselectedStyle = new Style( NDGStyleToolbox.getInstance().listStyle.getBaseStyle() );
         listUnselectedStyle.setBgTransparency(OPAQUE);
         listUnselectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        listUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
 
         listSelectedStyle = new Style( NDGStyleToolbox.getInstance().listStyle.getSelectedStyle() );
         listSelectedStyle.setBgTransparency(OPAQUE);
         listSelectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        listSelectedStyle.setFont(NDGStyleToolbox.fontSmall);
 
         menuUnselectedStyle = new Style( NDGStyleToolbox.getInstance().menuStyle.getBaseStyle() );
         menuUnselectedStyle.setBgTransparency(OPAQUE);
         menuUnselectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        menuUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
 
         menuSelectedStyle = new Style( NDGStyleToolbox.getInstance().menuStyle.getSelectedStyle() );
         menuSelectedStyle.setBgTransparency(OPAQUE);
         menuSelectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        menuSelectedStyle.setFont(NDGStyleToolbox.fontSmall);
 
         dialogTitleUnselectedStyle = new Style( NDGStyleToolbox.getInstance().dialogTitleStyle.getBaseStyle() );
         dialogTitleUnselectedStyle.setBgTransparency(OPAQUE);
         dialogTitleUnselectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        dialogTitleUnselectedStyle.setFont(NDGStyleToolbox.fontSmall);
 
         dialogTitleSelectedStyle = new Style( NDGStyleToolbox.getInstance().dialogTitleStyle.getSelectedStyle() );
         dialogTitleSelectedStyle.setBgTransparency(OPAQUE);
         dialogTitleSelectedStyle.setBorder( Border.createRoundBorder(1, 1, BLACK) );
+        dialogTitleSelectedStyle.setFont(NDGStyleToolbox.fontSmall);
+
         loadCurrentChanges();
     }
 

@@ -24,24 +24,23 @@ public class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
         Category category = (Category)value;
-
         Container centerContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
 
         categoryLabel = new Label(category.getName());
         categoryLabel.setIcon(null);
+        categoryLabel.getStyle().setPadding(0,0,0,0);
+        categoryLabel.getSelectedStyle().setPadding(0,0,0,0);
+        categoryLabel.getStyle().setMargin(0,0,0,0);
+        categoryLabel.getSelectedStyle().setMargin(0,0,0,0);
 
         questionsLabel = new Label(category.getQuestions().size() + (category.getQuestions().size() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION));
         questionsLabel.setIcon(null);
+        questionsLabel.getStyle().setPadding(0,0,0, 0);
+        questionsLabel.getSelectedStyle().setPadding(0,0,0,0);
+        questionsLabel.getStyle().setMargin(0,0,0,0);
+        questionsLabel.getSelectedStyle().setMargin(0,0,0,0);
 
         iconLabel = new Label("");
-
-        Dimension dQuestionsLabel = questionsLabel.getPreferredSize();
-        dQuestionsLabel.setHeight(dQuestionsLabel.getHeight()-8);
-        questionsLabel.setPreferredSize(dQuestionsLabel);
-
-        Dimension dcategoryLabel = categoryLabel.getPreferredSize();
-        dcategoryLabel.setHeight(dcategoryLabel.getHeight()-8);
-        categoryLabel.setPreferredSize(dcategoryLabel);
 
         if (isSelected) {
             setFocus(true);
@@ -49,10 +48,8 @@ public class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
             questionsLabel.setFocus(true);
             iconLabel.setFocus(true);
             categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.selectedFont );
-            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.selectedFont.getHeight() );
             categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont );
-            questionsLabel.setPreferredH(NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont.getHeight() );
             questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
             iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
@@ -63,9 +60,7 @@ public class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
             questionsLabel.setFocus(false);
             iconLabel.setFocus(false);
             categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.unselectedFont );
-            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.unselectedFont.getHeight() );
             questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont );
-            questionsLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont.getHeight() );
             categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
             iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);

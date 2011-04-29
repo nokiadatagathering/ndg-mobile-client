@@ -75,6 +75,7 @@ public class SelectStyleView extends Screen implements ActionListener, ChoiceGro
         AppMIDlet.getInstance().getSettings().getStructure().setStyleId(i);
         AppMIDlet.getInstance().getSettings().writeSettings();
         AppMIDlet.getInstance().initLWUIT();
+        form.show();
     }
 }
 

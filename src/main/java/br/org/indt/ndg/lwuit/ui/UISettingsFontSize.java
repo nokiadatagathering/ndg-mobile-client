@@ -115,6 +115,7 @@ public class UISettingsFontSize extends Screen implements ActionListener {
                 NDGStyleToolbox.getInstance().fontSizeSetting = NDGStyleToolbox.DEFAULT;
                 NDGStyleToolbox.getInstance().saveSettings();
                 NDGStyleToolbox.getInstance().loadSettings();
+                form.show();
                 return;
             } else if( cmd == smallFont ) {
                 defaultFont.setSelected(false);
@@ -148,6 +149,7 @@ public class UISettingsFontSize extends Screen implements ActionListener {
                                                     NDGStyleToolbox.getInstance().fontSmall =
                                                         newFont;
             NDGStyleToolbox.getInstance().saveSettings();
+            form.show();
         }
     }
 
