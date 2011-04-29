@@ -321,7 +321,7 @@ abstract class ContainerUI extends Container implements FocusListener {
     }
 
     public void focusLost(Component cmpnt) {
-        if(!cmpnt.getComponentForm().isVisible()){
+        if( cmpnt.getComponentForm() == null || !cmpnt.getComponentForm().isVisible()){
             return;
         }
 
