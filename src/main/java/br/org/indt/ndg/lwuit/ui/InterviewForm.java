@@ -280,7 +280,7 @@ public class InterviewForm extends Screen implements ActionListener {
 
 abstract class ContainerUI extends Container implements FocusListener {
 
-    protected TextArea mQuestionTextArea;
+    protected Component mQuestionTextArea;
     protected NDGQuestion mQuestion;
     protected NDGAnswer mAnswer;
 
@@ -301,7 +301,25 @@ abstract class ContainerUI extends Container implements FocusListener {
                                                         NDGStyleToolbox.getInstance().focusLostColor ));
         mQuestion  = aQuestion;
         mAnswer = aAnswer;
-        mQuestionTextArea = UIUtils.createQuestionName( mQuestion.getName() );
+        mQuestionTextArea = getWrappedQuestion( UIUtils.createQuestionName( mQuestion.getName() ) );
+    }
+
+    private Container getWrappedQuestion( TextArea aQuestion ) {
+        Container comp = new Container( new BoxLayout( BoxLayout.X_AXIS ) );
+        if( aQuestion.getActualRows() > 1 || aQuestion.getRows() > 1 ) {
+            String text = aQuestion.getText();
+            StringBuffer newText = new StringBuffer( );
+            for ( int i = 0; i < text.length( ); i++ ) {
+                if( text.charAt(i) == ' ' ) {
+                    newText.append( "  " );
+                } else {
+                    newText.append( text.charAt(i) );
+                }
+            }
+            aQuestion.setText( newText.toString() );
+        }
+        comp.addComponent(aQuestion);
+        return comp;
     }
 
     public NDGQuestion getQuestion() {
