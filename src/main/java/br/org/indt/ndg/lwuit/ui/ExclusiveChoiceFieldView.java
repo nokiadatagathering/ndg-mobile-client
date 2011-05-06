@@ -31,11 +31,15 @@ public class ExclusiveChoiceFieldView extends Screen implements ActionListener {
         cmdOk = new Command( Resources.OK );
         form.addCommand(cmdOk);
         form.addCommandListener(this);
+        form.addGameKeyListener(Display.GAME_UP, this);
         form.addGameKeyListener(Display.GAME_RIGHT, this);
         form.addGameKeyListener(Display.GAME_DOWN, this);
 
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         form.setScrollable(false);
+        form.setScrollableY(true);
+        form.setSmoothScrolling(true);
+        form.setCyclicFocus(false);
     }
 
     protected void loadData() {
@@ -48,7 +52,9 @@ public class ExclusiveChoiceFieldView extends Screen implements ActionListener {
 
     protected void customize() {
         setTitle(Resources.NEWUI_NOKIA_DATA_GATHERING, "");
-        mQuestionTextArea.setFocusable(false);
+        mQuestionTextArea.setFocusable(true);
+        mQuestionTextArea.setSelectedStyle(mQuestionTextArea.getUnselectedStyle());
+        mQuestionTextArea.setEditable(false);
         // pass model trough proxy
         final FilterProxyListModel proxyModel = new FilterProxyListModel(mDataModel);
         proxyModel.setMaxDisplay(-1); // Unlimited
@@ -66,7 +72,10 @@ public class ExclusiveChoiceFieldView extends Screen implements ActionListener {
         spacer.setFocusable(true);
         spacer.addFocusListener( new FocusListener() {
             public void focusGained(Component cmp) {
-                mChoiceList.requestFocus();
+                if ( mChoiceList.size() > 0 )
+                    mChoiceList.requestFocus();
+                else
+                    mExclusiveChoiceTextField.requestFocus();
             }
             public void focusLost(Component cmp) {}
         });
@@ -75,7 +84,6 @@ public class ExclusiveChoiceFieldView extends Screen implements ActionListener {
         mChoiceList.setNextFocusLeft(mExclusiveChoiceTextField);
         mChoiceList.setNextFocusRight(mChoiceList);
         mChoiceList.addActionListener(this);
-        mExclusiveChoiceTextField.setNextFocusUp(mExclusiveChoiceTextField);
 
         form.removeAll();
         form.addComponent(mQuestionTextArea);
@@ -94,12 +102,13 @@ public class ExclusiveChoiceFieldView extends Screen implements ActionListener {
                 mChoiceList.setHandlesInput(true);
             } else if ( mChoiceList.hasFocus() && evt.getKeyEvent() == Display.GAME_FIRE ) {
                 mChoiceList.setHandlesInput(true);
-            } else if ( mExclusiveChoiceTextField.hasFocus() &&
-                        evt.getKeyEvent() == Display.GAME_DOWN &&
-                        mChoiceList.size() > 0 )
-            { // pass focus to list only when non-empty
-                mExclusiveChoiceTextField.setHandlesInput(false);
-                mChoiceList.requestFocus();
+            } else if ( mExclusiveChoiceTextField.hasFocus() && mExclusiveChoiceTextField.handlesInput() ) {
+                if ( evt.getKeyEvent() == Display.GAME_DOWN && mChoiceList.size() > 0 )
+                { // pass focus to list only when non-empty
+                    mChoiceList.requestFocus();
+                } else if ( evt.getKeyEvent() == Display.GAME_UP ) {
+                    mQuestionTextArea.requestFocus();
+                }
             }
         }
     }
