@@ -59,6 +59,7 @@ public class QuantityForm extends Screen implements ActionListener {
         tfDesc.setInputModeOrder(new String[]{"123"});
         tfDesc.setEditable(true);
         tfDesc.setFocus(true);
+        tfDesc.clear();
         tfDesc.requestFocus();
         c.addComponent(tfDesc);
         dialog.addComponent(c);
