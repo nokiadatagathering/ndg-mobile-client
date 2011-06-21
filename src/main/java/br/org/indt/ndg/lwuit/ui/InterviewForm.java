@@ -191,9 +191,6 @@ public class InterviewForm extends Screen implements ActionListener {
             title2 = Resources.EDITING;
         }
         setTitle(title1, title2);
-        if( vContainers!= null && vContainers.size() > 0 ) {
-            ((ContainerUI)vContainers.elementAt(0)).requestFocus();
-        }
     }
 
     private void setModifiedInterview(boolean _val) {
@@ -265,6 +262,10 @@ public class InterviewForm extends Screen implements ActionListener {
         Object cmd = evt.getSource();
         if (cmd == BackInterviewFormCommand.getInstance().getCommand() ) {
             BackInterviewFormCommand.getInstance().execute(this);
+            if( vContainers != null && vContainers.size() > 0 ) {
+                form.scrollComponentToVisible((ContainerUI)vContainers.elementAt(0));             // Scroll back to the firt question
+                form.repaint();
+            }
         } else if ( cmd == AcceptQuestionListFormCommand.getInstance().getCommand() ){
             AcceptQuestionListFormCommand.getInstance().execute(this);
         } else if( cmd == OpenFileBrowserCommand.getInstance().getCommand() ) {
