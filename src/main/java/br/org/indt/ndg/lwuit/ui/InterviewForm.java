@@ -90,7 +90,7 @@ public class InterviewForm extends Screen implements ActionListener {
         form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         form.getContentPane().getStyle().setBorder(Border.createEmpty(), false);
         form.setScrollAnimationSpeed(100);
-        form.setFocusScrolling(true);
+        form.setFocusScrolling(false);
 
         Vector questions = SurveysControl.getInstance().getSelectedCategory().getQuestions();
 
