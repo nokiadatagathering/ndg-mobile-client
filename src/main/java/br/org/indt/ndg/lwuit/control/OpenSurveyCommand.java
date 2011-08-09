@@ -4,10 +4,10 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.ResultList;
 import br.org.indt.ndg.mobile.SurveyList;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
 /**
@@ -21,7 +21,7 @@ public class OpenSurveyCommand extends CommandControl {
     private static OpenSurveyCommand instance;
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_OPEN));
+        return new Command(Resources.CMD_OPEN);
     }
 
     public static OpenSurveyCommand getInstance() {
@@ -51,7 +51,7 @@ public class OpenSurveyCommand extends CommandControl {
 
             try { Thread.sleep(200); } catch (InterruptedException ex) { ex.printStackTrace(); }
 
-            System.out.println("Name: "+Resources.ROOT_DIR + AppMIDlet.getInstance().getFileSystem().getSurveyDirName() + Resources.SURVEY_NAME);
+            System.out.println("Name: "+ AppMIDlet.getInstance().getRootDir() + AppMIDlet.getInstance().getFileSystem().getSurveyDirName() + NdgConsts.SURVEY_NAME);
 
             boolean isValidSurvey = true;
             try {

@@ -6,6 +6,7 @@ import br.org.indt.ndg.lwuit.extended.ChoiceGroupListener;
 import br.org.indt.ndg.lwuit.extended.DateField;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.events.ActionEvent;
@@ -41,7 +42,7 @@ public class SelectDateFormatForm extends Screen implements ActionListener, Choi
 
         form.addCommand(BackToSettingsFormCommand.getInstance().getCommand());
 
-        String[] choices = new String[]{Resources.DDMMYYYY, Resources.MMDDYYYY};
+        String[] choices = new String[]{NdgConsts.DDMMYYYY, NdgConsts.MMDDYYYY};
         int id = AppMIDlet.getInstance().getSettings().getStructure().getDateFormatId();
 
         int selected = 0;

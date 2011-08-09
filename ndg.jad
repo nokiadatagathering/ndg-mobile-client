@@ -13,6 +13,8 @@ app-language: device-language
 app-msisdn: +12345678
 server-servlet_CheckForUpdate: ClientUpdate
 server-servlet_Context: /ndg-servlets/
+server-servlet_LanguageList: LanguageList
+server-servlet_Localization: LocalizationServing
 server-servlet_PostResults: PostResults
 server-servlet_PostResultsOpenRosa: PostResultsOpenRosa
 server-servlet_ReceiveSurveys: ReceiveSurveys

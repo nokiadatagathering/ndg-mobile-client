@@ -3,6 +3,7 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.control.BackToSurveyListCommand;
 import br.org.indt.ndg.lwuit.control.CommandControl;
 import br.org.indt.ndg.lwuit.control.GPSCommand;
+import br.org.indt.ndg.lwuit.control.OpenLangScreenCommand;
 import br.org.indt.ndg.lwuit.control.ResolutionSelectionViewCommand;
 import br.org.indt.ndg.lwuit.control.SelectDateFormatCommand;
 import br.org.indt.ndg.lwuit.control.SelectSettingsCommand;
@@ -34,7 +35,9 @@ public class SettingsForm extends Screen implements ActionListener{
         commandList.addElement( GPSCommand.getInstance() );
         commandList.addElement( ResolutionSelectionViewCommand.getInstance() );
         commandList.addElement( SelectStyleViewCommand.getInstance() );
-        commandList.addElement( SelectDateFormatCommand.getInstance());
+        commandList.addElement( SelectDateFormatCommand.getInstance() );
+        commandList.addElement( OpenLangScreenCommand.getInstance() );
+
 
         commandStringList = new Vector();
         for( int idx = 0; idx < commandList.size(); idx++){

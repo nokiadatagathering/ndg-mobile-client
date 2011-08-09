@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
-import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
 
@@ -24,7 +19,7 @@ public class MarkAllResultsCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_MARKALL));
+        return new Command(Resources.CMD_MARKALL);
     }
 
     protected void doAction(Object parameter) {

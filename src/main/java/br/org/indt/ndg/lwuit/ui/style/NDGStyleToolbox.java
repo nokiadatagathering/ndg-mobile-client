@@ -2,6 +2,8 @@ package br.org.indt.ndg.lwuit.ui.style;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.Screen;
+import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import com.sun.lwuit.Font;
@@ -89,7 +91,7 @@ public class NDGStyleToolbox {
     }
 
     public void saveSettings() {
-        String filename = Resources.ROOT_DIR + Resources.STYLE_FILE;
+        String filename = AppMIDlet.getInstance().getRootDir() + NdgConsts.STYLE_FILE;
 
         try {
             FileConnection connection = (FileConnection) Connector.open(filename);
@@ -133,7 +135,7 @@ public class NDGStyleToolbox {
             StyleHandler sh = new StyleHandler();
             sh.setStyleStructure(this);
             Parser parser = new Parser(sh);
-            parser.parseFileNoClose(Resources.ROOT_DIR + Resources.STYLE_FILE);
+            parser.parseFileNoClose(AppMIDlet.getInstance().getRootDir() + NdgConsts.STYLE_FILE);
             applayFontSetting();
         } catch (SAXException ex) {
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );

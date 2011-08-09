@@ -9,10 +9,10 @@ import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.NumericAnswer;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
-import br.org.indt.ndg.lwuit.ui.ResultList;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SortsKeys;
 import br.org.indt.ndg.mobile.Utils;
@@ -209,7 +209,7 @@ public class PersistenceManager {
             // Create directory for binaries
             String surveyDirname = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
             String surveyFilenameWithBinaries = "b_" + surveyFilename;
-            String surveyDirnameWithBinaries = Resources.ROOT_DIR + surveyDirname + surveyFilenameWithBinaries;
+            String surveyDirnameWithBinaries = AppMIDlet.getInstance().getRootDir() + surveyDirname + surveyFilenameWithBinaries;
             FileConnection directory = null;
             try {
                 directory = (FileConnection) Connector.open(surveyDirnameWithBinaries);
@@ -298,12 +298,12 @@ public class PersistenceManager {
             }
 
 
-            output.println("<title>" + AppMIDlet.getInstance().u2x(getResultDisplayName()) + "</title>");
+            output.println("<title>" + Utils.u2x(getResultDisplayName()) + "</title>");
 
             Vector/*<CategoryAnwser>*/ anwsers = mAnswers.getAllAnwsers();
             for( int i = 0; i< anwsers.size(); i++ ){
                 CategoryAnswer category = (CategoryAnswer)anwsers.elementAt(i);
-                output.print("<category " + "name=\"" + AppMIDlet.getInstance().u2x(category.getName() ) + "\" ");
+                output.print("<category " + "name=\"" + Utils.u2x(category.getName() ) + "\" ");
                 output.println("id=\"" + category.getId() + "\">");
                 for ( int subCat = 0; subCat < category.getSubcategoriesCount(); subCat++ ) {
                     /** Subcategory **/
@@ -371,7 +371,7 @@ public class PersistenceManager {
         String surveyDir = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
         String filename;
 
-        filename = Resources.ROOT_DIR + surveyDir + fname;
+        filename = AppMIDlet.getInstance().getRootDir() + surveyDir + fname;
         return filename;
     }
 

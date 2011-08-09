@@ -178,7 +178,7 @@ public class FileSystem {
 
         kParser kparser = new kParser();
         kparser.setFileSystemSurveyStructure(fsSurveyStructure);
-        kparser.parserSurveyFileInfo(root + _dirName + Resources.SURVEY_NAME);
+        kparser.parserSurveyFileInfo(root + _dirName + NdgConsts.SURVEY_NAME);
         setError(kparser.getError());
     }
 
@@ -378,9 +378,8 @@ public class FileSystem {
             while(filelist1.hasMoreElements()) {
                 dirName = (String) filelist1.nextElement();
                 fc2 = (FileConnection) Connector.open(root + dirName);
-                if (fc2.isDirectory() && (AppMIDlet.getInstance().isNdgDir(dirName) ||
-                                          AppMIDlet.getInstance().isXformDir(dirName))){//(dirName.startsWith("survey")  || dirName.startsWith("SURVEY") || dirName.startsWith("Survey")) ) {
-                    fc3 = (FileConnection) Connector.open(root + dirName + Resources.SURVEY_NAME);
+                if ( fc2.isDirectory() && (Utils.isNdgDir(dirName) || Utils.isXformDir(dirName)) ) {
+                    fc3 = (FileConnection) Connector.open(root + dirName + NdgConsts.SURVEY_NAME);
                     if (fc3.exists() ) {
                         this.loadSurveyInfo(dirName);
                     } else {

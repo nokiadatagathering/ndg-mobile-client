@@ -4,6 +4,7 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.Utils;
 import com.sun.lwuit.Command;
 import java.util.Date;
 
@@ -47,7 +48,7 @@ public class OpenResultCommand extends CommandControl {
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
                 AppMIDlet.getInstance().getFileSystem().setLocalFile(true);
 
-                if(AppMIDlet.getInstance().isCurrentDirXForm()){
+                if( Utils.isCurrentDirXForm() ){
                     AppMIDlet.getInstance().getFileStores().loadXFormResult();
                     AppMIDlet.getInstance().showInterview();
                 }else{

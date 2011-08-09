@@ -1,7 +1,9 @@
 
 package br.org.indt.ndg.mobile.settings;
 
+import br.org.indt.ndg.mobile.structures.Language;
 import java.util.Stack;
+import java.util.Vector;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -10,11 +12,13 @@ public class SettingsHandler extends DefaultHandler {
 
     private SettingsStructure structure;
     private Stack tagStack = new Stack();
+    private Vector languges = new Vector();
 
     public SettingsHandler() { }
 
     public void setSettingsStructure(SettingsStructure _structure) {
         this.structure = _structure;
+        structure.setLanguages(languges);
     }
 
     public void startDocument() throws SAXException { }
@@ -44,6 +48,10 @@ public class SettingsHandler extends DefaultHandler {
                 structure.setServerCompression(true);
             else
                 structure.setServerCompression(false);
+        }
+        else if(qName.equals("language"))
+        {
+            languges.addElement(new Language(attributes.getValue("name"), attributes.getValue("locale")));
         }
         else if (qName.equals("gps")) {
             if (attributes.getValue(attributes.getIndex("configured")).equals("yes"))

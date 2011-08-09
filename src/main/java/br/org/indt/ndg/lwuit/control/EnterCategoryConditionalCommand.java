@@ -2,7 +2,7 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
 /**
@@ -14,7 +14,7 @@ public class EnterCategoryConditionalCommand extends CommandControl {
     private static EnterCategoryConditionalCommand instance;
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_RESULTS));
+        return new Command( Resources.CMD_RESULTS );
     }
 
     protected void doAction(Object parameter) {

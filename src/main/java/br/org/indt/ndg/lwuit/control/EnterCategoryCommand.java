@@ -7,7 +7,6 @@ import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.lwuit.ui.QuantityForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
 /**
@@ -19,7 +18,7 @@ public class EnterCategoryCommand extends CommandControl {
     private static EnterCategoryCommand instance;
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_RESULTS));
+        return new Command(Resources.CMD_RESULTS );
     }
 
     protected void doAction(Object parameter) {

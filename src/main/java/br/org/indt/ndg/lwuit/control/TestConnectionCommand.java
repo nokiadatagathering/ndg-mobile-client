@@ -1,8 +1,8 @@
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.submit.TestConnection;
-import com.nokia.mid.appl.cmd.Local;
 
 public class TestConnectionCommand extends CommandControl {
 
@@ -15,7 +15,7 @@ public class TestConnectionCommand extends CommandControl {
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_TEST_CONNECTION));
+        return new Command(Resources.CMD_TEST_CONNECTION);
     }
 
     protected void doAction(Object parameter) {

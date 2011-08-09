@@ -3,9 +3,9 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.model.CheckableListModel;
 import br.org.indt.ndg.lwuit.ui.SentResultList;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.XmlResultFile;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -25,7 +25,7 @@ public class DeleteSentResultCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_DELETE));
+        return new Command(Resources.CMD_DELETE);
     }
 
     protected void doAction(Object parameter) {

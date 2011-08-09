@@ -6,6 +6,8 @@ import java.io.PrintStream;
 
 import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
+import br.org.indt.ndg.mobile.structures.Language;
+import java.util.Vector;
 
 /**
  * READ FIRST!
@@ -35,13 +37,17 @@ public class SettingsStructure {
     private static final int DEFAULT_DATE_FORMAT_ID = DateField.DDMMYYYY;
     private static final boolean DEFAULT_ENCRYPTION = false;
     private static final int DEFAULT_ENCRIPTION_CONFIGURED = 0;
+    private static final String DEFAULT_LANGUAGE_NAME = "Default (English)";
+    private static final String DEFAULT_LANGUAGE_LOCALE = "en-GB";
 
     private String server_normal_url;
     private String server_compress_url;
+    private String localization_serving_url;
     private String server_results_openrosa_url;
     private String receive_survey_url;
     private String update_check_url;
     private String register_imei_url;
+    private String language_list_url;
     private boolean compress_state = DEFAULT_USE_COMPRESSION;
 
     private int splash_time = DEFAULT_SPLASH_TIME;
@@ -59,8 +65,12 @@ public class SettingsStructure {
     private int encryptionConfigured = DEFAULT_ENCRIPTION_CONFIGURED;
     private boolean encryption = DEFAULT_ENCRYPTION;
 
-    private String language;
+    private String language = DEFAULT_LANGUAGE_NAME;
     private String appVersion;
+    private Language defaultLanguage = new Language(DEFAULT_LANGUAGE_NAME, DEFAULT_LANGUAGE_LOCALE);
+
+    private Vector languages = new Vector();
+
 
 
     public SettingsStructure() {
@@ -69,26 +79,26 @@ public class SettingsStructure {
 
     private void initializeDefaultRuntimeSettings() {
         String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
-        String defaultAppLanguage = AppMIDlet.getInstance().getDefaultAppLanguage();
-        String[] defaultServelts = AppMIDlet.getInstance().getDefaultServlets();
+        String[] defaultServlets = AppMIDlet.getInstance().getDefaultServlets();
 
-        server_normal_url = defaultServerUrl + defaultServelts[0] + defaultServelts[1];
-        server_compress_url = defaultServerUrl + defaultServelts[0] + defaultServelts[1];
-        server_results_openrosa_url = defaultServerUrl + defaultServelts[0] + defaultServelts[5];
-        receive_survey_url = defaultServerUrl + defaultServelts[0] + defaultServelts[2];
-        update_check_url = defaultServerUrl + defaultServelts[0] + defaultServelts[3];
-        register_imei_url = defaultServerUrl + defaultServelts[0] + defaultServelts[4];
-        language = defaultAppLanguage;
+        server_normal_url = defaultServerUrl + defaultServlets[0] + defaultServlets[1];
+        server_compress_url = defaultServerUrl + defaultServlets[0] + defaultServlets[1];
+        localization_serving_url = defaultServerUrl + defaultServlets[0] + defaultServlets[6];
+        language_list_url = defaultServerUrl + defaultServlets[0] + defaultServlets[7];
+        server_results_openrosa_url = defaultServerUrl + defaultServlets[0] + defaultServlets[5];
+        receive_survey_url = defaultServerUrl + defaultServlets[0] + defaultServlets[2];
+        update_check_url = defaultServerUrl + defaultServlets[0] + defaultServlets[3];
+        register_imei_url = defaultServerUrl + defaultServlets[0] + defaultServlets[4];
         appVersion = AppMIDlet.getInstance().getAppVersion();
+        languages.addElement(defaultLanguage);
     }
 
     public void createDefaultSettings(PrintStream _out) {
         String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
-        String defaultAppLanguage = AppMIDlet.getInstance().getDefaultAppLanguage();
-        String[] defaultServelts = AppMIDlet.getInstance().getDefaultServlets();
+        String[] defaultServlets = AppMIDlet.getInstance().getDefaultServlets();
 
         // Reset to default values
-        setLanguage(defaultAppLanguage);
+        setLanguage(defaultLanguage.getLocale());
         setRegisteredFlag(DEFAULT_IS_REGISTERED);
         setSplashTime(DEFAULT_SPLASH_TIME);
         setGpsConfigured(DEFAULT_GPS);
@@ -100,13 +110,16 @@ public class SettingsStructure {
         setDateFormatId(DEFAULT_DATE_FORMAT_ID);
         setEncryptionConfigured(DEFAULT_ENCRIPTION_CONFIGURED);
         setEncryption(DEFAULT_ENCRYPTION);
-        setServerUrl_Compress(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
-        setServerUrl_Normal(defaultServerUrl + defaultServelts[0] + defaultServelts[1]);
-        setServerUrl_ResultsOpenRosa(defaultServerUrl + defaultServelts[0] + defaultServelts[5]);
-        setReceiveSurveyURL(defaultServerUrl + defaultServelts[0] + defaultServelts[2]);
-        setUpdateCheckURL(defaultServerUrl + defaultServelts[0] + defaultServelts[3]);
-        setRegisterIMEIUrl(defaultServerUrl + defaultServelts[0] + defaultServelts[4]);
+        setServerUrl_Compress(defaultServerUrl + defaultServlets[0] + defaultServlets[1]);
+        setServerUrl_Normal(defaultServerUrl + defaultServlets[0] + defaultServlets[1]);
+        setServerUrl_ResultsOpenRosa(defaultServerUrl + defaultServlets[0] + defaultServlets[5]);
+        setReceiveSurveyURL(defaultServerUrl + defaultServlets[0] + defaultServlets[2]);
+        setUpdateCheckURL(defaultServerUrl + defaultServlets[0] + defaultServlets[3]);
+        setRegisterIMEIUrl(defaultServerUrl + defaultServlets[0] + defaultServlets[4]);
+        setLocalizationServingURL(defaultServerUrl + defaultServlets[0] + defaultServlets[6]);
+        setLanguageListURL(defaultServerUrl + defaultServlets[0] + defaultServlets[7]);
         setAppVersion(AppMIDlet.getInstance().getAppVersion());
+        languages.addElement(defaultLanguage);
 
         saveSettings(_out);
     }
@@ -126,6 +139,7 @@ public class SettingsStructure {
         writeStyleSettings(_out);
         writeLogSettings(_out);
         writeServerSettings(_out);
+        writeLanguageSettings(_out);
         writeVersionSettings(_out);
         writeDateFormatSettings(_out);
         writeEncryption(_out);
@@ -144,8 +158,28 @@ public class SettingsStructure {
         _out.println("<url_receive_survey>" + receive_survey_url + "</url_receive_survey>");
         _out.println("<url_update_check>" + update_check_url + "</url_update_check>");
         _out.println("<url_register_imei>" + register_imei_url + "</url_register_imei>");
+        _out.println("<url_localization_serving>" + localization_serving_url + "</url_localization_serving>");
+        _out.println("<url_language_list>" + language_list_url + "</url_language_list>");
 
         _out.println("</server>");
+    }
+
+    private void writeLanguageSettings(PrintStream _out) {
+        
+        if(languages != null)
+        {
+            _out.println("<languages>");
+            StringBuffer languageString = null;
+            for(int i = 0 ; i < languages.size(); i++)
+            {
+                languageString = new StringBuffer();
+                languageString.append("<language name=\"").append( ((Language)languages.elementAt(i)).getLangName());
+                languageString.append("\" locale= \"").append(((Language)languages.elementAt(i)).getLocale()).append("\"/>");
+                _out.println(languageString);
+            }
+            _out.println("</languages>");
+        }
+        
     }
 
     public void writeGpsSettings(PrintStream _out) {
@@ -200,10 +234,13 @@ public class SettingsStructure {
         return logSupport;
     }
 
-    void setLanguage(String _lang) {
+    public void setLanguage(String _lang) {
         language = _lang;
     }
     public String getLanguage() {
+        if(language == null || language.equals("")){
+            language = defaultLanguage.getLocale();
+        }
         return language;
     }
 
@@ -276,6 +313,25 @@ public class SettingsStructure {
 
     public String getReceiveSurveyURL(){
         return receive_survey_url;
+    }
+
+    public String getLocalizationServingURL()
+    {
+        return localization_serving_url;
+    }
+
+    public void setLocalizationServingURL(String url){
+        localization_serving_url = url;
+    }
+
+    public String getLanguageListURL()
+    {
+        return language_list_url;
+    }
+
+    public void setLanguageListURL(String url)
+    {
+        language_list_url = url;
     }
 
     public String getRegisterIMEIUrl() {
@@ -352,5 +408,18 @@ public class SettingsStructure {
 
     public void setEncryption(boolean encrypt) {
         encryption = encrypt;
+    }
+
+
+    public Vector getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(Vector languages) {
+        this.languages = languages;
+    }
+
+    public Language getDefaultLanguage(){
+        return defaultLanguage;
     }
 }

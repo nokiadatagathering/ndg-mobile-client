@@ -3,9 +3,9 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.ui.StatusScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.submit.SubmitServer;
 import br.org.indt.ndg.mobile.submit.SubmitResultRunnable;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import java.util.Vector;
 
@@ -32,7 +32,7 @@ public class SendResultNowCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_SEND));
+        return new Command(Resources.NEWUI_SEND_RESULTS);
     }
 
     protected void doAction(Object parameter) {

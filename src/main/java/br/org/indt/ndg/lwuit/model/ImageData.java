@@ -2,7 +2,7 @@ package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import br.org.indt.ndg.mobile.logging.Logger;
 import com.sun.lwuit.Image;
@@ -22,7 +22,7 @@ public class ImageData {
     final public static int THUMBNAIL_SIZE = 50;
 
     // This directory is used to store original images in case user decides to revert the changes
-    private String imgDir = Resources.ROOT_DIR
+    private String imgDir = AppMIDlet.getInstance().getRootDir()
                           + AppMIDlet.getInstance().getFileSystem().getSurveyDirName()
                           + "imgTmp/";
 
@@ -68,7 +68,7 @@ public class ImageData {
         String outPath = null;
         FileConnection fileout = null;
         try {
-            outPath = Resources.ROOT_DIR
+            outPath = AppMIDlet.getInstance().getRootDir()
                            + AppMIDlet.getInstance().getFileSystem().getSurveyDirName()
                            + "b_"
                            + AppMIDlet.getInstance().getFileSystem().getResultFilename()

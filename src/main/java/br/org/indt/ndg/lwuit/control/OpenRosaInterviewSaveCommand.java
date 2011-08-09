@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.control;
 
-import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.XFormsDocument;
 import com.sun.lwuit.Command;
 
@@ -14,7 +14,7 @@ public class OpenRosaInterviewSaveCommand extends CommandControl {
     private SaveResultsObserver saveObserver = null;
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_SAVE));
+        return new Command(Resources.CMD_SAVE);
     }
 
     public void setObserver(SaveResultsObserver observer){

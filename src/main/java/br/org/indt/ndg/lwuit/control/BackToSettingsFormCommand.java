@@ -2,7 +2,7 @@ package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.SettingsForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
-import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
 /**
@@ -20,7 +20,7 @@ public class BackToSettingsFormCommand extends BackCommand{
         return instance;
     }
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_BACK));
+        return new Command( Resources.NEWUI_BACK );
     }
 
     protected void doAction(Object parameter) {

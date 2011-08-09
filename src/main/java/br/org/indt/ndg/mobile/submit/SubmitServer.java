@@ -11,6 +11,7 @@ import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.ResultList;
 import br.org.indt.ndg.mobile.SurveyList;
@@ -125,9 +126,9 @@ public class SubmitServer {
         try {
             String surveyRoot = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
             // result without binary data (if there is no binary data in the survey then it is the complete result file)
-            String pathToSurveyWithoutBinary = Resources.ROOT_DIR + surveyRoot + _filename;
+            String pathToSurveyWithoutBinary = AppMIDlet.getInstance().getRootDir() + surveyRoot + _filename;
             // result with binary data (possibly big very file), is available only if binary data actually exists in the survey
-            String pathToSurveyWithData = Resources.ROOT_DIR + surveyRoot + "b_" + _filename + "/" + "b_" + _filename;
+            String pathToSurveyWithData = AppMIDlet.getInstance().getRootDir() + surveyRoot + "b_" + _filename + "/" + "b_" + _filename;
             // try to open file with binary data, if it does not exist open result without binary data
             fc = (FileConnection) Connector.open( pathToSurveyWithData );
             if ( fc.exists() ) {

@@ -1,9 +1,9 @@
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.SettingsForm;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 
 public class OkSimpleLocationCommand extends BackCommand {
 
@@ -16,7 +16,7 @@ public class OkSimpleLocationCommand extends BackCommand {
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_OK));
+        return new Command( Resources.NEW_IU_OK );
     }
 
     protected void doAction(Object parameter) {

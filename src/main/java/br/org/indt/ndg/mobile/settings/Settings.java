@@ -11,7 +11,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 
 public class Settings {
@@ -22,7 +22,7 @@ public class Settings {
     }
     
     public void writeSettings() {
-        String filename = Resources.ROOT_DIR + Resources.SETTINGS_FILE;
+        String filename = AppMIDlet.getInstance().getRootDir() + NdgConsts.SETTINGS_FILE;
         FileConnection fileConnection = null;
         OutputStream outputStream = null;
         PrintStream printStream = null;
@@ -80,12 +80,12 @@ public class Settings {
         sh.setSettingsStructure(settingsStructure);
 
         Parser parser = new Parser(sh);
-        parser.parseFile(Resources.ROOT_DIR + Resources.SETTINGS_FILE);
+        parser.parseFile(AppMIDlet.getInstance().getRootDir() + NdgConsts.SETTINGS_FILE);
     }
     
     private void deleteSettingsFile() {
         try {
-            FileConnection conn = (FileConnection) Connector.open(Resources.ROOT_DIR + Resources.SETTINGS_FILE);
+            FileConnection conn = (FileConnection) Connector.open(AppMIDlet.getInstance().getRootDir() + NdgConsts.SETTINGS_FILE);
             if(conn.exists()) {
                 conn.delete();
                 conn.close();
@@ -98,7 +98,7 @@ public class Settings {
     
     private void createSettingsFile() {
         try {
-            FileConnection conn = (FileConnection) Connector.open(Resources.ROOT_DIR + Resources.SETTINGS_FILE);
+            FileConnection conn = (FileConnection) Connector.open(AppMIDlet.getInstance().getRootDir() + NdgConsts.SETTINGS_FILE);
             if(!conn.exists()){
                 conn.create();
                 OutputStream outputStream = conn.openDataOutputStream();

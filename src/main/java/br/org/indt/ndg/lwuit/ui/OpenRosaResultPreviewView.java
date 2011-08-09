@@ -8,6 +8,7 @@ import br.org.indt.ndg.lwuit.control.SurveysControl;
 import br.org.indt.ndg.lwuit.ui.openrosa.OpenRosaResultWidgetFactory;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import com.nokia.xfolite.xforms.dom.UserInterface;
 import com.nokia.xfolite.xml.dom.WidgetFactory;
@@ -63,7 +64,7 @@ public class OpenRosaResultPreviewView extends OpenRosaScreen implements UserInt
         createXFormsDocument();
 
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        String file = Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME;
+        String file = AppMIDlet.getInstance().getRootDir() + dirName + NdgConsts.SURVEY_NAME;
         addResultData();
         load(file);
     }

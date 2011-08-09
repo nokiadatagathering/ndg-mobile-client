@@ -7,6 +7,7 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.StatusScreenDownload;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SurveyList;
 import br.org.indt.ndg.mobile.logging.Logger;
@@ -169,7 +170,7 @@ public class DownloadNewSurveys implements Runnable{
     }
 
     private void showListNewSurveys() throws Exception {
-        String filename = Resources.ROOT_DIR + Resources.NEW_SURVEYS_LIST;
+        String filename = AppMIDlet.getInstance().getRootDir() + NdgConsts.NEW_SURVEYS_LIST;
         FileConnection fconn = null;
         DataOutputStream out = null;
         DataInputStream dis = null;
@@ -850,11 +851,11 @@ public class DownloadNewSurveys implements Runnable{
             ByteArrayInputStream bais = new ByteArrayInputStream(surveyBytes);
             parser.parseInputStream(bais);
             String surveyID = getCurrentSurveyId();
-            FileConnection fconnDir = (FileConnection) Connector.open(Resources.ROOT_DIR + m_surveyDirPrefix + surveyID + "/");
+            FileConnection fconnDir = (FileConnection) Connector.open(AppMIDlet.getInstance().getRootDir() + m_surveyDirPrefix + surveyID + "/");
             if (!fconnDir.exists()) {
                 fconnDir.mkdir();
                 fconnDir.close();
-                FileConnection fconnSurvey = (FileConnection) Connector.open(Resources.ROOT_DIR + m_surveyDirPrefix + surveyID + "/" + Resources.SURVEY_NAME);
+                FileConnection fconnSurvey = (FileConnection) Connector.open(AppMIDlet.getInstance().getRootDir() + m_surveyDirPrefix + surveyID + "/" + NdgConsts.SURVEY_NAME);
                 if (!fconnSurvey.exists()) fconnSurvey.create();
                 else {
                     fconnSurvey.delete();
@@ -865,7 +866,7 @@ public class DownloadNewSurveys implements Runnable{
                 dos.flush();
                 dos.close();
                 fconnSurvey.close();
-                m_surveysDirFiles.put(Resources.ROOT_DIR + m_surveyDirPrefix + surveyID + "/", Resources.ROOT_DIR + m_surveyDirPrefix + surveyID + "/" + Resources.SURVEY_NAME);
+                m_surveysDirFiles.put(AppMIDlet.getInstance().getRootDir() + m_surveyDirPrefix + surveyID + "/", AppMIDlet.getInstance().getRootDir() + m_surveyDirPrefix + surveyID + "/" + NdgConsts.SURVEY_NAME);
             } else {
                 //The following surveys were not downloaded since they already exist in mobile.
                 m_notDownloadedSurveys += "\n"  + getCurrentSurveyTitle();
@@ -876,7 +877,7 @@ public class DownloadNewSurveys implements Runnable{
             if (!isOperationCanceled()) {
                 sendAck();
                 if (!isOperationCanceled()) {
-                    AppMIDlet.getInstance().setFileSystem(new FileSystem(Resources.ROOT_DIR));
+                    AppMIDlet.getInstance().setFileSystem(new FileSystem(AppMIDlet.getInstance().getRootDir()));
                     AppMIDlet.getInstance().setSurveyList(new SurveyList());
                     // Send Alert about now downloaded surveys
                     if (!m_notDownloadedSurveys.equals("")) {
@@ -909,7 +910,7 @@ public class DownloadNewSurveys implements Runnable{
 
 
         public NDGSurveyDownloader( String aUrlDownload ) {
-            super( new NDGSurveyHandler(), Resources.NDG_SURVEY_DIR_PREFIX, Resources.XML_TAG_END_SURVEY);
+            super( new NDGSurveyHandler(), NdgConsts.NDG_SURVEY_DIR_PREFIX, NdgConsts.XML_TAG_END_SURVEY);
             mUrlDownload = aUrlDownload;
         }
 
@@ -967,7 +968,7 @@ public class DownloadNewSurveys implements Runnable{
         private int m_currentIndex = 0;
 
         public XFormsSurveyDownloader( XFormSurvey[] surveys ) {
-            super(new XFormsSurveyHandler(), Resources.XFORMS_SURVEY_DIR_PREFIX, Resources.XFORMS_TAG_END_SURVEY);
+            super(new XFormsSurveyHandler(), NdgConsts.XFORMS_SURVEY_DIR_PREFIX, NdgConsts.XFORMS_TAG_END_SURVEY);
             if (surveys == null)
                 throw new NullPointerException(); // can't pass null
             m_surveys = surveys;

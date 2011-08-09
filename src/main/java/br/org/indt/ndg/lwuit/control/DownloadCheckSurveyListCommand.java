@@ -1,13 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.download.DownloadNewSurveys;
-import com.nokia.mid.appl.cmd.Local;
 
 public class DownloadCheckSurveyListCommand extends CommandControl {
 
@@ -20,7 +15,7 @@ public class DownloadCheckSurveyListCommand extends CommandControl {
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_DOWNLOAD));
+        return new Command( Resources.DOWNLOAD );
     }
 
     protected void doAction(Object parameter) {

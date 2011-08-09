@@ -89,12 +89,12 @@ public class FileStores {
 
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
 
-        if (AppMIDlet.getInstance().isXformDir(dirName)) {
+        if ( Utils.isXformDir(dirName) ) {
             surveyStructure.setTitle(AppMIDlet.getInstance().getFileSystem().getCurrentSurveyName());
         } else {
             kparser = new kParser();
             kparser.setSurveyStructure(surveyStructure);
-            kparser.parserSurveyFile(Resources.ROOT_DIR + dirName + Resources.SURVEY_NAME);
+            kparser.parserSurveyFile(AppMIDlet.getInstance().getRootDir() + dirName + NdgConsts.SURVEY_NAME);
         }
         SurveysControl.getInstance().setSurvey((Survey) surveyStructure);
     }
@@ -104,7 +104,7 @@ public class FileStores {
 
         String resultFileName = AppMIDlet.getInstance().getFileSystem().getResultFilename();
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        String resultPath = Resources.ROOT_DIR + dirName + resultFileName;
+        String resultPath = AppMIDlet.getInstance().getRootDir() + dirName + resultFileName;
         FileConnection fc;
         try {
             fc = (FileConnection) Connector.open(resultPath, Connector.READ);
@@ -154,7 +154,7 @@ public class FileStores {
 
         if (fileName!=null) {
             parser = new Parser(handler);
-            parser.parseFile(Resources.ROOT_DIR + dirName + fileName);
+            parser.parseFile(AppMIDlet.getInstance().getRootDir() + dirName + fileName);
         }
     }
 

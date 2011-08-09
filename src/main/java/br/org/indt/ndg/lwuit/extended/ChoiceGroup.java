@@ -5,6 +5,7 @@ import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.plaf.Style;
@@ -14,26 +15,30 @@ import com.sun.lwuit.plaf.UIManager;
  *
  * @author mluz
  */
-public class ChoiceGroup extends Container implements ActionListener {
+public class ChoiceGroup extends Container implements ActionListener, FocusListener {
     
     public static int EXCLUSIVE = 2;
     public static int MULTIPLE = 1;
-    private int type;
+    protected int type;
     private boolean[] marks; // for multiple choice only
-    private String[] texts;
-    private final Component[] choices;
-    private int selectedIndex; // for exclusive choice only
-    private ButtonGroup radioGroup; // for exclusive choice only
+    protected String[] texts;
+    protected final Component[] choices;
+    protected int selectedIndex; // for exclusive choice only
+    protected ButtonGroup radioGroup; // for exclusive choice only
     private ChoiceGroupListener cgListener;
+    private ChoiceGroupSelectionListener selectionListener;
 
     public void setCgListener(ChoiceGroupListener cgListener) {
         this.cgListener = cgListener;
     }
 
-    private ChoiceGroup( String texts[] ) {
+    public void setSelectionListener(ChoiceGroupSelectionListener listener){
+        selectionListener = listener;
+    }
+
+    protected ChoiceGroup( int textSize ) {
         super(new BoxLayout(BoxLayout.Y_AXIS));
-        this.texts = texts;
-        this.choices = new Component[texts.length];
+        this.choices = new Component[textSize];
         getStyle().setBgTransparency(255); // no transparency = solid
         getStyle().setBorder(Border.createRoundBorder(8, 8, UIManager.getInstance().getComponentStyle("RadioButton").getFgColor()));
         Style tfStyle = getStyle();
@@ -46,7 +51,8 @@ public class ChoiceGroup extends Container implements ActionListener {
      * Constructor for multiple choice
      **/
     public ChoiceGroup(String[] texts, boolean[] marks) {
-        this(texts);
+        this(texts.length);
+        this.texts = texts;
         this.type = MULTIPLE;
         this.marks = marks;
         initChoiceGroup();
@@ -56,7 +62,8 @@ public class ChoiceGroup extends Container implements ActionListener {
      * Constructor for multiple choice
      **/
     public ChoiceGroup(String[] texts, int selectedIndex) {
-        this(texts);
+        this(texts.length);
+        this.texts = texts;
         this.type = EXCLUSIVE;
         this.selectedIndex = selectedIndex;
         this.radioGroup = new ButtonGroup();
@@ -65,21 +72,28 @@ public class ChoiceGroup extends Container implements ActionListener {
 
     private void initChoiceGroup() {
         if (type == MULTIPLE) {
+            CheckBox checkBox = null;
             for (int i=0; i<texts.length; i++) {
-                choices[i] = new br.org.indt.ndg.lwuit.extended.CheckBox(texts[i]);
-                addComponent(choices[i]);
-                ((br.org.indt.ndg.lwuit.extended.CheckBox)choices[i]).setSelected(marks[i]);
-                ((br.org.indt.ndg.lwuit.extended.CheckBox)choices[i]).addActionListener(this);
+                checkBox = new CheckBox(texts[i]);
+                
+                choices[i] = checkBox;
+                checkBox.setSelected(marks[i]);
+                checkBox.addActionListener(this);
+                checkBox.addFocusListener(this);
+                addComponent(checkBox);
             }
         } else if (type == EXCLUSIVE) {
+            RadioButton radioButton = null;
             for (int i=0; i<texts.length; i++) {
-                choices[i] = new br.org.indt.ndg.lwuit.extended.RadioButton(texts[i]);
-                addComponent(choices[i]);
+                radioButton = new RadioButton(texts[i]);
+
+                choices[i] = radioButton;
                 if (i == selectedIndex)
-                    ((br.org.indt.ndg.lwuit.extended.RadioButton)choices[i]).setSelected(true);
-                ((br.org.indt.ndg.lwuit.extended.RadioButton)choices[i]).addActionListener(this);
-                radioGroup.add(((br.org.indt.ndg.lwuit.extended.RadioButton)choices[i]));
-                ((RadioButton)choices[i]).addActionListener(this);
+                    radioButton.setSelected(true);
+                radioButton.addActionListener(this);
+                radioButton.addFocusListener(this);
+                radioGroup.add(radioButton);
+                addComponent(radioButton);
             }
         }
     }
@@ -175,4 +189,25 @@ public class ChoiceGroup extends Container implements ActionListener {
         return choices[choices.length-1];
     }
 
+    public void focusGained(Component cmpnt) {
+        for (int idx = 0; idx < choices.length; idx++) {
+            if(selectionListener != null && choices[idx] == cmpnt){
+                selectionListener.itemSelected(idx);
+                return;
+            }
+        }
+    }
+
+    public void focusLost(Component cmpnt) {
+        //do nothing
+    }
+
+    public int getFocusedIndex(){
+        for (int idx = 0; idx < choices.length; idx++) {
+            if(choices[idx].hasFocus()){
+                return idx;
+            }
+        }
+        return -1;
+    }
 }

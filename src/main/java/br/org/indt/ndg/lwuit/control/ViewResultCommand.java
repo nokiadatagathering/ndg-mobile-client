@@ -7,6 +7,7 @@ import br.org.indt.ndg.lwuit.ui.OpenRosaResultPreviewView;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.Utils;
 import com.sun.lwuit.Command;
 
 /**
@@ -47,7 +48,7 @@ public class ViewResultCommand extends CommandControl {
             try { Thread.sleep(200); } catch(Exception e){}
             if (AppMIDlet.getInstance().getFileSystem().getResultFilename() != null) {
 
-                if(AppMIDlet.getInstance().isCurrentDirXForm()){
+                if ( Utils.isCurrentDirXForm() ) {
                     AppMIDlet.getInstance().getFileStores().loadXFormResult();
                     AppMIDlet.getInstance().setDisplayable(OpenRosaResultPreviewView.class);
                 }else{

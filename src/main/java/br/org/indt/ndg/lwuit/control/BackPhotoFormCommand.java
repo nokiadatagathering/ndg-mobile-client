@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.multimedia.Camera;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
 /**
@@ -28,7 +23,7 @@ public class BackPhotoFormCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_BACK));
+        return new Command( Resources.NEWUI_BACK );
     }
 
     protected void doAction(Object parameter) {

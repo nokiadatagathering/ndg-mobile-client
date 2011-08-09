@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package br.org.indt.ndg.lwuit.control;
 
 import br.org.indt.ndg.lwuit.ui.GpsForm;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Resources;
 
 public class BackSimpleLocationCommand extends BackCommand{
 
@@ -21,7 +16,7 @@ public class BackSimpleLocationCommand extends BackCommand{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_BACK));
+        return new Command( Resources.NEWUI_BACK );
     }
 
     protected void doAction(Object parameter) {

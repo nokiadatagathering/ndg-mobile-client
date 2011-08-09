@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,8 +13,8 @@ import java.util.Date;
 public class DateQuestion extends NDGQuestion {
 
     private static final int MIDNIGHT = 24;
-    private long low = Resources.NOENTRY;
-    private long high = Resources.NOENTRY;
+    private long low = NdgConsts.NOENTRY;
+    private long high = NdgConsts.NOENTRY;
 
     private long parseDateLow(String _date) {  //date format is day/month/year ex: 24/12/2007
 
@@ -54,7 +55,7 @@ public class DateQuestion extends NDGQuestion {
             high = parseDateHigh(_date);
         }
         catch(RuntimeException re){
-            high = Resources.NOENTRY;
+            high = NdgConsts.NOENTRY;
         }
     }
 
@@ -63,12 +64,12 @@ public class DateQuestion extends NDGQuestion {
             low = parseDateLow(_date);
         }
         catch(RuntimeException re){
-            low = Resources.NOENTRY;
+            low = NdgConsts.NOENTRY;
         }
     }
 
     private boolean passLowConstraint( long value ) {
-       if (low == Resources.NOENTRY) return true;
+       if (low == NdgConsts.NOENTRY) return true;
        else {
            if (value >= low) return true;
            else {
@@ -80,7 +81,7 @@ public class DateQuestion extends NDGQuestion {
     }
 
     private boolean passHighConstraint( long value ) {
-        if (high == Resources.NOENTRY) return true;
+        if (high == NdgConsts.NOENTRY) return true;
         else {
             if (value <= high) return true;
             else {

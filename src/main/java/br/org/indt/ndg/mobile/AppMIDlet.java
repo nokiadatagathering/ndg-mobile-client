@@ -12,7 +12,6 @@ import javax.microedition.midlet.MIDletStateChangeException;
 import javax.microedition.location.Location;
 import br.org.indt.ndg.mobile.settings.Settings;
 import br.org.indt.ndg.mobile.settings.LocationHandler;
-import br.org.indt.ndg.mobile.xmlhandle.Conversor;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.lwuit.ui.SplashScreen;
 import br.org.indt.ndg.lwuit.ui.camera.ICameraManager;
@@ -23,14 +22,14 @@ import com.sun.lwuit.Display;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.impl.midp.VKBImplementationFactory;
 import com.sun.lwuit.plaf.UIManager;
-import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.location.Coordinates;
 import javax.microedition.location.LocationProvider;
-import javax.microedition.media.Manager;
-import javax.microedition.media.Player;
 
 public class AppMIDlet extends MIDlet {
 
@@ -43,7 +42,6 @@ public class AppMIDlet extends MIDlet {
     private Resources resources = null;
 
     private Settings settings = null;
-    private Conversor unicode = null;
 
     private LocationHandler locationHandler = null;
     private SubmitServer submitServer;
@@ -52,178 +50,55 @@ public class AppMIDlet extends MIDlet {
 
     private ICameraManager currentCameraManager;
 
-    private String imei = "9999";
+    private String imei = "999966669999";
 
     private byte[] key = null;
 
+    private String rootDir = null;
+
     public AppMIDlet() throws Exception {
         instance = this;
-    }
-
-    public LocationHandler getLocationHandler() {
-        return this.locationHandler;
-    }
-
-    public Location getLocation() {
-        if (locationHandler == null) return null;
-        else return locationHandler.getLocation();
-    }
-
-    public boolean locationObtained(){
-        return locationHandler.locationObtained();
-    }
-
-    public Coordinates getCoordinates() {
-        if (getLocation() == null) return null;
-        else return getLocation().getQualifiedCoordinates();
     }
 
     public static AppMIDlet getInstance() {
         return instance;
     }
 
-    public void setIMEI() {
-        imei = System.getProperty("com.nokia.mid.imei");
-        //imei = "9999";
-    } 
-
-    public String getIMEI() {
-        return imei;
+    protected void startApp() throws MIDletStateChangeException {
+        init(true);
     }
 
-    public String getAppVersion() {
-        return getAppProperty("MIDlet-Version");
-    }
+    protected void pauseApp() {}
 
-    public String getDefaultServerUrl() {
-        return getAppProperty("server-url");
-    }
-
-    public String getDefaultAppLanguage() {
-        return getAppProperty("app-language");
-    }
-
-    public String getAppMsisdn() {
-        return getAppProperty("app-msisdn");
-    }
-
-    public String[] getDefaultServlets() {
-        return new String[] {
-            getAppProperty("server-servlet_Context"),
-            getAppProperty("server-servlet_PostResults"),
-            getAppProperty("server-servlet_ReceiveSurveys"),
-            getAppProperty("server-servlet_CheckForUpdate"),
-            getAppProperty("server-servlet_RegisterIMEI"),
-            getAppProperty("server-servlet_PostResultsOpenRosa")
-        };
-    }
-
-    public void setTimeTracker(long _time) {
-        timeTracker = _time;
-    }
-
-    public long getTimeTracker() {
-        return timeTracker;
-    }
-
-    public SurveyList getSurveyList() {
-        return surveyList;
-    }
-
-    public void setSurveyList(SurveyList _list) {
-        surveyList = _list;
-    }
-
-    public void setSubmitServer( SubmitServer _submitServer ) {
-       this.submitServer = _submitServer;
-    }
-
-    public SubmitServer getSubmitServer()
-    {
-        return submitServer;
-    }
-
-    public ResultList getResultList() {
-        return resultList;
-    }
-
-    public void setResultList(ResultList _list) {
-        resultList = _list;
-    }
-
-    public FileSystem getFileSystem() {
-        return fileSystem;
-    }
-
-    public void setFileSystem(FileSystem _fs) {
-        fileSystem = _fs;
-    }
-
-    public void setSettings(Settings _settings) {
-        settings = _settings;
-    }
-
-    public Settings getSettings() {
-        return settings;
-    }
-
-    public FileStores getFileStores() {
-        return fileStores;
-    }
-
-    public String x2u(String _value) {
-        return unicode.xml2uni(_value);
-    }
-
-    public String u2x(String _value) {
-        return unicode.uni2xml(_value);
-    }
-
-    public void setKey(byte[] keyByte) {
-        key = keyByte;
-    }
-
-    public byte[] getKey() {
-        return key;
-    }
-
-    private void writeIMEIToFileSystem(){
-        try {
-            FileConnection con = (FileConnection) Connector.open(Resources.ROOT_DIR + "imei");
-            if (!con.exists()){
-                con.create();
-                DataOutputStream out = con.openDataOutputStream();
-                try{
-                    out.write(imei.getBytes("UTF-8"));
-                    out.flush();
-                }
-                catch(Exception e){
-                    Logger.getInstance().emul("", "IMEI is null when running in emulator. Relax.");
-                }
-                out.close();
-                con.close();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    public void destroyApp(boolean unconditional) throws MIDletStateChangeException {
+        if ( locationHandler != null )
+            locationHandler.disconnect();
+        locationHandler = null;
+        surveyList = null;
+        resultList = null;
+        resources = null;
+        fileSystem = null;
+        fileStores = null;
+        settings = null;
+        notifyDestroyed();
     }
 
     public void init(boolean showSplashScreen) {
-        VKBImplementationFactory.init();    //virtual keyboard will be shown on touch devices
+        VKBImplementationFactory.init(); // virtual keyboard will be shown on touch devices
         Display.init(this);
         if (showSplashScreen) {
             new SplashScreen().show();
         }
+        settings = new Settings();
+        Localization.initLocalizationSupport();
         resources = new Resources();
         locationHandler = new LocationHandler();
+        
         initLWUIT();
 
-        this.setIMEI();
+        setIMEI();
 
-        writeIMEIToFileSystem();
-
-        unicode = new Conversor();
-        fileSystem = new FileSystem(Resources.ROOT_DIR);
+        fileSystem = new FileSystem(AppMIDlet.getInstance().getRootDir());
         fileStores = new FileStores();
         registerApp();
     }
@@ -233,7 +108,6 @@ public class AppMIDlet extends MIDlet {
         // When creating a new font in a resource file, this charset must be used
         // jABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz0123456789.,;:!@/\*()[]{}|#$%^&<>?'"+- _`~¡¿¤§=£¥€ÀÁÂÃÄĄÅÇĆÈÉÊĘÌÍŁÑŃŚŠÒÓÔÕÖÙÚÜŻŹŽàáâãäąåçćèéêęìíłñńśšòóôõöùúüżźž÷
         Hashtable i18n = new Hashtable();
-        //com.sun.lwuit.Display.init(this);//moved to app start to speed up resource loading
         i18n.put("menu", Resources.NEWUI_OPTIONS);
         i18n.put("select", Resources.NEWUI_SELECT);
         i18n.put("cancel", Resources.NEWUI_CANCEL);
@@ -242,19 +116,13 @@ public class AppMIDlet extends MIDlet {
         try {
             com.sun.lwuit.util.Resources res = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/NDG.res");
             Screen.setRes(res);
-            if( !isS40() ) {
-                Screen.setFontRes( com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/fonts.res") );
+            if( !Utils.isS40() ) {
+                Screen.setFontRes( createResourceFromFile() );
             }
             NDGLookAndFeel ndgLF = new NDGLookAndFeel();
             // checkbox
             ndgLF.setCheckBoxImages(res.getImage("checked"), res.getImage("unchecked"));
             ndgLF.setRadioButtonImages(res.getImage("radioon"), res.getImage("radiooff"));
-            //Style style = UIManager.getInstance().getComponentStyle("Dialog");
-            //style.setBorder(Border.createEmpty());
-            //style = UIManager.getInstance().getComponentStyle("DialogTitle");
-            //style.setBorder(Border.createEmpty());
-            //style = UIManager.getInstance().getComponentStyle("DialogBody");
-            //style.setBorder(Border.createEmpty());
             UIManager.getInstance().setLookAndFeel(ndgLF);
             NDGLookAndFeel.setDefaultFormTransitionInForward();
             NDGLookAndFeel.setDefaultDialogTransitionInAndOut();
@@ -290,32 +158,35 @@ public class AppMIDlet extends MIDlet {
         }
     }
 
-    public void destroy() {
-        if (locationHandler != null) locationHandler.disconnect();
-        locationHandler = null;
-        surveyList = null;
-        resultList = null;
-        resources = null;
-        fileSystem = null;
-        fileStores = null;
-        unicode = null;
-        settings = null;
-    }
+    private com.sun.lwuit.util.Resources createResourceFromFile(){
+        FileConnection conn = null;
+        InputStream stream = null;
+        com.sun.lwuit.util.Resources fontRes = null;
 
-    protected void startApp() throws MIDletStateChangeException {
-        init(true);
-    }
+        String langLocale = getSettings().getStructure().getLanguage().substring(0, 2);
+        String resFile = AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR + NdgConsts.FONTS_FILE_NAME + langLocale + NdgConsts.RES_EXTENSION;
 
-    public void setDisplayable( Class c ) {
-        Screen.show( c, true);
-    }
-
-    protected void pauseApp() {
-    }
-
-    public void destroyApp(boolean unconditional) throws MIDletStateChangeException {
-        destroy();
-        notifyDestroyed();
+        try {
+            conn = (FileConnection) Connector.open( resFile );
+            if(conn.exists()){
+                fontRes = com.sun.lwuit.util.Resources.open(conn.openInputStream());
+            }else{
+                fontRes = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/fonts.res");
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally{
+            try{
+                if(stream != null){
+                    stream.close();
+                }
+                if(conn != null){
+                    conn.close();
+                }
+            }catch(IOException ex){
+            }
+        }
+        return fontRes;
     }
 
     public void registerApp() {
@@ -358,33 +229,135 @@ public class AppMIDlet extends MIDlet {
         }
     }
 
+    public void setDisplayable( Class c ) {
+        Screen.show( c, true);
+    }
+
     public void showInterview() {
         String dirName = AppMIDlet.getInstance().getFileSystem().getSurveyDirName();
-        if(isNdgDir(dirName)){
+        if ( Utils.isNdgDir(dirName) ) {
             SurveysControl.getInstance().setSurveyChanged(false);
             AppMIDlet.getInstance().setDisplayable(br.org.indt.ndg.lwuit.ui.CategoryList.class);
-        }else if(isXformDir(dirName)){
+        } else if ( Utils.isXformDir(dirName) ) {
             AppMIDlet.getInstance().setDisplayable(OpenRosaInterviewForm.class);
         }
     }
 
-    public boolean isNdgDir(String surveyDirName){
-        if(surveyDirName.substring(0, 6).equalsIgnoreCase(Resources.SURVEY)){
-            return true;
-        } else{
-            return false;
-        }
-    }
-    public boolean isXformDir(String surveyDirName){
-        if(surveyDirName.substring(0, 5).equalsIgnoreCase(Resources.XFORM)){
-            return true;
-        } else{
-            return false;
-        }
+
+    public LocationHandler getLocationHandler() {
+        return this.locationHandler;
     }
 
-    public boolean isCurrentDirXForm(){
-        return isXformDir(AppMIDlet.getInstance().getFileSystem().getSurveyDirName());
+    public Location getLocation() {
+        if ( locationHandler == null )
+            return null;
+        else
+            return locationHandler.getLocation();
+    }
+
+    public Coordinates getCoordinates() {
+        if ( getLocation() == null )
+            return null;
+        else
+            return getLocation().getQualifiedCoordinates();
+    }
+
+    public boolean locationObtained(){
+        return locationHandler.locationObtained();
+    }
+
+    public void setIMEI() {
+        imei = System.getProperty("com.nokia.mid.imei"); // is null on emulator
+        imei = "999966669999";
+    }
+
+    public String getIMEI() {
+        return imei;
+    }
+
+    public String getAppVersion() {
+        return getAppProperty("MIDlet-Version");
+    }
+
+    public String getDefaultServerUrl() {
+        return getAppProperty("server-url");
+    }
+
+    public String getAppMsisdn() {
+        return getAppProperty("app-msisdn");
+    }
+
+    public String[] getDefaultServlets() {
+        return new String[] {
+            getAppProperty("server-servlet_Context"),
+            getAppProperty("server-servlet_PostResults"),
+            getAppProperty("server-servlet_ReceiveSurveys"),
+            getAppProperty("server-servlet_CheckForUpdate"),
+            getAppProperty("server-servlet_RegisterIMEI"),
+            getAppProperty("server-servlet_PostResultsOpenRosa"),
+            getAppProperty("server-servlet_Localization"),
+            getAppProperty("server-servlet_LanguageList")
+        };
+    }
+
+    public void setTimeTracker(long _time) {
+        timeTracker = _time;
+    }
+
+    public long getTimeTracker() {
+        return timeTracker;
+    }
+
+    public void setSurveyList(SurveyList _list) {
+        surveyList = _list;
+    }
+
+    public SurveyList getSurveyList() {
+        return surveyList;
+    }
+
+    public void setResultList(ResultList _list) {
+        resultList = _list;
+    }
+
+    public ResultList getResultList() {
+        return resultList;
+    }
+
+    public void setSubmitServer( SubmitServer _submitServer ) {
+       this.submitServer = _submitServer;
+    }
+
+    public SubmitServer getSubmitServer() {
+        return submitServer;
+    }
+
+    public FileStores getFileStores() {
+        return fileStores;
+    }
+
+    public void setFileSystem(FileSystem _fs) {
+        fileSystem = _fs;
+    }
+
+    public FileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setSettings(Settings _settings) {
+        settings = _settings;
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setKey(byte[] keyByte) {
+        key = keyByte;
+    }
+
+    public byte[] getKey() {
+        return key;
     }
 
     public void setCurrentCameraManager(ICameraManager manager){
@@ -395,16 +368,56 @@ public class AppMIDlet extends MIDlet {
         return currentCameraManager;
     }
 
-    private boolean isS40() {
-        boolean s40 = false;
-        try {
-            Player player = Manager.createPlayer("capture://image");
-            player.deallocate();
-            player.close();
-            s40 = true;
-        } catch( Exception ex ) {
-            s40 = false;
+    public String getRootDir(){
+        if(rootDir == null){
+            setRootDir();
         }
-        return s40;
+        return rootDir;
     }
+
+    private void setRootDir() {
+        boolean sunWTKEmulator = false;
+        Enumeration e = FileSystemRegistry.listRoots();
+        while(e.hasMoreElements()){
+            String drive = (String) e.nextElement();
+            if (drive.equals("root1/")){
+                sunWTKEmulator = true;
+                break;
+            }
+        }
+
+        String cardDir = "";
+        String phoneDir = "";
+        if(sunWTKEmulator){
+            cardDir = "file:///root1/ndg/";
+            phoneDir = "file:///root1/ndg/";
+        }
+        else{
+            cardDir = System.getProperty("fileconn.dir.memorycard") + "ndg/";
+            phoneDir = System.getProperty("fileconn.dir.photos") + "ndg/";
+        }
+
+        FileConnection fc;
+        try {
+            fc = (FileConnection) Connector.open(cardDir);
+            if (!fc.exists()){
+                fc.mkdir();
+            }
+            rootDir = cardDir;
+            fc.close();
+        }
+        catch (IOException ioe) {
+           try {
+                fc = (FileConnection) Connector.open(phoneDir);
+                if (!fc.exists())
+                    fc.mkdir();
+                rootDir = phoneDir;
+                fc.close();
+            }
+            catch (IOException ioe2) {
+            }
+        }
+    }
+
+
 }

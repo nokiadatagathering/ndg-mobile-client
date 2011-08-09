@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.control;
 
-import com.nokia.mid.appl.cmd.Local;
+import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Command;
 
 /**
@@ -19,7 +19,7 @@ public class SelectSettingsCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_SELECT));
+        return new Command( Resources.NEWUI_SELECT );
     }
 
     protected void doAction(Object parameter) {

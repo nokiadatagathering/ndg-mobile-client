@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,9 +12,9 @@ public class TimeQuestion extends NDGQuestion {
     public static final int AM = 1;
     public static final int PM = 2;
 
-    private long low = Resources.NOENTRY; // definição dos limites MIN e MAX.
-    private long high = Resources.NOENTRY;
-    private long convention = Resources.NOENTRY;
+    private long low = NdgConsts.NOENTRY; // definição dos limites MIN e MAX.
+    private long high = NdgConsts.NOENTRY;
+    private long convention = NdgConsts.NOENTRY;
     private long am_pm = -1;
 
     private long parseDateLow(String _date) {  //timer format is hours:min ex: 01:30
@@ -53,7 +54,7 @@ public class TimeQuestion extends NDGQuestion {
             high = parseTimeHigh(_date);
         }
         catch(RuntimeException re){
-            high = Resources.NOENTRY;
+            high = NdgConsts.NOENTRY;
         }
     }
 
@@ -62,7 +63,7 @@ public class TimeQuestion extends NDGQuestion {
             low = parseDateLow(_date);
         }
         catch(RuntimeException re){
-            low = Resources.NOENTRY;
+            low = NdgConsts.NOENTRY;
         }
     }
 
@@ -71,7 +72,7 @@ public class TimeQuestion extends NDGQuestion {
             convention = Integer.parseInt(_time);
         }
         catch(Exception re){
-            convention = Resources.NOENTRY;
+            convention = NdgConsts.NOENTRY;
         }
     }
 
@@ -84,7 +85,7 @@ public class TimeQuestion extends NDGQuestion {
     }
 
     private boolean passLowConstraint( long value ) {
-       if (low == Resources.NOENTRY) return true;
+       if (low == NdgConsts.NOENTRY) return true;
        else {
            if (value >= low) return true;
            else {
@@ -96,7 +97,7 @@ public class TimeQuestion extends NDGQuestion {
     }
 
     private boolean passHighConstraint( long value ) {
-        if (high == Resources.NOENTRY) return true;
+        if (high == NdgConsts.NOENTRY) return true;
         else {
             if (value <= high) return true;
             else {

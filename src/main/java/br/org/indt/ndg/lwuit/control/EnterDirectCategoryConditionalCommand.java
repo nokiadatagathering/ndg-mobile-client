@@ -3,10 +3,8 @@ package br.org.indt.ndg.lwuit.control;
 import br.org.indt.ndg.lwuit.model.CategoryConditional;
 import br.org.indt.ndg.lwuit.ui.CategoryConditionalList;
 import br.org.indt.ndg.lwuit.ui.InterviewForm;
-import br.org.indt.ndg.lwuit.ui.QuantityForm;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 
 public class EnterDirectCategoryConditionalCommand extends CommandControl {

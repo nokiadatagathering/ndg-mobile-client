@@ -6,7 +6,7 @@
 package br.org.indt.ndg.mobile.logging;
 
 import br.org.indt.ndg.mobile.AppMIDlet;
-import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.NdgConsts;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -40,7 +40,7 @@ public class Logger {
                 int month = cal.get(Calendar.MONTH) + 1;
                 String strMonth = (month < 10 ? "0" + Integer.toString(month) : Integer.toString(month));
                 int year = cal.get(Calendar.YEAR);
-                logFile = (FileConnection) Connector.open(Resources.ROOT_DIR + "logging_" + year + strMonth + strDay + ".txt");
+                logFile = (FileConnection) Connector.open(AppMIDlet.getInstance().getRootDir() + "logging_" + year + strMonth + strDay + ".txt");
                 if(!logFile.exists()){                
                     logFile.create();
                 }

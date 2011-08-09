@@ -7,7 +7,6 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.XmlResultFile;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.ResultList;
-import com.nokia.mid.appl.cmd.Local;
 import com.sun.lwuit.Command;
 import java.util.Vector;
 
@@ -25,7 +24,7 @@ public class MoveToUnsentCommand extends CommandControl{
     }
 
     protected Command createCommand() {
-        return new Command(Local.getText(Local.QTJ_CMD_MOVETOUNSENT));
+        return new Command(Resources.CMD_MOVETOUNSENT);
     }
 
     protected void doAction(Object parameter) {

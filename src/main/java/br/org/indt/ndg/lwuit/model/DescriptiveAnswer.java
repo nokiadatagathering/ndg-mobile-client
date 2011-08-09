@@ -1,6 +1,6 @@
 package br.org.indt.ndg.lwuit.model;
 
-import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Utils;
 import java.io.PrintStream;
 
 public class DescriptiveAnswer extends NDGAnswer {
@@ -18,7 +18,7 @@ public class DescriptiveAnswer extends NDGAnswer {
                 temp = " ";
             }
             else {
-                temp = AppMIDlet.getInstance().u2x(value);
+                temp = Utils.u2x(value);
             }
         _output.print("<str>");
         _output.print(temp);
