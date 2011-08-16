@@ -119,7 +119,6 @@ public class SettingsStructure {
         setLocalizationServingURL(defaultServerUrl + defaultServlets[0] + defaultServlets[6]);
         setLanguageListURL(defaultServerUrl + defaultServlets[0] + defaultServlets[7]);
         setAppVersion(AppMIDlet.getInstance().getAppVersion());
-        languages.addElement(defaultLanguage);
 
         saveSettings(_out);
     }
