@@ -9,6 +9,7 @@ import br.org.indt.ndg.mobile.Utils;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
@@ -47,8 +48,8 @@ public class LocalizationDownloader implements Runnable {
 
     public void run() {
         try { Thread.sleep(200); } catch(Exception e){}
-        if(getViaServlet(urlAck, FILE_TYPE_TEXTS)){
-            getViaServlet(urlAck, FILE_TYPE_FONTS);
+        if(downloadFile(urlAck, FILE_TYPE_TEXTS)){
+            downloadFile(urlAck, FILE_TYPE_FONTS);
             WaitingScreen.dispose();
             listener.localizationDowonloadFinished(locale);
         }else{
@@ -58,76 +59,57 @@ public class LocalizationDownloader implements Runnable {
         
     }
 
-    public boolean getViaServlet(String url, String type) throws SecurityException {
-        HttpConnection hc = null;
-        InputStream is = null;
-        FileConnection fc = null;
-        DataOutputStream dos = null;
+    private boolean downloadFile(String url, String type){
+
+        if(!Utils.fileExists(AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR)){
+            Utils.createDirectory(AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR);
+        }
 
         String shortLocale = locale.substring(0, 2);
-
-        boolean downloaded = false;
-
-        try { 
-
-            if(!Utils.fileExists(AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR)){
-                Utils.createDirectory(AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR);
-            }
-
-            hc = (HttpConnection) Connector.open(url);
-            hc.setRequestMethod(HttpConnection.GET);
-            hc.setRequestProperty(LOCALE_HEADER, shortLocale);
-            hc.setRequestProperty(FILE_TYPE_HEADER, type);
-
-            is = hc.openInputStream();
-
-            if (hc.getResponseCode() == HttpConnection.HTTP_OK) {
-                String filePath = "";
-                if(type.equals(FILE_TYPE_FONTS)){
-                    filePath = AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR + NdgConsts.FONTS_FILE_NAME + shortLocale + NdgConsts.RES_EXTENSION;
-                }else{
-                    filePath = Utils.prepereMessagesPath(locale);
-                }
-
-                fc = (FileConnection) Connector.open( filePath, Connector.READ_WRITE);
-                if (!fc.exists()) {
-                    fc.create();
-                } else {
-                    fc.truncate(0);
-                    //check to do partial download or
-                    //check to write over file with yes/no dialog
-                }
-                dos = fc.openDataOutputStream();
-
-                int bytesread = 0;
-                byte[] databyte = new byte[MTU];
-
-                while ( (bytesread = is.read(databyte, 0, MTU)) != -1) {
-                    dos.write(databyte, 0, bytesread);
-                }
-                if (bytesread == -1) {
-                    downloaded = true;
-                }
-            }
-        } catch (IOException ioe) {
-        } finally {
-            try {
-                if (dos != null) {
-                    dos.close();
-                }
-                if (fc != null) {
-                    fc.close();
-                }
-                if (is != null) {
-                    is.close();
-                }
-                if (hc != null) {
-                    hc.close();
-                }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
+        String filePath = "";
+        if(type.equals(FILE_TYPE_FONTS)){
+            filePath = AppMIDlet.getInstance().getRootDir() + NdgConsts.LANGUAGE_DIR + NdgConsts.FONTS_FILE_NAME + shortLocale + NdgConsts.RES_EXTENSION;
+        }else{
+            filePath = Utils.prepereMessagesPath(locale);
         }
+
+        FileConnection fileConn = null;
+        DataOutputStream dataOutputStream = null;
+        boolean downloaded = false;
+        try {
+            fileConn = (FileConnection) Connector.open( filePath, Connector.READ_WRITE);
+            if (!fileConn.exists()) {
+                fileConn.create();
+            } else {
+                fileConn.truncate(0);
+                //check to do partial download or
+                //check to write over file with yes/no dialog
+            }
+            dataOutputStream = fileConn.openDataOutputStream();
+
+            Hashtable headers = new Hashtable();
+            headers.put(LOCALE_HEADER, shortLocale);
+            headers.put(FILE_TYPE_HEADER, type);
+
+            downloaded = DownloadUtils.getViaServlet(url, headers, dataOutputStream);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        finally{
+            try{
+                if(dataOutputStream != null){
+                    dataOutputStream.close();
+                }
+                if(fileConn != null){
+                    fileConn.close();
+                }
+                if(!downloaded){
+                    Utils.removeFile(filePath);
+                }
+            }catch(IOException ex){}
+        }
+
         return downloaded;
     }
 }

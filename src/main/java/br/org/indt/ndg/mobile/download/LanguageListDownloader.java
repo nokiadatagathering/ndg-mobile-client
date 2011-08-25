@@ -8,6 +8,7 @@ import br.org.indt.ndg.mobile.structures.Language;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
@@ -44,7 +45,7 @@ public class LanguageListDownloader implements Runnable {
 
     public void run() {
         try { Thread.sleep(200); } catch(Exception e){}
-        boolean bVal = getViaServlet(urlAck);
+        boolean bVal = downloadList();
         WaitingScreen.dispose();
         if(bVal){
             listener.langListDownloadFinished();
@@ -54,53 +55,29 @@ public class LanguageListDownloader implements Runnable {
         }
     }
 
-    public boolean getViaServlet(String url) throws SecurityException {
-        HttpConnection hc = null;
-        InputStream is = null;
-
+    private boolean downloadList(){
+        ByteArrayOutputStream bytestream = null;
         boolean downloaded = false;
-
         try {
+            bytestream = new ByteArrayOutputStream();
+            downloaded = DownloadUtils.getViaServlet(urlAck, null, bytestream);
+            String languagesString = new String(bytestream.toByteArray(), 0, bytestream.toByteArray().length, "UTF-8");
+            readLanguages(languagesString);
 
-            hc = (HttpConnection) Connector.open(url);
-            hc.setRequestMethod(HttpConnection.GET);
-            is = hc.openInputStream();
-            if (hc.getResponseCode() == HttpConnection.HTTP_OK) {
-
-                String languagesString = "";
-                ByteArrayOutputStream bytestream =new ByteArrayOutputStream();
-                int ch;
-                while ((ch = is.read()) != -1){
-                    bytestream.write(ch);
+            AppMIDlet.getInstance().getSettings().getStructure().setLanguages(languages);
+            AppMIDlet.getInstance().getSettings().writeSettings();
+        } catch (UnsupportedEncodingException ex) {
+            downloaded = false;
+        } finally{
+            try{
+                if(bytestream != null){
+                    bytestream.close();
                 }
-
-                languagesString = new String(bytestream.toByteArray(), 0, bytestream.toByteArray().length, "UTF-8");
-                bytestream.close();
-                readLanguages(languagesString);
-                AppMIDlet.getInstance().getSettings().getStructure().setLanguages(languages);
-                AppMIDlet.getInstance().getSettings().writeSettings();
-                downloaded = true;
-            }
-        } catch (IOException ioe) {
-            System.out.println(ioe.getMessage());
-            ioe.printStackTrace();
-        } catch (Exception ioe) {
-            System.out.println(ioe.getMessage());
-            ioe.printStackTrace();
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-                if (hc != null) {
-                    hc.close();
-                }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
+            }catch(IOException ex){}
         }
         return downloaded;
     }
+
 
     private void readLanguages(String languagesString) {
         //add default language
