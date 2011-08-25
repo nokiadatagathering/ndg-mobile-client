@@ -54,9 +54,17 @@ public class OpenRosaUtils {
      * @param dateString - string with date in XML format (YYYY-MM-DD)
      * @return Date
      */
-    public static Date getDateFromString(String dateString) {
+    public static Date getDateFromString(String dateString){
+        String separator = null;
+        if(dateString.indexOf("-") > 0){//XML date format
+            separator = "-";
+        }else if(dateString.indexOf("/") > 0){ //ODK builder format DD/MM/YYYY
+            separator = "/";
+        }else {
+//            throw new UnsupportedDateFormatException();
+            return null;
+        }
 
-        String separator = "-";
         String fieldOne = "", fieldTwo = "", fieldThree = "";
         Date date = null;
         try {
@@ -68,9 +76,20 @@ public class OpenRosaUtils {
                 fieldTwo = dateString.substring(firstSeparatorIndex + 1, secondSeparatorIndex);
                 fieldThree = dateString.substring(secondSeparatorIndex + 1, dateString.length());
             }
-            int year = Integer.parseInt(fieldOne);
-            int month = Integer.parseInt(fieldTwo);
-            int day = Integer.parseInt(fieldThree);
+
+            int year;
+            int month;
+            int day;
+
+            if(separator.equals("/")){
+                month = Integer.parseInt(fieldOne);
+                day= Integer.parseInt(fieldTwo);
+                year = Integer.parseInt(fieldThree);
+            }else{
+                year = Integer.parseInt(fieldOne);
+                month = Integer.parseInt(fieldTwo);
+                day = Integer.parseInt(fieldThree);
+            }
 
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);

@@ -542,6 +542,7 @@ class XfoilDateFieldUI extends ContainerUI {
         if(!retVal){
             long date = Calendar.getInstance().getTime().getTime();
             dfDate.setDate(new Date(date));
+            this.repaint();
         }
         return retVal;
     }
