@@ -13,7 +13,6 @@ import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
-
 public class LanguageListDownloader implements Runnable {
 
     private String urlAck;

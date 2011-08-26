@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.settings.PhotoSettings.PhotoResolution;
 import br.org.indt.ndg.mobile.structures.Language;
+import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 /**
@@ -93,7 +94,7 @@ public class SettingsStructure {
         languages.addElement(defaultLanguage);
     }
 
-    public void createDefaultSettings(PrintStream _out) {
+    public void createDefaultSettings(PrintStream _out) throws UnsupportedEncodingException {
         String defaultServerUrl = AppMIDlet.getInstance().getDefaultServerUrl();
         String[] defaultServlets = AppMIDlet.getInstance().getDefaultServlets();
 
@@ -123,7 +124,7 @@ public class SettingsStructure {
         saveSettings(_out);
     }
 
-    public void saveSettings(PrintStream _out) {
+    public void saveSettings(PrintStream _out) throws UnsupportedEncodingException {
         _out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
         _out.print("<settings");
@@ -163,7 +164,7 @@ public class SettingsStructure {
         _out.println("</server>");
     }
 
-    private void writeLanguageSettings(PrintStream _out) {
+    private void writeLanguageSettings(PrintStream _out) throws UnsupportedEncodingException {
         
         if(languages != null)
         {
@@ -172,7 +173,8 @@ public class SettingsStructure {
             for(int i = 0 ; i < languages.size(); i++)
             {
                 languageString = new StringBuffer();
-                languageString.append("<language name=\"").append( ((Language)languages.elementAt(i)).getLangName());
+                String languageInLatin1 = new String(((Language)languages.elementAt(i)).getLangName().getBytes("UTF-8"), "ISO-8859-1");
+                languageString.append("<language name=\"").append(languageInLatin1);
                 languageString.append("\" locale= \"").append(((Language)languages.elementAt(i)).getLocale()).append("\"/>");
                 _out.println(languageString);
             }
