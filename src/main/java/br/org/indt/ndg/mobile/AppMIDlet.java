@@ -153,6 +153,9 @@ public class AppMIDlet extends MIDlet {
 
             UIManager.getInstance().getLookAndFeel().setReverseSoftButtons(true);
             UIManager.getInstance().setResourceBundle(i18n);
+            if(Display.getInstance().isTouchScreenDevice())
+                UIManager.getInstance().getLookAndFeel().setTactileTouchDuration(20);
+
         } catch (java.io.IOException e) {
             Logger.getInstance().log(e.getMessage());
         }
