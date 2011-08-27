@@ -54,7 +54,6 @@ public class EncryptionConfigScreen extends Screen implements ActionListener, Ch
         }
         form.addCommandListener(this);
 
-
         TextArea questionName = UIUtils.createTextArea( Resources.ENCRYPTION_ENABLE,
                                                         NDGStyleToolbox.fontMedium );
         questionName.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
@@ -103,7 +102,6 @@ public class EncryptionConfigScreen extends Screen implements ActionListener, Ch
     public void actionPerformed(ActionEvent evt) {
         Object cmd = evt.getSource();
         if (cmd == OkEncryptionScreenCommand.getInstance().getCommand()) {
-            form.removeCommandListener(this);
             password = tfDesc.getText();
             if(encryptionOn) {
                 Digest digest = new MD5Digest();
