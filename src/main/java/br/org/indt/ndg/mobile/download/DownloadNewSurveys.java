@@ -584,7 +584,7 @@ public class DownloadNewSurveys implements Runnable{
                     break;
                 }
 
-                String sBuffer = new String(buffer, 0, bytesRead);
+                String sBuffer = new String(buffer, 0, bytesRead, "UTF-8");
                 sb.append(sBuffer);
                 totalBytesWritten += bytesRead;
             }
