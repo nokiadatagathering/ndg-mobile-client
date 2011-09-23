@@ -5,6 +5,7 @@ import br.org.indt.ndg.lwuit.ui.Screen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
+import br.org.indt.ndg.mobile.Sorts;
 import br.org.indt.ndg.mobile.xmlhandle.Parser;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.plaf.Style;
@@ -12,6 +13,7 @@ import com.sun.lwuit.plaf.UIManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,6 +24,7 @@ public class NDGStyleToolbox {
     public static final int SMALL = 1;
     public static final int MEDIUM = 2;
     public static final int LARGE = 3;
+    public static final int CUSTOM = 4;
 
     public static final String FONTSANS = "NokiaSansWide";
     public static final String FONTSANSBOLD = "NokiaSansWideBold";
@@ -33,7 +36,9 @@ public class NDGStyleToolbox {
     public ListStyleProxy listStyle;
     public MenuStyleProxy menuStyle;
     public DialogTitleStyleProxy dialogTitleStyle;
-    public int fontSizeSetting;
+
+    private int fontSizeSetting;
+    private String fontNameSetting = ""; //used when custom settings is set
 
     public int focusGainColor;
     public int focusLostColor;
@@ -51,6 +56,9 @@ public class NDGStyleToolbox {
     static private int smallSize;
     static private int mediumSize;
     static private int largeSize;
+
+    static private Vector defaultFontsList = null;
+    static private Vector allFontNameList = null;
 
     private NDGStyleToolbox() {
         smallSize = Font.createSystemFont( Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL ).getHeight();
@@ -74,6 +82,7 @@ public class NDGStyleToolbox {
         fontMedium = getFont( FONTSANS, Font.SIZE_MEDIUM );
         fontSmall = getFont( FONTSANS, Font.SIZE_SMALL );
         fontMediumBold = getFont( FONTSANSBOLD, Font.SIZE_MEDIUM );
+
         listStyle.updateFonts();
         menuStyle.updateFonts();
         dialogTitleStyle.updateFonts();
@@ -105,7 +114,11 @@ public class NDGStyleToolbox {
             PrintStream output = new PrintStream(out);
 
             output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            output.println("<settings fontSize=\"" + fontSizeSetting +"\">");
+            output.print("<settings fontSize=\"" + fontSizeSetting +"\" ");
+            if(fontSizeSetting == CUSTOM){
+                output.print("customFontName=\"" + fontNameSetting +"\"");
+            }
+            output.println(">");
             output.println("<style name=\"" + "list" + "\">" );
             listStyle.writeSettings(output);
             output.println("</style>");
@@ -136,7 +149,7 @@ public class NDGStyleToolbox {
             sh.setStyleStructure(this);
             Parser parser = new Parser(sh);
             parser.parseFileNoClose(AppMIDlet.getInstance().getRootDir() + NdgConsts.STYLE_FILE);
-            applayFontSetting();
+            applayFontSetting(fontSizeSetting);
         } catch (SAXException ex) {
             GeneralAlert.getInstance().addCommand( GeneralAlert.DIALOG_OK, true );
             GeneralAlert.getInstance().show( Resources.LOADING_STYLE,
@@ -149,7 +162,7 @@ public class NDGStyleToolbox {
         }
     }
 
-    public static Font getFont( String aBaseName, int sizeEnum ) {
+    public static Font getFont( String aBaseName, int sizeEnum ){
         int size = size2Height( sizeEnum );
         Font font = null;
 
@@ -196,34 +209,96 @@ public class NDGStyleToolbox {
         }
     }
 
-    private void applayFontSetting() {
+    public void applayFontSetting(int fontSize) {
         Font newFont = null;
+        fontSizeSetting = fontSize;
         switch( fontSizeSetting ) {
             case SMALL:
                 newFont = getFont( FONTSANS, Font.SIZE_SMALL );
+                applayFontSetting(newFont);
                 break;
             case MEDIUM:
                 newFont = getFont( FONTSANS, Font.SIZE_MEDIUM );
+                applayFontSetting(newFont);
                 break;
             case LARGE:
                 newFont = getFont( FONTSANS, Font.SIZE_LARGE );
+                applayFontSetting(newFont);
+                break;
+            case CUSTOM:
+                applayFontSetting(fontNameSetting);
                 break;
             case DEFAULT:
             default:
                 initFonts();
                 return;
         }
-        NDGStyleToolbox.getInstance().listStyle.selectedFont =
-            NDGStyleToolbox.getInstance().listStyle.unselectedFont =
-                NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont =
-                    NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont =
-                        NDGStyleToolbox.getInstance().menuStyle.selectedFont =
-                            NDGStyleToolbox.getInstance().menuStyle.unselectedFont =
-                                NDGStyleToolbox.getInstance().dialogTitleStyle.selectedFont =
-                                    NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont =
-                                        NDGStyleToolbox.fontMedium =
-                                            NDGStyleToolbox.fontMediumBold =
-                                                NDGStyleToolbox.fontSmall =
-                                                    newFont;
+
+    }
+
+    private void applayFontSetting(Font newFont) {
+        listStyle.selectedFont =
+            listStyle.unselectedFont =
+                listStyle.secondarySelectedFont =
+                    listStyle.secondaryUnselectedFont =
+                        menuStyle.selectedFont =
+                            menuStyle.unselectedFont =
+                                dialogTitleStyle.selectedFont =
+                                    dialogTitleStyle.unselectedFont =
+                                        fontMedium =
+                                            fontMediumBold =
+                                                fontSmall = newFont;
+
+        saveSettings();
+    }
+
+    public void applayFontSetting(String fontName) {
+        fontSizeSetting = CUSTOM;
+        fontNameSetting = fontName;
+        Font font = Screen.getFontRes().getFont( fontName );
+        if(font != null){
+            applayFontSetting( font );
+        }
+    }
+
+    public static Vector getAvailableFontSizes(){
+        if(allFontNameList == null){
+            String[] fontNames = Screen.getFontRes().getFontResourceNames();
+            Sorts sort = new Sorts();
+            sort.qsort(fontNames);
+
+            allFontNameList = new Vector();
+            for(int idx = 0; idx < fontNames.length; idx++){
+                if(fontNames[idx].startsWith(FONTSANS) || fontNames[idx].startsWith(FONTSANSBOLD)){
+                    allFontNameList.addElement(fontNames[idx]);
+                }
+            }
+        }
+
+        return allFontNameList;
+    }
+    public static Vector getDefaultFontList(){
+        if(defaultFontsList == null){
+            defaultFontsList = new Vector();
+            defaultFontsList.addElement(getFont( FONTSANSBOLD, Font.SIZE_MEDIUM ));
+            defaultFontsList.addElement(getFont( FONTSANS, Font.SIZE_MEDIUM ));
+            defaultFontsList.addElement(getFont( FONTSANS, Font.SIZE_SMALL ));
+        }
+        return defaultFontsList;
+    }
+
+    public String getFontSizeNameSetting() {
+        return fontNameSetting;
+    }
+
+    public void setFontSizeNameSettings(String name){
+        fontNameSetting = name;
+    }
+
+    public int getFontSizeSetting() {
+        return fontSizeSetting;
+    }
+    public void setFontSizeSetting(int size) {
+        fontSizeSetting = size;
     }
 }

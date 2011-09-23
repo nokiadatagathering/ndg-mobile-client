@@ -7,6 +7,8 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import br.org.indt.ndg.lwuit.extended.RadioButton;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.Utils;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Graphics;
@@ -24,6 +26,7 @@ public class UISettingsFontSize extends Screen implements ActionListener {
     private RadioButton smallFont;
     private RadioButton mediumFont;
     private RadioButton largeFont;
+    private RadioButton customFont;
 
     private static Painter focusBGPainter = new FocusBGPainter();
 
@@ -79,11 +82,22 @@ public class UISettingsFontSize extends Screen implements ActionListener {
         largeFont.addFocusListener( new RadioButtonFocusListener() );
         largeFont.addActionListener(this);
 
+        customFont = new RadioButton( Resources.CUSTOM );
+        customFont.getUnselectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ) );//current style
+        customFont.getSelectedStyle().setFont( NDGStyleToolbox.getFont( NDGStyleToolbox.FONTSANS, Font.SIZE_MEDIUM ) );
+        customFont.removeFocusListener( largeFont );
+        customFont.addFocusListener( new RadioButtonFocusListener() );
+        customFont.addActionListener(this);
+
         container.addComponent(defaultFont);
         container.addComponent(smallFont);
         container.addComponent(mediumFont);
         container.addComponent(largeFont);
-        switch( NDGStyleToolbox.getInstance().fontSizeSetting ) {
+        if(!Utils.isS40()){
+            container.addComponent(customFont);
+        }
+
+        switch( NDGStyleToolbox.getInstance().getFontSizeSetting() ) {
             case NDGStyleToolbox.SMALL:
                 smallFont.setSelected(true);
                 break;
@@ -92,6 +106,9 @@ public class UISettingsFontSize extends Screen implements ActionListener {
                 break;
             case NDGStyleToolbox.LARGE:
                 largeFont.setSelected(true);
+                break;
+            case NDGStyleToolbox.CUSTOM:
+                customFont.setSelected(true);
                 break;
             case NDGStyleToolbox.DEFAULT:
             default:
@@ -107,12 +124,13 @@ public class UISettingsFontSize extends Screen implements ActionListener {
         if ( cmd == BackUISettingsCommand.getInstance().getCommand() ) {
             BackUISettingsCommand.getInstance().execute(null);
         } else if( cmd instanceof RadioButton ) {
-            Font newFont = null;
+//            Font newFont = null;
+            int newfontSize = NDGStyleToolbox.DEFAULT;
             if( cmd == defaultFont ) {
                 smallFont.setSelected(false);
                 mediumFont.setSelected(false);
                 largeFont.setSelected(false);
-                NDGStyleToolbox.getInstance().fontSizeSetting = NDGStyleToolbox.DEFAULT;
+                NDGStyleToolbox.getInstance().setFontSizeSetting(NDGStyleToolbox.DEFAULT);
                 NDGStyleToolbox.getInstance().saveSettings();
                 NDGStyleToolbox.getInstance().loadSettings();
                 form.show();
@@ -121,34 +139,32 @@ public class UISettingsFontSize extends Screen implements ActionListener {
                 defaultFont.setSelected(false);
                 mediumFont.setSelected(false);
                 largeFont.setSelected(false);
-                newFont = smallFont.getStyle().getFont();
-                NDGStyleToolbox.getInstance().fontSizeSetting = NDGStyleToolbox.SMALL;
+                customFont.setSelected(false);
+                newfontSize = NDGStyleToolbox.SMALL;
             } else if( cmd == mediumFont ) {
                 defaultFont.setSelected(false);
                 smallFont.setSelected(false);
                 largeFont.setSelected(false);
-                newFont = mediumFont.getStyle().getFont();
-                NDGStyleToolbox.getInstance().fontSizeSetting = NDGStyleToolbox.MEDIUM;
+                customFont.setSelected(false);
+                newfontSize = NDGStyleToolbox.MEDIUM;
             } else if( cmd == largeFont ) {
                 defaultFont.setSelected(false);
                 smallFont.setSelected(false);
                 mediumFont.setSelected(false);
-                newFont = largeFont.getStyle().getFont();
-                NDGStyleToolbox.getInstance().fontSizeSetting = NDGStyleToolbox.LARGE;
+                customFont.setSelected(false);
+                newfontSize = NDGStyleToolbox.LARGE;
+            } else if( cmd == customFont ) {
+                defaultFont.setSelected(false);
+                smallFont.setSelected(false);
+                mediumFont.setSelected(false);
+                largeFont.setSelected(false);
+
+
+                AppMIDlet.getInstance().setDisplayable(UISettingsFontSizeCustom.class);
+                return;
             }
-            NDGStyleToolbox.getInstance().listStyle.selectedFont =
-                NDGStyleToolbox.getInstance().listStyle.unselectedFont =
-                    NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont =
-                        NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont =
-                            NDGStyleToolbox.getInstance().menuStyle.selectedFont =
-                                NDGStyleToolbox.getInstance().menuStyle.unselectedFont =
-                                    NDGStyleToolbox.getInstance().dialogTitleStyle.selectedFont =
-                                        NDGStyleToolbox.getInstance().dialogTitleStyle.unselectedFont =
-                                            NDGStyleToolbox.getInstance().fontMedium =
-                                                NDGStyleToolbox.getInstance().fontMediumBold =
-                                                    NDGStyleToolbox.getInstance().fontSmall =
-                                                        newFont;
-            NDGStyleToolbox.getInstance().saveSettings();
+
+            NDGStyleToolbox.getInstance().applayFontSetting(newfontSize);
             form.show();
         }
     }

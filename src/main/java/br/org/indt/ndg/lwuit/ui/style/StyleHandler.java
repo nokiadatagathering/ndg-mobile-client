@@ -35,12 +35,21 @@ public class StyleHandler  extends DefaultHandler {
             tagStack.addElement(qName);
         } else if( qName.equals("settings") ) {
             int size = NDGStyleToolbox.DEFAULT;
+            String customFontName = null;
             try{
                 String fontSize = attributes.getValue( attributes.getIndex( "fontSize" ) );
                 size = Integer.parseInt( fontSize );
+                int idx = attributes.getIndex( "customFontName" );
+                if(idx >= 0){
+                    customFontName = attributes.getValue(idx);
+                }
+
             } catch( Exception ex ) {
             }
-            toolbox.fontSizeSetting = size;
+            toolbox.setFontSizeSetting(size);
+            if(customFontName != null){
+                toolbox.setFontSizeNameSettings(customFontName);
+            }
             tagStack.addElement(qName);
         }
     }
