@@ -4,12 +4,11 @@ import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.lwuit.model.Category;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import com.sun.lwuit.Component;
-import com.sun.lwuit.Container;
+import com.sun.lwuit.Display;
+import com.sun.lwuit.Font;
+import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.List;
-import com.sun.lwuit.layouts.BorderLayout;
-import com.sun.lwuit.Label;
-import com.sun.lwuit.geom.Dimension;
-import com.sun.lwuit.layouts.BoxLayout;
 
 /**
  *
@@ -17,72 +16,66 @@ import com.sun.lwuit.layouts.BoxLayout;
  */
 public class CategoryListCellRenderer extends DefaultNDGListCellRenderer {
 
-    private Label categoryLabel;
-    private Label questionsLabel;
-    private Label iconLabel;
+    private Category category;
 
+    private static final int PADDING = 5;
+
+    Font catFont = null;
+    Font questFont = null;
+    int fontColor = 0;
+    int touchPadding = 0;
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
-        Category category = (Category)value;
-        Container centerContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
+        category = (Category)value;
 
-        categoryLabel = new Label(category.getName());
-        categoryLabel.setIcon(null);
-        categoryLabel.getStyle().setPadding(0,0,0,0);
-        categoryLabel.getSelectedStyle().setPadding(0,0,0,0);
-        categoryLabel.getStyle().setMargin(0,0,0,0);
-        categoryLabel.getSelectedStyle().setMargin(0,0,0,0);
-
-        questionsLabel = new Label(category.getQuestions().size() + (category.getQuestions().size() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION));
-        questionsLabel.setIcon(null);
-        questionsLabel.getStyle().setPadding(0,0,0, 0);
-        questionsLabel.getSelectedStyle().setPadding(0,0,0,0);
-        questionsLabel.getStyle().setMargin(0,0,0,0);
-        questionsLabel.getSelectedStyle().setMargin(0,0,0,0);
-
-        iconLabel = new Label("");
+        if(Display.getInstance().isTouchScreenDevice()) {
+           touchPadding = TOUCH_SCREEN_VERTICAL_PADDING;
+        }
 
         if (isSelected) {
             setFocus(true);
-            categoryLabel.setFocus(true);
-            questionsLabel.setFocus(true);
-            iconLabel.setFocus(true);
-            categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.selectedFont );
-            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.selectedFont.getHeight() );
-            categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
-            questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont );
-            questionsLabel.setPreferredH(NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont.getHeight() );
-            questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
-            getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.selectedFontColor );
-            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
             getStyle().setBgPainter(m_focusBGPainter);
+
+            catFont = NDGStyleToolbox.getInstance().listStyle.selectedFont;
+            questFont = NDGStyleToolbox.getInstance().listStyle.secondarySelectedFont;
+            fontColor = NDGStyleToolbox.getInstance().listStyle.selectedFontColor;
         } else {
             setFocus(false);
-            categoryLabel.setFocus(false);
-            questionsLabel.setFocus(false);
-            iconLabel.setFocus(false);
-            categoryLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.unselectedFont );
-            categoryLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.unselectedFont.getHeight() );
-            questionsLabel.getStyle().setFont( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont );
-            questionsLabel.setPreferredH( NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont.getHeight() );
-            categoryLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
-            questionsLabel.getStyle().setFgColor( NDGStyleToolbox.getInstance().listStyle.unselectedFontColor );
-            iconLabel.setIcon(category.isFullFilled() ? Resources.check : Resources.question);
             getStyle().setBgPainter(m_bgPainter);
+
+            catFont = NDGStyleToolbox.getInstance().listStyle.unselectedFont;
+            questFont = NDGStyleToolbox.getInstance().listStyle.secondaryUnselectedFont;
+            fontColor = NDGStyleToolbox.getInstance().listStyle.unselectedFontColor;
         }
 
-        Label bottonAlign = new Label(" ");
-        Dimension dBottonAlign = bottonAlign.getPreferredSize();
-        dBottonAlign.setHeight(2);
-        bottonAlign.setPreferredSize(dBottonAlign);
-
-        centerContainer.addComponent(categoryLabel);
-        centerContainer.addComponent(questionsLabel);
-        centerContainer.addComponent(bottonAlign);
-
-        addComponent(BorderLayout.CENTER, centerContainer);
-        addComponent(BorderLayout.WEST, iconLabel);
+        setPreferredH(catFont.getHeight() + questFont.getHeight() + 2 * touchPadding);
 
         return this;
+    }
+
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        int height = catFont.getHeight() + questFont.getHeight();
+        setPreferredH(height);
+
+        Image img = category.isFullFilled() ? Resources.check : Resources.question;
+        g.drawImage( img,
+                getX() + PADDING,
+                touchPadding + getY() + (height - img.getHeight())/2);
+
+        g.setColor(fontColor);
+        g.setFont(catFont);
+        g.drawString(category.getName(),
+                getX() + (PADDING * 2) + img.getWidth(),
+                touchPadding + getY() );
+
+        int diff = (int)(catFont.getHeight() * 0.25);
+
+        String questionCount = category.getQuestions().size() + (category.getQuestions().size() > 1 ? " " + Resources.QUESTIONS : " "+ Resources.QUESTION);
+        g.setFont(questFont);
+        g.drawString(questionCount,
+                getX() + (PADDING * 2) + img.getWidth(),
+                touchPadding + getY() + catFont.getHeight() - diff);
     }
 }
