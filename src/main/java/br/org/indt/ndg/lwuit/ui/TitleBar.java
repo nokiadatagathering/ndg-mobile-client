@@ -53,12 +53,8 @@ public class TitleBar implements Painter {
     }
 
     public int getPrefferedH() {
-        if( title1.length() == 0 && title2.length() == 0 )
-            return 0;
+        return 2*TEXT_PADDING + logoHeight;
 
-        int fontsHight = 3*TEXT_PADDING + getTitleFont().getHeight() + getTitleFont().getHeight();//title1 height and title2 height
-        int logoHight = 2*TEXT_PADDING + logoHeight;
-        return fontsHight < logoHight ? logoHight : fontsHight;
     }
 
     public void paint(Graphics g, Rectangle rect) {
@@ -94,7 +90,7 @@ public class TitleBar implements Painter {
             Font f = null;
             for(int idx = 0; idx < s40Fonts.size(); idx++){
                 f = (Font)s40Fonts.elementAt(idx);
-                if(f.stringWidth(title) + textOffsetHorizontal < dWidth){
+                if(f.stringWidth(title) + textOffsetHorizontal < dWidth && (f.getHeight() * 2) < getPrefferedH() ){
                     font = f;
                     break;
                 }
@@ -106,7 +102,7 @@ public class TitleBar implements Painter {
         Font f = null;
         for(int idx = fontVect.size() - 1; idx >= 0; idx--){
             f = Screen.getFontRes().getFont( (String)fontVect.elementAt(idx) );
-            if(f.stringWidth(title) + textOffsetHorizontal < dWidth){
+            if(f.stringWidth(title) + textOffsetHorizontal < dWidth && (f.getHeight() * 2) < getPrefferedH()){
                 font = f;
                 break;
             }

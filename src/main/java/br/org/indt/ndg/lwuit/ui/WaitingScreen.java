@@ -49,7 +49,18 @@ public class WaitingScreen {
         int disH = Display.getInstance().getDisplayHeight();
         int disW = Display.getInstance().getDisplayWidth();
 
-        dialog.show( (disH - hi)/2, (disH - hi)/2 , (disW - wi)/2, (disW - wi)/2, false, false );
+        int marginH = (disH - hi)/2;
+        if(marginH < 0){
+            marginH = 0;
+        }
+        int marginW = (disW - wi)/2;
+        if(marginW < 0){
+            marginW = 0;
+        }
+
+        dialog.show( marginH, marginH, marginW, marginW, false, false );
+
+
         //dialog.showPacked( BorderLayout.CENTER, false);
     }
 
