@@ -7,9 +7,9 @@ public class SurveyListCellRenderer extends SimpleListWithAnimatedTextCellRender
 
     public Component getListCellRendererComponent(List list, Object value, int index, boolean isSelected) {
         if (index == 0) {
-            m_label.setAlignment(CENTER);
+            m_label.setAlignment(Component.CENTER);
         } else {
-            m_label.setAlignment(LEFT);
+            m_label.setAlignment(Component.LEFT);
         }
         return super.getListCellRendererComponent(list,value,index,isSelected);
     }
@@ -22,5 +22,4 @@ public class SurveyListCellRenderer extends SimpleListWithAnimatedTextCellRender
     protected String getTextToAnimate() {
         return m_label.getText();
     }
-
 }

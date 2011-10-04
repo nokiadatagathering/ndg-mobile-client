@@ -22,6 +22,7 @@ public class SimpleListCellRenderer extends DefaultNDGListCellRenderer {
 
     public SimpleListCellRenderer() {
         super();
+        m_label.setCellRenderer(true);
         addComponent(BorderLayout.CENTER, m_label);
     }
 

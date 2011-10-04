@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.ui.renderers;
 
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Graphics;
 
 public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRenderer {
@@ -26,7 +27,7 @@ public class SimpleListWithAnimatedTextCellRenderer extends SimpleListCellRender
     public void paint(Graphics g) {
         String text = getTextToAnimate();
         int width = getStyle().getFont().stringWidth(text);
-        if (hasFocus() && (getWidth() <= width + PADDING)) {
+        if ( hasFocus() && (getWidth() <= width + PADDING) && m_label.getAlignment() != Component.CENTER ) {
             width+=PADDING*3;
             int fontHeight = NDGStyleToolbox.getInstance().listStyle.selectedFont.getHeight();
             int yPos = getY()+ (getHeight()-fontHeight)/2;
