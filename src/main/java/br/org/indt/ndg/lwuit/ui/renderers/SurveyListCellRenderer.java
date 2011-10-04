@@ -1,6 +1,5 @@
 package br.org.indt.ndg.lwuit.ui.renderers;
 
-import br.org.indt.ndg.lwuit.model.Survey;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.List;
 

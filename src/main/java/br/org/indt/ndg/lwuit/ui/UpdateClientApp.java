@@ -1,6 +1,7 @@
 package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.CancelUpdateClientAppCommand;
+import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.Resources;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Image;
@@ -14,26 +15,24 @@ public class UpdateClientApp extends Screen implements ActionListener {
     private TextArea item;
     private Image image;
     private Label l;
-    private boolean firstcreation = true;
 
     private String strText1, strText2;
-
 
     protected void loadData() {
         strText1 = Resources.CHECK_FOR_UPDATE_TITLE;
         strText2 = Resources.CONNECTING;
 
-        if (firstcreation) {
+        if (item == null) {
             item = new TextArea(3,20);
-            item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
             item.setEditable(false);
             item.setFocusable(false);
 
             image = Screen.getRes().getImage("wait2");
             l = new Label(image);
             l.setAlignment(Component.CENTER);
-            firstcreation = false;
         }
+        item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        item.getStyle().setFont(NDGStyleToolbox.fontSmall);
     }
 
     protected void customize() {
@@ -46,7 +45,7 @@ public class UpdateClientApp extends Screen implements ActionListener {
         form.addComponent(l);
 
         form.addCommand(CancelUpdateClientAppCommand.getInstance().getCommand());
-        
+
         try{
             form.removeCommandListener(this);
         } catch (NullPointerException npe ) {

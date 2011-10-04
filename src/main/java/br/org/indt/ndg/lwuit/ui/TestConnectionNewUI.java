@@ -19,21 +19,19 @@ public class TestConnectionNewUI extends Screen implements ActionListener {
     private TextArea item;
     private Image image;
     private Label l;
-    private boolean firstcreation = true;
 
     protected void loadData() {
-        if (firstcreation) {
+        if (item == null) {
             item = new TextArea(3,20);
-            item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
-            item.getStyle().setFont( NDGStyleToolbox.fontSmall );
             item.setEditable(false);
             item.setFocusable(false);
 
             image = Screen.getRes().getImage("wait2");
             l = new Label(image);
             l.setAlignment(Component.CENTER);
-            firstcreation = false;
         }
+        item.setUnselectedStyle(UIManager.getInstance().getComponentStyle("Label"));
+        item.getStyle().setFont(NDGStyleToolbox.fontSmall);
     }
 
     protected void customize() {
