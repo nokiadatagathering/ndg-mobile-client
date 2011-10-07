@@ -34,7 +34,7 @@ public class Utils {
             return false;
         }
     }
-    
+
     public static boolean isXformDir(String surveyDirName){
         if ( surveyDirName.substring(0, 5).equalsIgnoreCase(NdgConsts.XFORM) ) {
             return true;

@@ -54,7 +54,7 @@ public class kParser {
             parser.setFeature(KXmlParser.FEATURE_PROCESS_NAMESPACES, true);
             parser.setInput(new InputStreamReader(is, "UTF-8"));
             parser.nextTag();
- 
+
             String name = null;
             if ( parser.getName().equals("survey") ) {
                 name = parser.getAttributeValue(parser.getNamespace(), "title");

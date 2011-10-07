@@ -93,7 +93,7 @@ public class AppMIDlet extends MIDlet {
         Localization.initLocalizationSupport();
         resources = new Resources();
         locationHandler = new LocationHandler();
-        
+
         initLWUIT();
 
         setIMEI();
@@ -271,7 +271,7 @@ public class AppMIDlet extends MIDlet {
 
     public void setIMEI() {
         imei = System.getProperty("com.nokia.mid.imei"); // is null on emulator
-        imei = "999966669999";
+        //imei = "9999";
     }
 
     public String getIMEI() {

@@ -78,7 +78,7 @@ public class FileSystem {
     public void removeSelectedResult() {
         fsResultStructure.removeSelectedResult();
     }
-    
+
     /** Creates a new instance of FileSystem */
     public FileSystem(String _root) {
         root = _root;
@@ -349,12 +349,12 @@ public class FileSystem {
 
     public Vector getSentFilenames() {
         Vector sentFilenames = new Vector();
-        
+
         try {
             FileConnection fc = (FileConnection) Connector.open(root + fsSurveyStructure.getDirName());
             Enumeration filelist = fc.list("s_*", true);
             String fileName;
-            
+
             while(filelist.hasMoreElements()) {
                 fileName = (String) filelist.nextElement();
                 if (fileName.startsWith("s_")) {
@@ -373,7 +373,7 @@ public class FileSystem {
             FileConnection fc2 = null;
             FileConnection fc3 = null;
             String dirName;
-            
+
             Enumeration filelist1 = fc1.list("*", true);
             while(filelist1.hasMoreElements()) {
                 dirName = (String) filelist1.nextElement();
@@ -393,7 +393,7 @@ public class FileSystem {
                 fc2.close();
             if(fc3 != null)
                 fc3.close();
-            
+
         } catch (IOException ioe) {
             error = true;
             GeneralAlert.getInstance().addCommand( ExitCommand.getInstance());
@@ -456,7 +456,7 @@ public class FileSystem {
                     if ( ( fileName.startsWith("r_")) || (fileName.startsWith("s_") ) ) {
                         this.loadResultInfo(fileName);
                     }
-                    if (getError()){ 
+                    if (getError()){
                         moveCorruptedResult(fileName);
                     }
                 } else {
