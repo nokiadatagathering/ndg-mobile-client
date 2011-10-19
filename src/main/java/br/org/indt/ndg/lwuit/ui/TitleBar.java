@@ -4,7 +4,6 @@ import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.Utils;
-import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.settings.LocationHandler;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
@@ -19,7 +18,7 @@ import java.util.Vector;
  * @author mluz
  */
 public class TitleBar implements Painter {
-
+    private static final String threeDots = "... ";
     private static final Image hr = Screen.getRes().getImage("bottom");
     private static final Image imageGPS = Screen.getRes().getImage("gps");
     private static final int gpsWidth = imageGPS.getWidth();
@@ -54,7 +53,6 @@ public class TitleBar implements Painter {
 
     public int getPrefferedH() {
         return 2*TEXT_PADDING + logoHeight;
-
     }
 
     public void paint(Graphics g, Rectangle rect) {
@@ -73,16 +71,44 @@ public class TitleBar implements Painter {
 
         g.setFont( getTitleFont() );
         g.setColor( 0x007b7b7b );
-        g.drawString( title1, textOffsetHorizontal, spacingVertical );
-        g.drawString( title2, textOffsetHorizontal, spacingVertical +  getTitleFont().getHeight() + spacingVertical );
+
+        g.drawString( getFittingTitle( title1, currentScreenWidth - textOffsetHorizontal ),
+                      textOffsetHorizontal, spacingVertical );
+        g.drawString( getFittingTitle( title2, currentScreenWidth - textOffsetHorizontal ),
+                      textOffsetHorizontal,
+                      spacingVertical + getTitleFont().getHeight() + spacingVertical );
         LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
         if ( locationHandler != null && locationHandler.locationObtained() ) {
             g.drawImage(imageGPS, TEXT_PADDING, 22);
         }
     }
 
+    private String getFittingTitle( String title, int availableWidth ) {
+
+        Font font = getTitleFont();
+        if( font.stringWidth(title) < availableWidth ) {
+            return title;
+        }
+
+        int index = 1;
+        int wCharWidth = font.charWidth( 'W' );
+        int pointsW = font.stringWidth( threeDots );
+        while ( widthCheck( title, index, availableWidth - pointsW , wCharWidth, font ) ) {
+            index++;
+        }
+        return title.substring( 0, index - 1 ) + threeDots;
+    }
+
+    private boolean widthCheck( String s, int length, int availableWidth,int wCharWidth, Font font ) {
+        if ( length * wCharWidth < availableWidth ) {
+            return true;
+        }
+        length = Math.min( s.length(), length );
+        return font.substringWidth( s, 0, length ) < availableWidth;
+    }
+
     private Font prepereFont(String title){
-        Font font = NDGStyleToolbox.fontSmall;
+        Font font = NDGStyleToolbox.fontSmallHandler;
         int dWidth = Display.getInstance().getDisplayWidth();
 
         if(Utils.isS40()){

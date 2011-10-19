@@ -52,6 +52,7 @@ public class NDGStyleToolbox {
     static public Font fontMediumBold;
     static public Font fontMedium;
     static public Font fontSmall;
+    static public Font fontSmallHandler;
 
     static private int smallSize;
     static private int mediumSize;
@@ -82,6 +83,7 @@ public class NDGStyleToolbox {
         fontMedium = getFont( FONTSANS, Font.SIZE_MEDIUM );
         fontSmall = getFont( FONTSANS, Font.SIZE_SMALL );
         fontMediumBold = getFont( FONTSANSBOLD, Font.SIZE_MEDIUM );
+        fontSmallHandler = getFont( FONTSANS, Font.SIZE_SMALL );
 
         listStyle.updateFonts();
         menuStyle.updateFonts();
