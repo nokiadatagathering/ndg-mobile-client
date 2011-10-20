@@ -3,7 +3,6 @@ package br.org.indt.ndg.lwuit.ui;
 import br.org.indt.ndg.lwuit.ui.style.NDGStyleToolbox;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.Resources;
-import br.org.indt.ndg.mobile.Utils;
 import br.org.indt.ndg.mobile.settings.LocationHandler;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
@@ -11,7 +10,6 @@ import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Painter;
 import com.sun.lwuit.geom.Rectangle;
-import java.util.Vector;
 
 /**
  *
@@ -29,7 +27,6 @@ public class TitleBar implements Painter {
     int textOffsetHorizontal;
     private String title1;
     private String title2;
-    private Font titleFont = null;
     private int currentScreenWidth = 0;
 
 
@@ -41,16 +38,6 @@ public class TitleBar implements Painter {
         textOffsetHorizontal = TEXT_PADDING + gpsWidth + TEXT_PADDING + logoWidth + TEXT_PADDING;
     }
 
-    private Font getTitleFont(){
-        int newScreenWidth = Display.getInstance().getDisplayWidth();
-
-        if(titleFont == null || newScreenWidth != currentScreenWidth){
-            currentScreenWidth = newScreenWidth;
-            titleFont = prepereFont(title1);
-        }
-        return titleFont;
-    }
-
     public int getPrefferedH() {
         return 2*TEXT_PADDING + logoHeight;
     }
@@ -58,6 +45,7 @@ public class TitleBar implements Painter {
     public void paint(Graphics g, Rectangle rect) {
         int width = rect.getSize().getWidth();
         int height = rect.getSize().getHeight();
+        currentScreenWidth = Display.getInstance().getDisplayWidth();
 
         g.fillLinearGradient(0xffffff, 0xe1e1e1, rect.getX(), rect.getY(), width, height-3, false);
 
@@ -67,16 +55,16 @@ public class TitleBar implements Painter {
 
         g.drawImage( Resources.logo, TEXT_PADDING + gpsWidth + TEXT_PADDING, ( height - logoHeight )>>1 );
 
-        int spacingVertical =  ( height - getTitleFont().getHeight() - getTitleFont().getHeight() )/3;
+        int spacingVertical =  ( height -NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() )/3;
 
-        g.setFont( getTitleFont() );
+        g.setFont( NDGStyleToolbox.fontSmallHandler );
         g.setColor( 0x007b7b7b );
 
         g.drawString( getFittingTitle( title1, currentScreenWidth - textOffsetHorizontal ),
                       textOffsetHorizontal, spacingVertical );
         g.drawString( getFittingTitle( title2, currentScreenWidth - textOffsetHorizontal ),
                       textOffsetHorizontal,
-                      spacingVertical + getTitleFont().getHeight() + spacingVertical );
+                      spacingVertical + NDGStyleToolbox.fontSmallHandler.getHeight() + spacingVertical );
         LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
         if ( locationHandler != null && locationHandler.locationObtained() ) {
             g.drawImage(imageGPS, TEXT_PADDING, 22);
@@ -85,7 +73,7 @@ public class TitleBar implements Painter {
 
     private String getFittingTitle( String title, int availableWidth ) {
 
-        Font font = getTitleFont();
+        Font font = NDGStyleToolbox.fontSmallHandler;
         if( font.stringWidth(title) < availableWidth ) {
             return title;
         }
@@ -105,35 +93,6 @@ public class TitleBar implements Painter {
         }
         length = Math.min( s.length(), length );
         return font.substringWidth( s, 0, length ) < availableWidth;
-    }
-
-    private Font prepereFont(String title){
-        Font font = NDGStyleToolbox.fontSmallHandler;
-        int dWidth = Display.getInstance().getDisplayWidth();
-
-        if(Utils.isS40()){
-            Vector s40Fonts = NDGStyleToolbox.getDefaultFontList();
-            Font f = null;
-            for(int idx = 0; idx < s40Fonts.size(); idx++){
-                f = (Font)s40Fonts.elementAt(idx);
-                if(f.stringWidth(title) + textOffsetHorizontal < dWidth && (f.getHeight() * 2) < getPrefferedH() ){
-                    font = f;
-                    break;
-                }
-            }
-            return font;
-        }
-
-        Vector fontVect = NDGStyleToolbox.getAvailableFontSizes();
-        Font f = null;
-        for(int idx = fontVect.size() - 1; idx >= 0; idx--){
-            f = Screen.getFontRes().getFont( (String)fontVect.elementAt(idx) );
-            if(f.stringWidth(title) + textOffsetHorizontal < dWidth && (f.getHeight() * 2) < getPrefferedH()){
-                font = f;
-                break;
-            }
-        }
-        return font;
     }
 
     public void setTitle1(String title1) {
