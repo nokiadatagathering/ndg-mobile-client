@@ -19,7 +19,7 @@ public class UIUtils {
         item.setColumns(NUMBER_OF_COLUMNS);
         item.setRows(1);
         item.setGrowByContent(false);
-        item.setText(aText);
+        item.setText(aText.trim()+ "  ");
 
         int pw = Display.getInstance().getDisplayWidth() - 10;// magic number, it should rather be set to width of margins+borders+padding
         int w = aFont.stringWidth(aText);
