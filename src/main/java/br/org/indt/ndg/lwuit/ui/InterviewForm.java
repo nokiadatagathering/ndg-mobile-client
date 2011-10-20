@@ -2,6 +2,7 @@ package br.org.indt.ndg.lwuit.ui;
 
 import br.org.indt.ndg.lwuit.control.AcceptQuestionListFormCommand;
 import br.org.indt.ndg.lwuit.control.BackInterviewFormCommand;
+import br.org.indt.ndg.lwuit.control.Event;
 import br.org.indt.ndg.lwuit.control.ExclusiveChoiceFieldController;
 import br.org.indt.ndg.lwuit.control.OpenFileBrowserCommand;
 import br.org.indt.ndg.lwuit.control.PersistenceManager;
@@ -191,6 +192,13 @@ public class InterviewForm extends Screen implements ActionListener {
             title2 = Resources.EDITING;
         }
         setTitle(title1, title2);
+        registerEvent( new Event() {
+            protected void doAction( Object parameter ) {
+                if( vContainers != null && vContainers.size() > 0 ) {
+                    ((ContainerUI)vContainers.elementAt(0)).revalidate();
+                }
+            }
+        }, ON_SHOW);
     }
 
     private void setModifiedInterview(boolean _val) {
