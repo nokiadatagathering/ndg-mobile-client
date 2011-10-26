@@ -116,9 +116,9 @@ public class AppMIDlet extends MIDlet {
         try {
             com.sun.lwuit.util.Resources res = com.sun.lwuit.util.Resources.open("/br/org/indt/ndg/lwuit/ui/res/NDG.res");
             Screen.setRes(res);
-            if( !Utils.isS40() ) {
-                Screen.setFontRes( createResourceFromFile() );
-            }
+//            if( !Utils.isS40() ) {
+//                Screen.setFontRes( createResourceFromFile() );
+//            }
             NDGLookAndFeel ndgLF = new NDGLookAndFeel();
             // checkbox
             ndgLF.setCheckBoxImages(res.getImage("checked"), res.getImage("unchecked"));
