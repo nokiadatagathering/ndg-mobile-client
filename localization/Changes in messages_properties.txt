@@ -1,2 +1,0 @@
-messages.properties is defult language file 
-After changes remember to copy this file to directory \src\main\java\resources\text\

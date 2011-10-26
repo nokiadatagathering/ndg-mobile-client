@@ -1,0 +1,9 @@
+messages.properties is the default language file 
+If you make any change, remember to copy it to ndg-mobile-client/src/main/java/resources/text/
+
+All other localization files should be placed at locale.ota property defined in server's msm-settings.properties to be downloaded over the air. The default path is locale.ota=/server/default/deploy/ndg-ota.war/client/locale/
+
+If you are want to use LWUIT bitmap fonts, you need the proper resource file (fonts.res is the english one, should be used with messages.properties) and place it at ndg-mobile-client/src/main/java/br/org/indt/ndg/lwuit/ui/res/
+The other res files (fonts_xx.res) contain english characters, symbols and specific language characters. If you are using those languages with bitmap fonts, place them at the server's locale.ota path and add the file names to the database column languages.fontFilePath at the corresponding language row, in order to download it along with the localization file.
+
+We are using LWUIT 1.4 and to edit a resource file you need LWUIT's ResourceEditor.jar which is included in the LWUIT_1_4.zip
