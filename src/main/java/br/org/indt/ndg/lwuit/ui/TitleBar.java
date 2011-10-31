@@ -74,13 +74,17 @@ public class TitleBar implements Painter {
 
         g.drawImage( Resources.logo, TEXT_PADDING + gpsWidth + TEXT_PADDING, ( height - logoHeight )>>1 );
 
-        int spacingVertical =  ( height -NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() )/3;
+        int spacingVertical =  ( height - NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() ) / 3;
 
         g.setFont( NDGStyleToolbox.fontSmallHandler );
         g.setColor( 0x007b7b7b );
 
         g.drawString( getFittingTitle( title1, currentScreenWidth - textOffsetHorizontal ),
                       textOffsetHorizontal, spacingVertical );
+
+        g.setFont( NDGStyleToolbox.fontSmallBoldHandler );
+        g.setColor( 0x007b7b7b );
+
         g.drawString( getFittingTitle( title2, currentScreenWidth - textOffsetHorizontal ),
                       textOffsetHorizontal,
                       spacingVertical + NDGStyleToolbox.fontSmallHandler.getHeight() + spacingVertical );
