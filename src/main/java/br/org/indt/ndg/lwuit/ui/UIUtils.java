@@ -44,7 +44,7 @@ public class UIUtils {
         int w = aFont.stringWidth(aText);
         if (w >= pw) {
             item.setGrowByContent(true);
-            item.setRows(2);
+            //item.setRows(2);
         } else {
             item.setGrowByContent(false);
             item.setRows(1);
