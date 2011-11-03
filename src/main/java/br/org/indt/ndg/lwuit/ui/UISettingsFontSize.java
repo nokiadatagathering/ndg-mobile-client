@@ -112,9 +112,9 @@ public class UISettingsFontSize extends Screen implements ActionListener {
         container.addComponent(smallFont);
         container.addComponent(mediumFont);
         container.addComponent(largeFont);
-        if(!Utils.isS40()){
-            container.addComponent(customFont);
-        }
+//        if(!Utils.isS40()){
+//            container.addComponent(customFont);
+//        }
 
         switch( NDGStyleToolbox.getInstance().getFontSizeSetting() ) {
             case NDGStyleToolbox.SMALL:
