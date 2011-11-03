@@ -40,11 +40,9 @@ public class NumericField extends TextField implements DataChangedListener {
         setConstraint(DECIMAL);
         m_length = length;
         m_decimal = decimal;
+        setInputMode("123");
         addDataChangeListener(this);
         setOverwriteMode(false);
-
-        setInputMode("123");
-        setInputModeOrder(new String[]{"123"});
 
         if( Display.getInstance().isTouchScreenDevice() ) {
             VirtualKeyboard onScreenKeyboard = new VirtualKeyboard();
