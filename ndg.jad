@@ -1,11 +1,11 @@
 MIDlet-1: Nokia Data Gathering,/resources/images/icon.png,br.org.indt.ndg.mobile.AppMIDlet
-MIDlet-Jar-Size: 868586
+MIDlet-Jar-Size: 713191
 MIDlet-Jar-URL: ndg.jar
 MIDlet-Name: Nokia Data Gathering
 MIDlet-Permissions: javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.media.control.VideoControl.getSnapshot
 MIDlet-Permissions-Opt: javax.microedition.location.Location, javax.microedition.io.Connector.https
 MIDlet-Vendor: Nokia
-MIDlet-Version: 3.04
+MIDlet-Version: 3.11
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 Nokia-MIDlet-On-Screen-Keypad: no
