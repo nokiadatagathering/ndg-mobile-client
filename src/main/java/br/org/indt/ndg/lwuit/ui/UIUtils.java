@@ -27,7 +27,7 @@ import com.sun.lwuit.TextArea;
 
 public class UIUtils {
 
-    private static final int NUMBER_OF_COLUMNS = 20;
+    private static final int NUMBER_OF_COLUMNS = 40;
 
     static public TextArea createTextArea( String aText, Font aFont ) {
         TextArea item = new TextArea();
@@ -37,18 +37,19 @@ public class UIUtils {
         item.setFocusable(false);
         item.setColumns(NUMBER_OF_COLUMNS);
         item.setRows(1);
-        item.setGrowByContent(false);
-        item.setText(aText.trim()+ "  ");
+        item.setGrowByContent(true);
+        item.setText(aText);
 
-        int pw = Display.getInstance().getDisplayWidth() - 10;// magic number, it should rather be set to width of margins+borders+padding
-        int w = aFont.stringWidth(aText);
-        if (w >= pw) {
-            item.setGrowByContent(true);
-            //item.setRows(2);
-        } else {
-            item.setGrowByContent(false);
-            item.setRows(1);
-        }
+// Also not necessary
+//        int pw = Display.getInstance().getDisplayWidth() - 10;// magic number, it should rather be set to width of margins+borders+padding
+//        int w = aFont.stringWidth(aText);
+//        if (w >= pw) {
+//            item.setGrowByContent(true);
+//            //item.setRows(2);
+//        } else {
+//            item.setGrowByContent(false);
+//            item.setRows(1);
+//        }
         return item;
     }
 
