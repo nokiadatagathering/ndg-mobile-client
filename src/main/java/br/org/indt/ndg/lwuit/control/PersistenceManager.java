@@ -76,6 +76,7 @@ public class PersistenceManager {
     private static String TIME_START_NAME = "orx:timeStart";
     private static String TIME_END_NAME = "orx:timeEnd";
     private static String DEVICE_ID_NAME = "orx:deviceID";
+    private boolean saveWithOldLocation = true;
 
     private PersistenceManager(){
     }
@@ -100,9 +101,7 @@ public class PersistenceManager {
 
         mAnswers = SurveysControl.getInstance().getResult();
 
-        if ( !addCoordinates() ) {
-           return;
-        }
+        saveWithOldLocation = addCoordinates();
 
         WaitingScreen.show(Resources.SAVING_RESULT);
         SaveResultRunnable srr = new SaveResultRunnable();
@@ -307,7 +306,7 @@ public class PersistenceManager {
             output.println();
 
             if( AppMIDlet.getInstance().getFileStores().getResultStructure() != null &&
-                AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid())
+                AppMIDlet.getInstance().getFileStores().getResultStructure().isLocationValid() && saveWithOldLocation )
             {
                 String latitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLatitude();
                 String longitude = AppMIDlet.getInstance().getFileStores().getResultStructure().getLongitude();
