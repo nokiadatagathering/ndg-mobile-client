@@ -1,10 +1,22 @@
-This is the NDG mobile client
+    # ******************************************************************************************************* #
+    #                                                                                                         #
+    #     _   _       _    _         ____        _           ____       _   _               _                 #
+    #    | \ | | ___ | | _(_) __ _  |  _ \  __ _| |_ __ _   / ___| __ _| |_| |__   ___ _ __(_)_ __   __ _     #
+    #    |  \| |/ _ \| |/ / |/ _` | | | | |/ _` | __/ _` | | |  _ / _` | __| '_ \ / _ \ '__| | '_ \ / _` |    #
+    #    | |\  | (_) |   <| | (_| | | |_| | (_| | || (_| | | |_| | (_| | |_| | | |  __/ |  | | | | | (_| |    #
+    #    |_| \_|\___/|_|\_\_|\__,_| |____/ \__,_|\__\__,_|  \____|\__,_|\__|_| |_|\___|_|  |_|_| |_|\__, |    #
+    #                                                                                               |___/     #
+    #                                                                                                         #
+    # ******************************************************************************************************* #
 
-NDG mobile client has two .jar files added into the lib directory. We have specified the location, the .jar name, give a short description and the software license: 
-2. lib/
-       kxml2-2.3.0.jar - kXML is a lean Common XML API with namespace and WAP support - Source code included
+
+Nokia Data Gathering mobile client has three files the lib directory. We have specified the location, the .jar name, give a short description and the software license: 
+
+lib/
+       cldc_classes.zip - Bouncycastle classes for AES encryption.
+
+       xFolite.jar - XFolite library to parse XForms
+
        LWUIT.jar - UI Toolkit (Binary Distribution) - The early access binary library is Licensed under the Sun License Agreement (SLA). This license enables you to use the library in commercial products for free. The source code is not included but the binary needs to be in this folder  
 
-For more information about NDG, please see http://projects.forum.nokia.com/ndg
-  
-
+For more information about NDG, please see http://projects.developer.nokia.com/ndg
