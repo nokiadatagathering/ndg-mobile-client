@@ -30,6 +30,7 @@ import br.org.indt.ndg.lwuit.model.IntegerAnswer;
 import br.org.indt.ndg.lwuit.model.NDGAnswer;
 import br.org.indt.ndg.lwuit.model.DescriptiveAnswer;
 import br.org.indt.ndg.lwuit.model.TimeAnswer;
+import br.org.indt.ndg.mobile.LocationHelper;
 import br.org.indt.ndg.mobile.logging.Logger;
 import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import java.util.Hashtable;
@@ -41,7 +42,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import br.org.indt.ndg.mobile.structures.ResultStructure;
 import java.util.Calendar;
-import javax.microedition.location.Coordinates;
 
 public class ResultHandler extends DefaultHandler {
     private ResultStructure result;
@@ -50,7 +50,6 @@ public class ResultHandler extends DefaultHandler {
     private CategoryAnswer answers=null;
 
     private String currentOtherIndex = null;
-    private Coordinates currentCoordinates = null;
     private boolean binary = false;
     private int subCategory = 1;
 
@@ -114,8 +113,9 @@ public class ResultHandler extends DefaultHandler {
                 binary = false;
             }
 
+            if(System.getProperty("microedition.location.version") != null)
             if( latitude != null && longitude != null ) {
-                currentCoordinates = new Coordinates(Double.parseDouble(latitude), Double.parseDouble(longitude), 0);
+                LocationHelper.getInstance().setCurrentCoordinates(Double.parseDouble(latitude), Double.parseDouble(longitude), 0);
             }
         }
 
@@ -185,10 +185,9 @@ public class ResultHandler extends DefaultHandler {
                     {
                         if( !binary ) {
                             byte[] imgData = Base64Coder.decode(chars);
-                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(imgData, currentCoordinates) );
-                            currentCoordinates = null;
+                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(imgData) );
                         } else {
-                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData( chars, currentCoordinates) );
+                            ((ImageAnswer) currentAnswer).getImages().addElement( new ImageData(chars) );
                         }
                     }
                 }

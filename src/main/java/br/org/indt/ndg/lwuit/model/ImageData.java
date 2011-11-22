@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.location.Coordinates;
 
 /**
  *
@@ -48,8 +47,6 @@ public class ImageData {
     private String uniqueId = String.valueOf(System.currentTimeMillis()) + imageExtenstion;
     final private String privPath = imgDir + uniqueId ;
 
-
-    private Coordinates myLocation;
     private Image thumbnail;
 
     // create directory
@@ -66,21 +63,11 @@ public class ImageData {
     }
 
     public ImageData( String aPath ){
-        this(aPath, null);
-    }
-
-    public ImageData( String aPath, Coordinates location ){
-        myLocation = location;
         loadResult( aPath );
     }
 
-    public ImageData( byte[] data ) {
-        this(data, null);
-    }
-
-    public ImageData( byte[] data, Coordinates location ){
+    public ImageData( byte[] data ){
         saveData(data);
-        myLocation = location;
     }
 
     public String saveResult() throws OutOfMemoryErrorExtended {
@@ -122,14 +109,6 @@ public class ImageData {
 
     public byte[] getData() throws OutOfMemoryErrorExtended {
         return readData();
-    }
-
-    public void setGeoTag(Coordinates location) {
-        myLocation = location;
-    }
-
-    public Coordinates getGeoTag() {
-        return myLocation;
     }
 
     public Image getThumbnail() {

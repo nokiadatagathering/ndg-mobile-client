@@ -23,12 +23,12 @@ import br.org.indt.ndg.lwuit.model.ImageAnswer;
 import br.org.indt.ndg.lwuit.model.ImageData;
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.mobile.AppMIDlet;
+import br.org.indt.ndg.mobile.LocationHelper;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
-import javax.microedition.location.Coordinates;
 
 
 /**
@@ -44,7 +44,6 @@ public class NDGCameraManager implements ICameraManager {
     private int imageIndex;
     private CameraManagerListener listener;
     private boolean isFromFile = false;
-
 
     private NDGCameraManager(){
     }
@@ -85,15 +84,16 @@ public class NDGCameraManager implements ICameraManager {
              AppMIDlet.getInstance().getSettings().getStructure().getGeoTaggingConfigured() &&
              AppMIDlet.getInstance().getSettings().getStructure().getGpsConfigured()) {
 
-            Coordinates location = AppMIDlet.getInstance().getCoordinates();
+            if(System.getProperty("microedition.location.version") != null) {
 
-            GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
-            if(location == null){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.WARNING);
-            }else if(location != null && !AppMIDlet.getInstance().locationObtained()){
-                GeneralAlert.getInstance().show(Resources.WARNING, Resources.LOCATION_OUT_OF_DATE_WARN, GeneralAlert.WARNING);
+                GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
+                if(LocationHelper.getInstance().getCoordinates() == null){
+                    GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.WARNING);
+                }else if(LocationHelper.getInstance().getCoordinates() != null && !AppMIDlet.getInstance().locationObtained()){
+                    GeneralAlert.getInstance().show(Resources.WARNING, Resources.LOCATION_OUT_OF_DATE_WARN, GeneralAlert.WARNING);
+                }
+                LocationHelper.getInstance().setGeoTag( LocationHelper.getInstance().getCoordinates() );
             }
-            imageData.setGeoTag( location );
         }
         listener.update();
     }

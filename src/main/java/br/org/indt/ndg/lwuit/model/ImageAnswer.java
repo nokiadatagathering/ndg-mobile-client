@@ -20,6 +20,7 @@
 package br.org.indt.ndg.lwuit.model;
 
 import br.org.indt.ndg.lwuit.ui.GeneralAlert;
+import br.org.indt.ndg.mobile.LocationHelper;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.error.OutOfMemoryErrorExtended;
 import br.org.indt.ndg.mobile.logging.Logger;
@@ -27,7 +28,6 @@ import br.org.indt.ndg.mobile.multimedia.Base64Coder;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Vector;
-import javax.microedition.location.Coordinates;
 
 /**
  *
@@ -58,12 +58,15 @@ public class ImageAnswer extends NDGAnswer{
                 imgData = (ImageData) getImages().elementAt(idx);
                 byte[] imageData = imgData.getData();
                 if (imageData != null) {
-                    Coordinates loc = imgData.getGeoTag();
-                    if (loc != null) {
-                        _output.print("<img_data " + "latitude=\"" + loc.getLatitude() + "\"" + " " + "longitude=\"" + loc.getLongitude() + "\"" + " " + "type=\"binary\">");
-                    } else {
-                        _output.print("<img_data type=\"binary\">");
+                    if(System.getProperty("microedition.location.version") != null) {
+                        if (LocationHelper.getInstance().getGeoTag() != null) {
+                            _output.print("<img_data " + "latitude=\"" + LocationHelper.getInstance().getGeoTag().getLatitude() + "\"" + " " + "longitude=\"" + LocationHelper.getInstance().getGeoTag().getLongitude() + "\"" + " " + "type=\"binary\">");
+                        } else {
+                         _output.print("<img_data type=\"binary\">");
+                        }
                     }
+                    else
+                        _output.print("<img_data type=\"binary\">");
                     try {
                         _output.print(imgData.saveResult());
                     } finally {
@@ -87,12 +90,15 @@ public class ImageAnswer extends NDGAnswer{
                     imgData = (ImageData) getImages().elementAt(idx);
                     byte[] imageData = imgData.getData();
                     if (imageData != null) {
-                        Coordinates loc = imgData.getGeoTag();
-                        if (loc != null) {
-                            _output.print("<img_data " + "latitude=\"" + loc.getLatitude() + "\"" + " " + "longitude=\"" + loc.getLongitude() + "\">");
-                        } else {
-                            _output.print("<img_data>");
+                        if(System.getProperty("microedition.location.version") != null) {
+                            if (LocationHelper.getInstance().getGeoTag() != null) {
+                                _output.print("<img_data " + "latitude=\"" + LocationHelper.getInstance().getGeoTag().getLatitude() + "\"" + " " + "longitude=\"" + LocationHelper.getInstance().getGeoTag().getLongitude() + "\">");
+                            } else {
+                                _output.print("<img_data>");
+                            }
                         }
+                        else
+                            _output.print("<img_data>");
                         try {
                             if( imageData.length > MAX_CHUNK_SIZE ) {
                                 chunkWrite( _output, imageData );

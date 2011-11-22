@@ -31,6 +31,7 @@ import br.org.indt.ndg.lwuit.ui.GeneralAlert;
 import br.org.indt.ndg.lwuit.ui.WaitingScreen;
 import br.org.indt.ndg.mobile.AppMIDlet;
 import br.org.indt.ndg.mobile.FileSystem;
+import br.org.indt.ndg.mobile.LocationHelper;
 import br.org.indt.ndg.mobile.NdgConsts;
 import br.org.indt.ndg.mobile.Resources;
 import br.org.indt.ndg.mobile.SortsKeys;
@@ -53,7 +54,6 @@ import java.util.Vector;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.location.Location;
 
 /**
  *
@@ -101,7 +101,8 @@ public class PersistenceManager {
 
         mAnswers = SurveysControl.getInstance().getResult();
 
-        saveWithOldLocation = addCoordinates();
+        if(System.getProperty("microedition.location.version") != null)
+            saveWithOldLocation = addCoordinates();
 
         WaitingScreen.show(Resources.SAVING_RESULT);
         SaveResultRunnable srr = new SaveResultRunnable();
@@ -489,8 +490,7 @@ public class PersistenceManager {
             return true;
         }
 
-        Location loc = AppMIDlet.getInstance().getLocation();
-        if (loc == null || loc.getQualifiedCoordinates() == null) {
+        if (LocationHelper.getInstance().getLocation() == null || LocationHelper.getInstance().getLocation().getQualifiedCoordinates() == null) {
             GeneralAlert.getInstance().addCommand(GeneralAlert.DIALOG_OK, true);
             GeneralAlert.getInstance().show(Resources.WARNING, Resources.ADD_LOCATION_FAILURE, GeneralAlert.WARNING);
             return true;
@@ -504,8 +504,8 @@ public class PersistenceManager {
             }
         }
 
-        double latitude = loc.getQualifiedCoordinates().getLatitude();
-        double longtitude = loc.getQualifiedCoordinates().getLongitude();
+        double latitude = LocationHelper.getInstance().getLocation().getQualifiedCoordinates().getLatitude();
+        double longtitude = LocationHelper.getInstance().getLocation().getQualifiedCoordinates().getLongitude();
         AppMIDlet.getInstance().getFileStores().getResultStructure().setLatitude(Double.toString(latitude));
         AppMIDlet.getInstance().getFileStores().getResultStructure().setLongitude(Double.toString(longtitude));
 
