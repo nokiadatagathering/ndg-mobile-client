@@ -42,6 +42,7 @@ public class TitleBar implements Painter {
     private static final int TEXT_PADDING = 2;
     private static int logoWidth;
     private static int logoHeight;
+    private static int smallScreenDevice = 160;
 
     int textOffsetHorizontal;
     private String title1;
@@ -58,39 +59,76 @@ public class TitleBar implements Painter {
     }
 
     public int getPrefferedH() {
-        return 2*TEXT_PADDING + logoHeight;
+        if(Display.getInstance().getDisplayHeight() != smallScreenDevice)
+            return 2*TEXT_PADDING + logoHeight;
+        else
+            return 30;
     }
 
     public void paint(Graphics g, Rectangle rect) {
-        int width = rect.getSize().getWidth();
-        int height = rect.getSize().getHeight();
-        currentScreenWidth = Display.getInstance().getDisplayWidth();
+        if(Display.getInstance().getDisplayHeight() != smallScreenDevice) {         // Temporary solution
+            int width = rect.getSize().getWidth();
+            int height = rect.getSize().getHeight();
+            currentScreenWidth = Display.getInstance().getDisplayWidth();
 
-        g.fillLinearGradient(0xffffff, 0xe1e1e1, rect.getX(), rect.getY(), width, height-3, false);
+            g.fillLinearGradient(0xffffff, 0xe1e1e1, rect.getX(), rect.getY(), width, height-3, false);
 
-        g.drawImage( hr.scaled( Display.getInstance().getDisplayWidth(),
-                                hr.getHeight()),
-                                rect.getX(), rect.getY() + height - 2 );
+            g.drawImage( hr.scaled( Display.getInstance().getDisplayWidth(),
+                                    hr.getHeight()),
+                                    rect.getX(), rect.getY() + height - 2 );
 
-        g.drawImage( Resources.logo, TEXT_PADDING + gpsWidth + TEXT_PADDING, ( height - logoHeight )>>1 );
+            g.drawImage( Resources.logo, TEXT_PADDING + gpsWidth + TEXT_PADDING, ( height - logoHeight )>>1 );
 
-        int spacingVertical =  ( height - NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() ) / 3;
+            int spacingVertical =  ( height - NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() ) / 3;
 
-        g.setFont( NDGStyleToolbox.fontSmallHandler );
-        g.setColor( 0x007b7b7b );
+            g.setFont( NDGStyleToolbox.fontSmallHandler );
+            g.setColor( 0x007b7b7b );
 
-        g.drawString( getFittingTitle( title1, currentScreenWidth - textOffsetHorizontal ),
-                      textOffsetHorizontal, spacingVertical );
+            g.drawString( getFittingTitle( title1, currentScreenWidth - textOffsetHorizontal ),
+                          textOffsetHorizontal, spacingVertical );
 
-        g.setFont( NDGStyleToolbox.fontSmallBoldHandler );
-        g.setColor( 0x007b7b7b );
+            g.setFont( NDGStyleToolbox.fontSmallBoldHandler );
+            g.setColor( 0x007b7b7b );
 
-        g.drawString( getFittingTitle( title2, currentScreenWidth - textOffsetHorizontal ),
-                      textOffsetHorizontal,
-                      spacingVertical + NDGStyleToolbox.fontSmallHandler.getHeight() + spacingVertical );
-        LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
-        if ( locationHandler != null && locationHandler.locationObtained() ) {
-            g.drawImage(imageGPS, TEXT_PADDING, 22);
+            g.drawString( getFittingTitle( title2, currentScreenWidth - textOffsetHorizontal ),
+                          textOffsetHorizontal,
+                          spacingVertical + NDGStyleToolbox.fontSmallHandler.getHeight() + spacingVertical );
+            LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
+            if ( locationHandler != null && locationHandler.locationObtained() ) {
+                g.drawImage(imageGPS, TEXT_PADDING, 22);
+            }
+        }
+        else {
+            int width = rect.getSize().getWidth();
+            int height = 50;
+            currentScreenWidth = Display.getInstance().getDisplayWidth();
+
+            g.fillLinearGradient(0xffffff, 0xe1e1e1, rect.getX(), rect.getY(), width, height-3, false);
+
+            g.drawImage( hr.scaled( Display.getInstance().getDisplayWidth(),
+                                    40),
+                                    rect.getX(), rect.getY() + height - 2 );
+
+            g.drawImage( Resources.logo.scaled(26, 26), TEXT_PADDING + TEXT_PADDING, ( height - logoHeight )>>1 );
+
+            int spacingVertical =  ( height - NDGStyleToolbox.fontSmallHandler.getHeight() - NDGStyleToolbox.fontSmallHandler.getHeight() ) / 3;
+
+            g.setFont( NDGStyleToolbox.fontSmallHandler );
+            g.setColor( 0x007b7b7b );
+
+            g.drawString( getFittingTitle( title1, currentScreenWidth - 34 ),
+                          34, TEXT_PADDING );
+
+            g.setFont( NDGStyleToolbox.fontSmallBoldHandler );
+            g.setColor( 0x007b7b7b );
+
+            g.drawString( getFittingTitle( title2, currentScreenWidth - 34 ),
+                          34,
+                          spacingVertical + NDGStyleToolbox.fontSmallHandler.getHeight() );
+            LocationHandler locationHandler = AppMIDlet.getInstance().getLocationHandler();
+            if ( locationHandler != null && locationHandler.locationObtained() ) {
+                g.drawImage(imageGPS, TEXT_PADDING, 22);
+            }
         }
     }
 
